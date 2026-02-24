@@ -58,30 +58,42 @@
     "news": [
         {
             "id": "news-001",
-            "title": "Q1 2026 Market Outlook: Opportunities in a Shifting Landscape",
-            "excerpt": "Our analysts break down the key trends shaping the financial market this quarter.",
-            "content": "As we enter Q1 2026, the global financial landscape presents both challenges and opportunities. Interest rates have stabilized, creating favorable conditions for borrowers and investors alike. Our team of analysts has identified key sectors poised for growth, including sustainable energy, technology infrastructure, and healthcare innovation. We recommend a diversified approach to portfolio management, with a focus on long-term value creation.",
+            "title": "แนวโน้มตลาดไตรมาส 1 ปี 2026: โอกาสในภูมิทัศน์ที่เปลี่ยนแปลง",
+            "title_en": "Q1 2026 Market Outlook: Opportunities in a Shifting Landscape",
+            "excerpt": "นักวิเคราะห์ของเราวิเคราะห์แนวโน้มสำคัญที่กำหนดรูปร่างตลาดการเงินในไตรมาสนี้",
+            "excerpt_en": "Our analysts break down the key trends shaping the financial market this quarter.",
+            "content": "<p>เมื่อเราเข้าสู่ไตรมาส 1 ปี 2026 ภูมิทัศน์ทางการเงินทั่วโลกนำเสนอทั้งความท้าทายและโอกาส อัตราดอกเบี้ยมีเสถียรภาพ สร้างเงื่อนไขที่เอื้ออำนวยสำหรับทั้งผู้กู้และนักลงทุน ทีมนักวิเคราะห์ของเราได้ระบุภาคส่วนที่มีศักยภาพในการเติบโต รวมถึงพลังงานยั่งยืน โครงสร้างพื้นฐานเทคโนโลยี และนวัตกรรมด้านสุขภาพ</p>",
+            "content_en": "<p>As we enter Q1 2026, the global financial landscape presents both challenges and opportunities. Interest rates have stabilized, creating favorable conditions for borrowers and investors alike. Our team of analysts has identified key sectors poised for growth, including sustainable energy, technology infrastructure, and healthcare innovation.</p>",
             "date": "2026-02-20",
             "pinned": true,
-            "category": "Market Analysis"
+            "category": "Market Analysis",
+            "image": "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&q=80"
         },
         {
             "id": "news-002",
-            "title": "Agile Assets Launches Green Finance Initiative",
-            "excerpt": "New lending products designed to support sustainable business practices.",
-            "content": "Agile Assets is proud to announce the launch of our Green Finance Initiative, offering preferential rates for businesses investing in sustainable practices. This program includes reduced interest rates on loans for solar installations, energy-efficient equipment, and eco-friendly construction projects. We believe that sustainable business is good business, and we are committed to supporting our clients in making environmentally responsible choices.",
+            "title": "Agile Assets เปิดตัวโครงการสินเชื่อสีเขียว",
+            "title_en": "Agile Assets Launches Green Finance Initiative",
+            "excerpt": "ผลิตภัณฑ์สินเชื่อใหม่ที่ออกแบบมาเพื่อสนับสนุนการดำเนินธุรกิจอย่างยั่งยืน",
+            "excerpt_en": "New lending products designed to support sustainable business practices.",
+            "content": "<p>Agile Assets มีความภูมิใจที่จะประกาศเปิดตัวโครงการ Green Finance Initiative โดยเสนออัตราพิเศษสำหรับธุรกิจที่ลงทุนในแนวทางปฏิบัติที่ยั่งยืน โปรแกรมนี้รวมถึงอัตราดอกเบี้ยที่ลดลงสำหรับสินเชื่อติดตั้งพลังงานแสงอาทิตย์ อุปกรณ์ประหยัดพลังงาน และโครงการก่อสร้างที่เป็นมิตรต่อสิ่งแวดล้อม</p>",
+            "content_en": "<p>Agile Assets is proud to announce the launch of our Green Finance Initiative, offering preferential rates for businesses investing in sustainable practices. This program includes reduced interest rates on loans for solar installations, energy-efficient equipment, and eco-friendly construction projects.</p>",
             "date": "2026-02-15",
             "pinned": false,
-            "category": "Company News"
+            "category": "Company News",
+            "image": "https://images.unsplash.com/photo-1473341304170-971dccb5ac1e?w=800&q=80"
         },
         {
             "id": "news-003",
-            "title": "Understanding the Impact of Federal Reserve Decisions on Your Loans",
-            "excerpt": "A comprehensive guide to how Fed policy affects borrowing costs.",
-            "content": "The Federal Reserve's monetary policy decisions have a direct impact on the interest rates you pay on loans and earn on savings. In this article, we explain the relationship between the Fed funds rate and consumer borrowing costs, and provide practical advice on how to position yourself for success regardless of the direction of monetary policy.",
+            "title": "ทำความเข้าใจผลกระทบจากการตัดสินใจของเฟดต่อสินเชื่อของคุณ",
+            "title_en": "Understanding the Impact of Federal Reserve Decisions on Your Loans",
+            "excerpt": "คู่มือฉบับสมบูรณ์เกี่ยวกับผลกระทบของนโยบายเฟดต่อต้นทุนการกู้ยืม",
+            "excerpt_en": "A comprehensive guide to how Fed policy affects borrowing costs.",
+            "content": "<p>การตัดสินใจด้านนโยบายการเงินของธนาคารกลางสหรัฐมีผลกระทบโดยตรงต่ออัตราดอกเบี้ยที่คุณจ่ายสำหรับสินเชื่อ ในบทความนี้ เราอธิบายความสัมพันธ์ระหว่างอัตราเฟดกับต้นทุนการกู้ยืมของผู้บริโภค และให้คำแนะนำที่เป็นประโยชน์</p>",
+            "content_en": "<p>The Federal Reserve's monetary policy decisions have a direct impact on the interest rates you pay on loans and earn on savings. In this article, we explain the relationship between the Fed funds rate and consumer borrowing costs.</p>",
             "date": "2026-02-10",
             "pinned": false,
-            "category": "Education"
+            "category": "Education",
+            "image": "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?w=800&q=80"
         }
     ],
     "customFields": [

@@ -1,17 +1,19 @@
 import { useState } from 'react';
-import { Menu, X, TrendingUp } from 'lucide-react';
+import { Menu, X, TrendingUp, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const navLinks = [
-    { label: 'Home', href: '#home' },
-    { label: 'Rates', href: '#rates' },
-    { label: 'News', href: '#news' },
-    { label: 'About', href: '#about' },
-    { label: 'Contact', href: '#contact' },
+    { labelKey: 'nav.home', href: '#home' },
+    { labelKey: 'nav.rates', href: '#rates' },
+    { labelKey: 'nav.news', href: '#news' },
+    { labelKey: 'nav.about', href: '#about' },
+    { labelKey: 'nav.contact', href: '#contact' },
 ];
 
 export function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
+    const { lang, setLang, t } = useLanguage();
 
     const handleNavClick = (href: string) => {
         setIsOpen(false);
@@ -19,6 +21,10 @@ export function Navbar() {
         if (el) {
             el.scrollIntoView({ behavior: 'smooth' });
         }
+    };
+
+    const toggleLang = () => {
+        setLang(lang === 'th' ? 'en' : 'th');
     };
 
     return (
@@ -41,18 +47,40 @@ export function Navbar() {
                                 onClick={() => handleNavClick(link.href)}
                                 className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg hover:bg-white/5"
                             >
-                                {link.label}
+                                {t(link.labelKey)}
                             </button>
                         ))}
+
+                        {/* Language Toggle */}
+                        <button
+                            onClick={toggleLang}
+                            className="ml-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
+                        >
+                            <Globe className="w-3.5 h-3.5 text-gold" />
+                            <span className={lang === 'th' ? 'text-gold' : ''}>TH</span>
+                            <span className="text-border">/</span>
+                            <span className={lang === 'en' ? 'text-gold' : ''}>EN</span>
+                        </button>
                     </div>
 
-                    {/* Mobile toggle */}
-                    <button
-                        onClick={() => setIsOpen(!isOpen)}
-                        className="md:hidden p-2 text-muted-foreground hover:text-foreground"
-                    >
-                        {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-                    </button>
+                    {/* Mobile: Language + Toggle */}
+                    <div className="flex items-center gap-2 md:hidden">
+                        <button
+                            onClick={toggleLang}
+                            className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-border text-xs font-semibold text-muted-foreground hover:text-foreground transition-all"
+                        >
+                            <Globe className="w-3 h-3 text-gold" />
+                            <span className={lang === 'th' ? 'text-gold' : ''}>TH</span>
+                            <span className="text-border">/</span>
+                            <span className={lang === 'en' ? 'text-gold' : ''}>EN</span>
+                        </button>
+                        <button
+                            onClick={() => setIsOpen(!isOpen)}
+                            className="p-2 text-muted-foreground hover:text-foreground"
+                        >
+                            {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -70,7 +98,7 @@ export function Navbar() {
                             onClick={() => handleNavClick(link.href)}
                             className="block w-full text-left px-3 py-2 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 rounded-lg transition-colors"
                         >
-                            {link.label}
+                            {t(link.labelKey)}
                         </button>
                     ))}
                 </div>

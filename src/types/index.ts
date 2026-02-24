@@ -17,11 +17,15 @@ export interface InterestRate {
 export interface NewsItem {
     id: string;
     title: string;
+    title_en: string;
     excerpt: string;
+    excerpt_en: string;
     content: string;
+    content_en: string;
     date: string;
     pinned: boolean;
     category: string;
+    image?: string;
 }
 
 export interface CustomField {
@@ -57,6 +61,7 @@ export interface User {
 export interface AuthState {
     user: User | null;
     isAuthenticated: boolean;
+    isLoading: boolean;
     login: (username: string, password: string) => boolean;
     logout: () => void;
 }

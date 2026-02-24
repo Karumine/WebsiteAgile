@@ -99,3 +99,101 @@
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* ─── React Quill Dark Theme ─── */
+.quill-dark-wrapper .ql-toolbar.ql-snow {
+  border-color: var(--color-border);
+  background: var(--color-navy-light);
+  border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.quill-dark-wrapper .ql-container.ql-snow {
+  border-color: var(--color-border);
+  background: var(--color-navy-light);
+  border-radius: 0 0 0.5rem 0.5rem;
+  min-height: 150px;
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  color: var(--color-foreground);
+}
+
+.quill-dark-wrapper .ql-editor.ql-blank::before {
+  color: var(--color-muted-foreground);
+  font-style: normal;
+}
+
+.quill-dark-wrapper .ql-snow .ql-stroke {
+  stroke: var(--color-muted-foreground);
+}
+
+.quill-dark-wrapper .ql-snow .ql-fill,
+.quill-dark-wrapper .ql-snow .ql-stroke.ql-fill {
+  fill: var(--color-muted-foreground);
+}
+
+.quill-dark-wrapper .ql-snow .ql-picker-label {
+  color: var(--color-muted-foreground);
+}
+
+.quill-dark-wrapper .ql-snow .ql-picker-options {
+  background: var(--color-navy);
+  border-color: var(--color-border);
+}
+
+.quill-dark-wrapper .ql-snow .ql-picker-item {
+  color: var(--color-foreground);
+}
+
+.quill-dark-wrapper .ql-toolbar button:hover .ql-stroke,
+.quill-dark-wrapper .ql-toolbar button.ql-active .ql-stroke {
+  stroke: var(--color-primary);
+}
+
+.quill-dark-wrapper .ql-toolbar button:hover .ql-fill,
+.quill-dark-wrapper .ql-toolbar button.ql-active .ql-fill {
+  fill: var(--color-primary);
+}
+
+/* ─── Rich Content Rendering (Public) ─── */
+.rich-content p {
+  margin-bottom: 0.75em;
+}
+
+.rich-content h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5em;
+}
+
+.rich-content h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5em;
+}
+
+.rich-content ul,
+.rich-content ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.rich-content ul {
+  list-style: disc;
+}
+
+.rich-content ol {
+  list-style: decimal;
+}
+
+.rich-content a {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.rich-content blockquote {
+  border-left: 3px solid var(--color-gold);
+  padding-left: 1em;
+  color: var(--color-muted-foreground);
+  margin-bottom: 0.75em;
+}
+

@@ -1,9 +1,11 @@
 import { ArrowRight, Shield, BarChart3, Clock } from 'lucide-react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function HeroBanner() {
     const { settings } = useSiteSettings();
     const { banner } = settings;
+    const { t } = useLanguage();
 
     const handleCTA = () => {
         const el = document.querySelector(banner.ctaLink);
@@ -29,7 +31,7 @@ export function HeroBanner() {
                     {/* Badge */}
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-xs font-medium text-gold mb-8">
                         <Shield className="w-3.5 h-3.5" />
-                        Trusted by 10,000+ Investors Since 2010
+                        {t('hero.badge')}
                     </div>
 
                     <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold leading-tight mb-6">
@@ -53,7 +55,7 @@ export function HeroBanner() {
                             onClick={() => document.querySelector('#about')?.scrollIntoView({ behavior: 'smooth' })}
                             className="inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl border border-border text-foreground font-semibold text-sm hover:bg-white/5 transition-all"
                         >
-                            Learn More
+                            {t('hero.learnMore')}
                         </button>
                     </div>
                 </div>
@@ -61,9 +63,9 @@ export function HeroBanner() {
                 {/* Stats */}
                 <div className="mt-20 grid grid-cols-1 sm:grid-cols-3 gap-6 animate-slide-up" style={{ animationDelay: '0.3s' }}>
                     {[
-                        { icon: BarChart3, label: 'Assets Under Management', value: '$2.4B+' },
-                        { icon: Shield, label: 'Years of Excellence', value: '16+' },
-                        { icon: Clock, label: 'Average Loan Approval', value: '24 Hours' },
+                        { icon: BarChart3, label: t('hero.stat.aum'), value: '$2.4B+' },
+                        { icon: Shield, label: t('hero.stat.years'), value: '16+' },
+                        { icon: Clock, label: t('hero.stat.approval'), value: t('hero.stat.approvalValue') },
                     ].map((stat) => (
                         <div key={stat.label} className="glass rounded-xl p-6 flex items-center gap-4">
                             <div className="w-12 h-12 rounded-lg bg-gold/10 flex items-center justify-center flex-shrink-0">

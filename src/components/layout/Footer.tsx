@@ -1,9 +1,19 @@
 import { TrendingUp, Mail, Phone, MapPin } from 'lucide-react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function Footer() {
     const { settings } = useSiteSettings();
     const { companyInfo } = settings;
+    const { t } = useLanguage();
+
+    const quickLinks = [
+        { labelKey: 'nav.home', href: '#home' },
+        { labelKey: 'nav.rates', href: '#rates' },
+        { labelKey: 'nav.news', href: '#news' },
+        { labelKey: 'nav.about', href: '#about' },
+        { labelKey: 'nav.contact', href: '#contact' },
+    ];
 
     return (
         <footer className="border-t border-border bg-navy">
@@ -25,19 +35,19 @@ export function Footer() {
                     {/* Quick Links */}
                     <div>
                         <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
-                            Quick Links
+                            {t('footer.quickLinks')}
                         </h3>
                         <ul className="space-y-2">
-                            {['Home', 'Rates', 'News', 'About', 'Contact'].map((item) => (
-                                <li key={item}>
+                            {quickLinks.map((item) => (
+                                <li key={item.href}>
                                     <button
                                         onClick={() => {
-                                            const el = document.querySelector(`#${item.toLowerCase()}`);
+                                            const el = document.querySelector(item.href);
                                             el?.scrollIntoView({ behavior: 'smooth' });
                                         }}
                                         className="text-sm text-muted-foreground hover:text-gold transition-colors"
                                     >
-                                        {item}
+                                        {t(item.labelKey)}
                                     </button>
                                 </li>
                             ))}
@@ -47,7 +57,7 @@ export function Footer() {
                     {/* Contact Info */}
                     <div>
                         <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-4">
-                            Contact
+                            {t('footer.contact')}
                         </h3>
                         <ul className="space-y-3">
                             <li className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -68,8 +78,8 @@ export function Footer() {
 
                 <div className="mt-8 pt-8 border-t border-border text-center">
                     <p className="text-xs text-muted-foreground">
-                        © {new Date().getFullYear()} {companyInfo.name}. All rights reserved. |
-                        Licensed by the Department of Financial Institutions. NMLS #123456
+                        © {new Date().getFullYear()} {companyInfo.name}. {t('footer.copyright')} |{' '}
+                        {t('footer.license')}
                     </p>
                 </div>
             </div>

@@ -1,10 +1,12 @@
 import { TrendingUp, Star } from 'lucide-react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { formatRate } from '@/lib/utils';
 
 export function InterestRates() {
     const { settings } = useSiteSettings();
     const { interestRates } = settings;
+    const { t } = useLanguage();
 
     return (
         <section id="rates" className="py-24 relative">
@@ -15,13 +17,13 @@ export function InterestRates() {
                 <div className="text-center mb-16">
                     <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-xs font-medium text-gold mb-4">
                         <TrendingUp className="w-3.5 h-3.5" />
-                        Live Rates
+                        {t('rates.badge')}
                     </div>
                     <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-                        Competitive Interest Rates
+                        {t('rates.title')}
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto">
-                        Transparent, competitive rates across all our lending products. Updated in real-time.
+                        {t('rates.subtitle')}
                     </p>
                 </div>
 
@@ -37,7 +39,7 @@ export function InterestRates() {
                                 <div className="absolute -top-3 right-4">
                                     <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full gradient-gold text-white text-xs font-semibold shadow-lg">
                                         <Star className="w-3 h-3" />
-                                        Featured
+                                        {t('rates.featured')}
                                     </span>
                                 </div>
                             )}
@@ -55,11 +57,11 @@ export function InterestRates() {
                                 <span className="text-4xl font-bold text-primary">
                                     {formatRate(rate.rate)}
                                 </span>
-                                <span className="text-sm text-muted-foreground pb-1">APR</span>
+                                <span className="text-sm text-muted-foreground pb-1">{t('rates.apr')}</span>
                             </div>
 
                             <div className="flex items-center justify-between pt-4 border-t border-border">
-                                <span className="text-xs text-muted-foreground">Term</span>
+                                <span className="text-xs text-muted-foreground">{t('rates.term')}</span>
                                 <span className="text-sm font-medium text-foreground">{rate.term}</span>
                             </div>
                         </div>
@@ -68,8 +70,7 @@ export function InterestRates() {
 
                 <div className="mt-12 text-center">
                     <p className="text-xs text-muted-foreground">
-                        * Rates are subject to change and may vary based on creditworthiness and loan amount.
-                        Contact us for a personalized quote.
+                        {t('rates.disclaimer')}
                     </p>
                 </div>
             </div>

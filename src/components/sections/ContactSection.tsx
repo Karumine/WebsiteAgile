@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Send, Phone, Mail, MapPin } from 'lucide-react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export function ContactSection() {
     const { settings } = useSiteSettings();
     const { companyInfo } = settings;
+    const { t } = useLanguage();
     const [formData, setFormData] = useState({ name: '', email: '', message: '' });
     const [submitted, setSubmitted] = useState(false);
 
@@ -20,10 +22,10 @@ export function ContactSection() {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-16">
                     <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
-                        Get in Touch
+                        {t('contact.title')}
                     </h2>
                     <p className="text-muted-foreground max-w-2xl mx-auto">
-                        Ready to explore your financial options? Our team is here to help.
+                        {t('contact.subtitle')}
                     </p>
                 </div>
 
@@ -31,12 +33,12 @@ export function ContactSection() {
                     {/* Contact Info */}
                     <div className="space-y-8">
                         <div>
-                            <h3 className="text-xl font-semibold text-foreground mb-6">Contact Information</h3>
+                            <h3 className="text-xl font-semibold text-foreground mb-6">{t('contact.info')}</h3>
                             <div className="space-y-4">
                                 {[
-                                    { icon: Phone, label: 'Phone', value: companyInfo.phone },
-                                    { icon: Mail, label: 'Email', value: companyInfo.email },
-                                    { icon: MapPin, label: 'Address', value: companyInfo.address },
+                                    { icon: Phone, label: t('contact.phone'), value: companyInfo.phone },
+                                    { icon: Mail, label: t('contact.email'), value: companyInfo.email },
+                                    { icon: MapPin, label: t('contact.address'), value: companyInfo.address },
                                 ].map((item) => (
                                     <div key={item.label} className="flex items-start gap-4 glass rounded-xl p-4">
                                         <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center flex-shrink-0">
@@ -52,57 +54,57 @@ export function ContactSection() {
                         </div>
 
                         <div className="glass rounded-xl p-6">
-                            <h4 className="text-sm font-semibold text-foreground mb-2">Business Hours</h4>
+                            <h4 className="text-sm font-semibold text-foreground mb-2">{t('contact.hours')}</h4>
                             <div className="space-y-1 text-sm text-muted-foreground">
-                                <p>Monday – Friday: 8:00 AM – 6:00 PM EST</p>
-                                <p>Saturday: 9:00 AM – 1:00 PM EST</p>
-                                <p>Sunday: Closed</p>
+                                <p>{t('contact.hours.weekday')}</p>
+                                <p>{t('contact.hours.saturday')}</p>
+                                <p>{t('contact.hours.sunday')}</p>
                             </div>
                         </div>
                     </div>
 
                     {/* Contact Form */}
                     <div className="glass rounded-2xl p-8">
-                        <h3 className="text-xl font-semibold text-foreground mb-6">Send Us a Message</h3>
+                        <h3 className="text-xl font-semibold text-foreground mb-6">{t('contact.form.title')}</h3>
 
                         {submitted && (
                             <div className="mb-6 p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm">
-                                Thank you! Your message has been sent successfully.
+                                {t('contact.form.success')}
                             </div>
                         )}
 
                         <form onSubmit={handleSubmit} className="space-y-5">
                             <div>
-                                <label className="block text-sm font-medium text-muted-foreground mb-1.5">Full Name</label>
+                                <label className="block text-sm font-medium text-muted-foreground mb-1.5">{t('contact.form.name')}</label>
                                 <input
                                     type="text"
                                     required
                                     value={formData.name}
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     className="w-full px-4 py-3 rounded-xl bg-navy-light border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                                    placeholder="Your full name"
+                                    placeholder={t('contact.form.namePlaceholder')}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-muted-foreground mb-1.5">Email</label>
+                                <label className="block text-sm font-medium text-muted-foreground mb-1.5">{t('contact.form.email')}</label>
                                 <input
                                     type="email"
                                     required
                                     value={formData.email}
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     className="w-full px-4 py-3 rounded-xl bg-navy-light border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
-                                    placeholder="your.email@example.com"
+                                    placeholder={t('contact.form.emailPlaceholder')}
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-muted-foreground mb-1.5">Message</label>
+                                <label className="block text-sm font-medium text-muted-foreground mb-1.5">{t('contact.form.message')}</label>
                                 <textarea
                                     required
                                     rows={4}
                                     value={formData.message}
                                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                                     className="w-full px-4 py-3 rounded-xl bg-navy-light border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
-                                    placeholder="How can we help you?"
+                                    placeholder={t('contact.form.messagePlaceholder')}
                                 />
                             </div>
                             <button
@@ -110,7 +112,7 @@ export function ContactSection() {
                                 className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl gradient-gold text-white font-semibold text-sm shadow-lg shadow-gold/20 hover:shadow-gold/40 transition-all hover:scale-[1.01] active:scale-[0.99]"
                             >
                                 <Send className="w-4 h-4" />
-                                Send Message
+                                {t('contact.form.submit')}
                             </button>
                         </form>
                     </div>
