@@ -14,5 +14,17 @@ export default defineConfig({
   server: {
     open: true,
     port: 3001,
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom', 'react-router-dom', 'react-helmet-async'],
+          'ui': ['lucide-react', 'react-hot-toast', 'clsx', 'tailwind-merge'],
+          'editor': ['react-quill-new'],
+        },
+      },
+    },
+    chunkSizeWarningLimit: 800,
   }
 })

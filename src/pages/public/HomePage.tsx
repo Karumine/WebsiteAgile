@@ -27,9 +27,12 @@ export function HomePage() {
                 <meta property="og:title" content={title} />
                 <meta property="og:description" content={description} />
                 <meta property="og:type" content="website" />
+                <meta property="og:url" content="https://agileassets.com/" />
+                <meta property="og:image" content="https://agileassets.com/og-image.jpg" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={title} />
                 <meta name="twitter:description" content={description} />
+                <meta name="twitter:image" content="https://agileassets.com/og-image.jpg" />
                 <link rel="canonical" href={window.location.origin} />
             </Helmet>
             <Navbar />

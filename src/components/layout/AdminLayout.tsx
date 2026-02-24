@@ -37,7 +37,7 @@ export function AdminLayout() {
             {/* Sidebar */}
             <aside
                 className={cn(
-                    'fixed inset-y-0 left-0 z-50 w-64 bg-navy border-r border-border flex flex-col transition-transform duration-300 lg:translate-x-0 lg:static',
+                    'fixed inset-y-0 left-0 z-50 w-64 bg-navy border-r border-border flex flex-col transition-transform duration-300 lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen',
                     sidebarOpen ? 'translate-x-0' : '-translate-x-full'
                 )}
             >

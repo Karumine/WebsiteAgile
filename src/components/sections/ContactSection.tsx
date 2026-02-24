@@ -9,9 +9,16 @@ export function ContactSection() {
     const { t } = useLanguage();
     const [formData, setFormData] = useState({ name: '', email: '', message: '' });
     const [submitted, setSubmitted] = useState(false);
+    const [isVerifying, setIsVerifying] = useState(false);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsVerifying(true);
+
+        // Mock API call and Turnstile verification delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        setIsVerifying(false);
         setSubmitted(true);
         setFormData({ name: '', email: '', message: '' });
         setTimeout(() => setSubmitted(false), 4000);
@@ -83,6 +90,7 @@ export function ContactSection() {
                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     className="w-full px-4 py-3 rounded-xl bg-navy-light border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                                     placeholder={t('contact.form.namePlaceholder')}
+                                    disabled={isVerifying}
                                 />
                             </div>
                             <div>
@@ -94,6 +102,7 @@ export function ContactSection() {
                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     className="w-full px-4 py-3 rounded-xl bg-navy-light border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
                                     placeholder={t('contact.form.emailPlaceholder')}
+                                    disabled={isVerifying}
                                 />
                             </div>
                             <div>
@@ -105,14 +114,36 @@ export function ContactSection() {
                                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                                     className="w-full px-4 py-3 rounded-xl bg-navy-light border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all resize-none"
                                     placeholder={t('contact.form.messagePlaceholder')}
+                                    disabled={isVerifying}
                                 />
                             </div>
+
+                            {/* reCAPTCHA / Turnstile Mock UI */}
+                            <div className="flex items-center justify-between text-xs text-muted-foreground">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-4 h-4 rounded-full border border-muted-foreground/30 flex items-center justify-center">
+                                        <div className="w-2 h-2 rounded-full bg-blue-400"></div>
+                                    </div>
+                                    Protected by Cloudflare Turnstile
+                                </div>
+                            </div>
+
                             <button
                                 type="submit"
-                                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 text-white font-semibold text-sm shadow-lg shadow-blue-400/20 hover:shadow-blue-400/40 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                                disabled={isVerifying}
+                                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 text-white font-semibold text-sm shadow-lg shadow-blue-400/20 hover:shadow-blue-400/40 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:pointer-events-none"
                             >
-                                <Send className="w-4 h-4" />
-                                {t('contact.form.submit')}
+                                {isVerifying ? (
+                                    <>
+                                        <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin"></div>
+                                        Verifying...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Send className="w-4 h-4" />
+                                        {t('contact.form.submit')}
+                                    </>
+                                )}
                             </button>
                         </form>
                     </div>
