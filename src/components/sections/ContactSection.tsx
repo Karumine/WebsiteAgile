@@ -41,8 +41,8 @@ export function ContactSection() {
                                     { icon: MapPin, label: t('contact.address'), value: companyInfo.address },
                                 ].map((item) => (
                                     <div key={item.label} className="flex items-start gap-4 glass rounded-xl p-4">
-                                        <div className="w-10 h-10 rounded-lg bg-gold/10 flex items-center justify-center flex-shrink-0">
-                                            <item.icon className="w-5 h-5 text-gold" />
+                                        <div className="w-10 h-10 rounded-lg bg-blue-400/10 flex items-center justify-center flex-shrink-0">
+                                            <item.icon className="w-5 h-5 text-blue-400" />
                                         </div>
                                         <div>
                                             <p className="text-xs text-muted-foreground uppercase tracking-wider">{item.label}</p>
@@ -109,7 +109,7 @@ export function ContactSection() {
                             </div>
                             <button
                                 type="submit"
-                                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl gradient-gold text-white font-semibold text-sm shadow-lg shadow-gold/20 hover:shadow-gold/40 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 text-white font-semibold text-sm shadow-lg shadow-blue-400/20 hover:shadow-blue-400/40 transition-all hover:scale-[1.01] active:scale-[0.99]"
                             >
                                 <Send className="w-4 h-4" />
                                 {t('contact.form.submit')}

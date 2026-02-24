@@ -48,8 +48,8 @@ export function AboutSection() {
                             className="group glass rounded-2xl p-6 text-center hover:bg-white/[0.06] transition-all duration-300 hover:scale-[1.02]"
                             style={{ animationDelay: `${index * 0.1}s` }}
                         >
-                            <div className="w-14 h-14 rounded-xl bg-gold/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-gold/20 transition-colors">
-                                <value.icon className="w-7 h-7 text-gold" />
+                            <div className="w-14 h-14 rounded-xl bg-blue-400/10 flex items-center justify-center mx-auto mb-4 group-hover:bg-blue-400/20 transition-colors">
+                                <value.icon className="w-7 h-7 text-blue-400" />
                             </div>
                             <h3 className="text-lg font-semibold text-foreground mb-2">{t(value.titleKey)}</h3>
                             <p className="text-sm text-muted-foreground leading-relaxed">{t(value.descKey)}</p>

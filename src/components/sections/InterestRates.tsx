@@ -15,7 +15,7 @@ export function InterestRates() {
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Section Header */}
                 <div className="text-center mb-16">
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-xs font-medium text-gold mb-4">
+                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-xs font-medium text-blue-400 mb-4">
                         <TrendingUp className="w-3.5 h-3.5" />
                         {t('rates.badge')}
                     </div>
@@ -37,7 +37,7 @@ export function InterestRates() {
                         >
                             {rate.featured && (
                                 <div className="absolute -top-3 right-4">
-                                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full gradient-gold text-white text-xs font-semibold shadow-lg">
+                                    <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 text-white text-xs font-semibold shadow-lg shadow-blue-400/20">
                                         <Star className="w-3 h-3" />
                                         {t('rates.featured')}
                                     </span>
@@ -45,7 +45,7 @@ export function InterestRates() {
                             )}
 
                             <div className="mb-4">
-                                <h3 className="text-lg font-semibold text-foreground group-hover:text-gold transition-colors">
+                                <h3 className="text-lg font-semibold text-foreground group-hover:text-blue-400 transition-colors">
                                     {rate.product}
                                 </h3>
                                 <p className="text-sm text-muted-foreground mt-1">

@@ -2,15 +2,14 @@ import { useState } from 'react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import type { CustomField } from '@/types';
 import { generateId } from '@/lib/utils';
-import { Plus, Trash2, Save, AlertCircle, CheckCircle, Settings } from 'lucide-react';
+import { Plus, Trash2, Save, Settings } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const FIELD_TYPES: CustomField['type'][] = ['text', 'number', 'date', 'boolean', 'url'];
 
 export function CustomFieldsEditor() {
     const { settings, updateSettings } = useSiteSettings();
     const [fields, setFields] = useState<CustomField[]>([...settings.customFields]);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
 
     const addField = () => {
         setFields([
@@ -36,11 +35,11 @@ export function CustomFieldsEditor() {
     const validate = (): boolean => {
         for (const field of fields) {
             if (!field.label.trim()) {
-                setError('All custom fields must have a label.');
+                toast.error('All custom fields must have a label.');
                 return false;
             }
             if (!field.value.trim()) {
-                setError(`Value for "${field.label}" is required.`);
+                toast.error(`Value for "${field.label}" is required.`);
                 return false;
             }
         }
@@ -48,12 +47,9 @@ export function CustomFieldsEditor() {
     };
 
     const handleSave = () => {
-        setError('');
-        setSuccess('');
         if (!validate()) return;
         updateSettings({ customFields: fields });
-        setSuccess('Custom fields saved successfully!');
-        setTimeout(() => setSuccess(''), 3000);
+        toast.success('Custom fields saved successfully!');
     };
 
     // Group fields by campaign
@@ -78,7 +74,7 @@ export function CustomFieldsEditor() {
                     </button>
                     <button
                         onClick={handleSave}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-gold text-white font-semibold text-sm shadow-lg shadow-gold/20 hover:shadow-gold/40 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 text-white font-semibold text-sm shadow-lg shadow-blue-400/20 hover:shadow-blue-400/40 transition-all hover:scale-[1.01] active:scale-[0.99]"
                     >
                         <Save className="w-4 h-4" />
                         Save All
@@ -86,26 +82,13 @@ export function CustomFieldsEditor() {
                 </div>
             </div>
 
-            {error && (
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                    {error}
-                </div>
-            )}
-            {success && (
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                    {success}
-                </div>
-            )}
-
             {/* Campaign Info */}
             {campaigns.length > 0 && (
                 <div className="glass rounded-xl p-4">
                     <h3 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Active Campaigns</h3>
                     <div className="flex flex-wrap gap-2">
                         {campaigns.map((campaign) => (
-                            <span key={campaign} className="text-xs font-medium text-gold bg-gold/10 px-3 py-1 rounded-full">
+                            <span key={campaign} className="text-xs font-medium text-blue-400 bg-blue-400/ px-3 py-1 rounded-full">
                                 {campaign} ({fields.filter((f) => f.campaign === campaign).length} fields)
                             </span>
                         ))}

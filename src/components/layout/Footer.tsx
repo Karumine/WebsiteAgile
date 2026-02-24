@@ -22,7 +22,7 @@ export function Footer() {
                     {/* Brand */}
                     <div>
                         <div className="flex items-center gap-2 mb-4">
-                            <div className="w-8 h-8 rounded-lg gradient-gold flex items-center justify-center">
+                            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center">
                                 <TrendingUp className="w-4 h-4 text-white" />
                             </div>
                             <span className="text-lg font-bold text-gradient">Agile Assets</span>
@@ -45,7 +45,7 @@ export function Footer() {
                                             const el = document.querySelector(item.href);
                                             el?.scrollIntoView({ behavior: 'smooth' });
                                         }}
-                                        className="text-sm text-muted-foreground hover:text-gold transition-colors"
+                                        className="text-sm text-muted-foreground hover:text-blue-400 transition-colors"
                                     >
                                         {t(item.labelKey)}
                                     </button>
@@ -61,15 +61,15 @@ export function Footer() {
                         </h3>
                         <ul className="space-y-3">
                             <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Phone className="w-4 h-4 text-gold" />
+                                <Phone className="w-4 h-4 text-blue-400" />
                                 {companyInfo.phone}
                             </li>
                             <li className="flex items-center gap-2 text-sm text-muted-foreground">
-                                <Mail className="w-4 h-4 text-gold" />
+                                <Mail className="w-4 h-4 text-blue-400" />
                                 {companyInfo.email}
                             </li>
                             <li className="flex items-start gap-2 text-sm text-muted-foreground">
-                                <MapPin className="w-4 h-4 text-gold mt-0.5" />
+                                <MapPin className="w-4 h-4 text-blue-400 mt-0.5" />
                                 {companyInfo.address}
                             </li>
                         </ul>

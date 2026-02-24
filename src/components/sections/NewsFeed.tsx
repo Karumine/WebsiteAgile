@@ -80,7 +80,7 @@ export function NewsFeed() {
                 <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     {/* Section Header */}
                     <div className="text-center mb-16">
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-xs font-medium text-gold mb-4">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass text-xs font-medium text-blue-400 mb-4">
                             <Newspaper className="w-3.5 h-3.5" />
                             {t('news.badge')}
                         </div>
@@ -104,11 +104,12 @@ export function NewsFeed() {
                                     <img
                                         src={getImageUrl(featuredArticle)}
                                         alt={getField(featuredArticle, 'title')}
+                                        loading="lazy"
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                                     <div className="absolute top-4 left-4 flex items-center gap-2">
-                                        <span className="px-3 py-1 rounded-full gradient-gold text-white text-xs font-semibold shadow-lg">
+                                        <span className="px-3 py-1 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 text-white text-xs font-semibold shadow-lg">
                                             <Pin className="w-3 h-3 inline mr-1" />
                                             {t('news.pinned')}
                                         </span>
@@ -120,18 +121,18 @@ export function NewsFeed() {
                                 {/* Content */}
                                 <div className="p-8 lg:p-10 flex flex-col justify-center">
                                     <div className="flex items-center gap-2 mb-4">
-                                        <CalendarDays className="w-4 h-4 text-gold" />
+                                        <CalendarDays className="w-4 h-4 text-blue-400" />
                                         <span className="text-sm text-muted-foreground">
                                             {formatDate(featuredArticle.date)}
                                         </span>
                                     </div>
-                                    <h3 className="text-2xl lg:text-3xl font-bold text-foreground mb-4 group-hover:text-gold transition-colors leading-tight">
+                                    <h3 className="text-2xl lg:text-3xl font-bold text-foreground mb-4 group-hover:text-blue-400 transition-colors leading-tight">
                                         {getField(featuredArticle, 'title')}
                                     </h3>
                                     <p className="text-muted-foreground leading-relaxed mb-6 line-clamp-3">
                                         {stripHtml(getField(featuredArticle, 'excerpt'))}
                                     </p>
-                                    <div className="inline-flex items-center gap-2 text-gold font-semibold text-sm group-hover:gap-3 transition-all">
+                                    <div className="inline-flex items-center gap-2 text-blue-400 font-semibold text-sm group-hover:gap-3 transition-all">
                                         {t('news.readMore')}
                                         <ArrowRight className="w-4 h-4" />
                                     </div>
@@ -154,6 +155,7 @@ export function NewsFeed() {
                                     <img
                                         src={getImageUrl(article)}
                                         alt={getField(article, 'title')}
+                                        loading="lazy"
                                         className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
@@ -171,7 +173,7 @@ export function NewsFeed() {
                                 </div>
 
                                 <div className="p-6 flex flex-col flex-1">
-                                    <h3 className="text-lg font-semibold text-foreground group-hover:text-gold transition-colors mb-2 line-clamp-2">
+                                    <h3 className="text-lg font-semibold text-foreground group-hover:text-blue-400 transition-colors mb-2 line-clamp-2">
                                         {getField(article, 'title')}
                                     </h3>
 
@@ -186,7 +188,7 @@ export function NewsFeed() {
                                                 {formatDate(article.date)}
                                             </span>
                                         </div>
-                                        <span className="text-xs text-gold font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
+                                        <span className="text-xs text-blue-400 font-medium inline-flex items-center gap-1 group-hover:gap-2 transition-all">
                                             {t('news.readMore')}
                                             <ArrowRight className="w-3 h-3" />
                                         </span>
@@ -212,7 +214,7 @@ export function NewsFeed() {
                                         key={i}
                                         onClick={() => setCurrentPage(i)}
                                         className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${i === currentPage
-                                            ? 'bg-gold w-8 rounded-full'
+                                            ? 'bg-blue-400 w-8 rounded-full'
                                             : 'bg-white/20 hover:bg-white/40'
                                             }`}
                                     />
@@ -246,6 +248,7 @@ export function NewsFeed() {
                             <img
                                 src={getImageUrl(openArticle)}
                                 alt={getField(openArticle, 'title')}
+                                loading="lazy"
                                 className="w-full h-full object-cover"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-transparent to-transparent" />
@@ -256,7 +259,7 @@ export function NewsFeed() {
                                 <X className="w-5 h-5" />
                             </button>
                             <div className="absolute bottom-3 left-5 flex items-center gap-2">
-                                <span className="px-3 py-1 rounded-full bg-gold/90 text-white text-xs font-semibold">
+                                <span className="px-3 py-1 rounded-full bg-blue-400/90 text-white text-xs font-semibold">
                                     {openArticle.category}
                                 </span>
                                 {openArticle.pinned && (
@@ -271,7 +274,7 @@ export function NewsFeed() {
                         {/* Content — contained inside modal */}
                         <div style={{ flex: '1 1 0%', minHeight: 0, overflowY: 'auto', overflowX: 'hidden', padding: '1.5rem 2rem', wordBreak: 'break-word' }}>
                             <div className="flex items-center gap-2 mb-3">
-                                <CalendarDays className="w-4 h-4 text-gold" />
+                                <CalendarDays className="w-4 h-4 text-blue-400" />
                                 <span className="text-sm text-muted-foreground">
                                     {formatDate(openArticle.date)}
                                 </span>

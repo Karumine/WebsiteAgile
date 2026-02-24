@@ -1,12 +1,11 @@
 import { useState } from 'react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
-import { Save, AlertCircle, CheckCircle, Eye } from 'lucide-react';
+import { Save, Eye } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export function BannerEditor() {
     const { settings, updateSettings } = useSiteSettings();
     const [banner, setBanner] = useState({ ...settings.banner });
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
     const [showPreview, setShowPreview] = useState(false);
 
     const updateField = (field: string, value: string) => {
@@ -15,27 +14,24 @@ export function BannerEditor() {
 
     const validate = (): boolean => {
         if (!banner.headline.trim()) {
-            setError('Headline is required.');
+            toast.error('Headline is required.');
             return false;
         }
         if (!banner.subheadline.trim()) {
-            setError('Subheadline is required.');
+            toast.error('Subheadline is required.');
             return false;
         }
         if (!banner.ctaText.trim()) {
-            setError('CTA button text is required.');
+            toast.error('CTA button text is required.');
             return false;
         }
         return true;
     };
 
     const handleSave = () => {
-        setError('');
-        setSuccess('');
         if (!validate()) return;
         updateSettings({ banner });
-        setSuccess('Banner settings saved successfully!');
-        setTimeout(() => setSuccess(''), 3000);
+        toast.success('Banner settings saved successfully!');
     };
 
     return (
@@ -55,26 +51,13 @@ export function BannerEditor() {
                     </button>
                     <button
                         onClick={handleSave}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-gold text-white font-semibold text-sm shadow-lg shadow-gold/20 hover:shadow-gold/40 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 text-white font-semibold text-sm shadow-lg shadow-blue-400/20 hover:shadow-blue-400/40 transition-all hover:scale-[1.01] active:scale-[0.99]"
                     >
                         <Save className="w-4 h-4" />
                         Save Changes
                     </button>
                 </div>
             </div>
-
-            {error && (
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                    {error}
-                </div>
-            )}
-            {success && (
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                    {success}
-                </div>
-            )}
 
             {/* Preview */}
             {showPreview && (
@@ -83,7 +66,7 @@ export function BannerEditor() {
                     <div className="relative z-10">
                         <h2 className="text-3xl sm:text-4xl font-bold text-foreground mb-3">{banner.headline || 'Headline...'}</h2>
                         <p className="text-lg text-muted-foreground mb-6">{banner.subheadline || 'Subheadline...'}</p>
-                        <span className="inline-flex items-center px-6 py-3 rounded-xl gradient-gold text-white font-semibold text-sm">
+                        <span className="inline-flex items-center px-6 py-3 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 text-white font-semibold text-sm">
                             {banner.ctaText || 'CTA Text...'}
                         </span>
                     </div>

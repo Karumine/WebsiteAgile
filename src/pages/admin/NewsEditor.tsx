@@ -2,9 +2,10 @@ import { useState, useRef, useCallback } from 'react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import type { NewsItem } from '@/types';
 import { generateId, formatDate } from '@/lib/utils';
-import { Plus, Trash2, Save, Pin, AlertCircle, CheckCircle, ChevronDown, ChevronUp, Upload, X, ImageIcon } from 'lucide-react';
+import { Plus, Trash2, Save, Pin, ChevronDown, ChevronUp, Upload, X, ImageIcon } from 'lucide-react';
 import ReactQuill from 'react-quill-new';
 import 'react-quill-new/dist/quill.snow.css';
+import toast from 'react-hot-toast';
 
 const quillModules = {
     toolbar: [
@@ -61,8 +62,6 @@ type ArticleLang = 'th' | 'en';
 export function NewsEditor() {
     const { settings, updateSettings } = useSiteSettings();
     const [articles, setArticles] = useState<NewsItem[]>([...settings.news]);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [articleLangs, setArticleLangs] = useState<Record<string, ArticleLang>>({});
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -107,7 +106,7 @@ export function NewsEditor() {
             // Use functional updater to avoid stale closure issue
             setArticles(prev => prev.map(a => a.id === articleId ? { ...a, image: base64 } : a));
         } catch {
-            setError('Failed to process image. Please try another file.');
+            toast.error('Failed to process image. Please try another file.');
         }
         setUploadingId(null);
     }, []);
@@ -128,11 +127,11 @@ export function NewsEditor() {
     const validate = (): boolean => {
         for (const article of articles) {
             if (!article.title.trim() && !article.title_en.trim()) {
-                setError('ข่าวทุกรายการต้องมีชื่อเรื่องอย่างน้อย 1 ภาษา');
+                toast.error('ข่าวทุกรายการต้องมีชื่อเรื่องอย่างน้อย 1 ภาษา');
                 return false;
             }
             if (!article.excerpt.trim() && !article.excerpt_en.trim()) {
-                setError(`Excerpt for "${article.title || article.title_en}" is required in at least one language.`);
+                toast.error(`Excerpt for "${article.title || article.title_en}" is required in at least one language.`);
                 return false;
             }
         }
@@ -140,12 +139,9 @@ export function NewsEditor() {
     };
 
     const handleSave = () => {
-        setError('');
-        setSuccess('');
         if (!validate()) return;
         updateSettings({ news: articles });
-        setSuccess('บันทึกข่าวสารเรียบร้อยแล้ว!');
-        setTimeout(() => setSuccess(''), 3000);
+        toast.success('บันทึกข่าวสารเรียบร้อยแล้ว!');
     };
 
     const categories = ['Company News', 'Market Analysis', 'Education', 'Product Update', 'Press Release'];
@@ -176,26 +172,13 @@ export function NewsEditor() {
                     </button>
                     <button
                         onClick={handleSave}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-gold text-white font-semibold text-sm shadow-lg shadow-gold/20 hover:shadow-gold/40 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 text-white font-semibold text-sm shadow-lg shadow-blue-400/20 hover:shadow-blue-400/40 transition-all hover:scale-[1.01] active:scale-[0.99]"
                     >
                         <Save className="w-4 h-4" />
                         บันทึก
                     </button>
                 </div>
             </div>
-
-            {error && (
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                    {error}
-                </div>
-            )}
-            {success && (
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                    {success}
-                </div>
-            )}
 
             <div className="space-y-3">
                 {articles.map((article) => {

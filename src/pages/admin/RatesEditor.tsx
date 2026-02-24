@@ -2,13 +2,12 @@ import { useState } from 'react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import type { InterestRate } from '@/types';
 import { generateId, formatRate } from '@/lib/utils';
-import { Plus, Trash2, Save, Star, AlertCircle, CheckCircle } from 'lucide-react';
+import { Plus, Trash2, Save, Star } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export function RatesEditor() {
     const { settings, updateSettings } = useSiteSettings();
     const [rates, setRates] = useState<InterestRate[]>([...settings.interestRates]);
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
 
     const addRate = () => {
         setRates([
@@ -35,15 +34,15 @@ export function RatesEditor() {
     const validate = (): boolean => {
         for (const rate of rates) {
             if (!rate.product.trim()) {
-                setError('All products must have a name.');
+                toast.error('All products must have a name.');
                 return false;
             }
             if (rate.rate <= 0 || rate.rate > 100) {
-                setError(`Rate for "${rate.product}" must be between 0 and 100.`);
+                toast.error(`Rate for "${rate.product}" must be between 0 and 100.`);
                 return false;
             }
             if (!rate.term.trim()) {
-                setError(`Term for "${rate.product}" is required.`);
+                toast.error(`Term for "${rate.product}" is required.`);
                 return false;
             }
         }
@@ -51,12 +50,9 @@ export function RatesEditor() {
     };
 
     const handleSave = () => {
-        setError('');
-        setSuccess('');
         if (!validate()) return;
         updateSettings({ interestRates: rates });
-        setSuccess('Interest rates saved successfully!');
-        setTimeout(() => setSuccess(''), 3000);
+        toast.success('Interest rates saved successfully!');
     };
 
     return (
@@ -68,25 +64,12 @@ export function RatesEditor() {
                 </div>
                 <button
                     onClick={handleSave}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl gradient-gold text-white font-semibold text-sm shadow-lg shadow-gold/20 hover:shadow-gold/40 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 text-white font-semibold text-sm shadow-lg shadow-blue-400/20 hover:shadow-blue-400/40 transition-all hover:scale-[1.01] active:scale-[0.99]"
                 >
                     <Save className="w-4 h-4" />
                     Save Changes
                 </button>
             </div>
-
-            {error && (
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
-                    {error}
-                </div>
-            )}
-            {success && (
-                <div className="flex items-center gap-2 p-3 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400 text-sm">
-                    <CheckCircle className="w-4 h-4 flex-shrink-0" />
-                    {success}
-                </div>
-            )}
 
             <div className="space-y-4">
                 {rates.map((rate, index) => (
@@ -96,7 +79,7 @@ export function RatesEditor() {
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => updateRate(rate.id, 'featured', !rate.featured)}
-                                    className={`p-1.5 rounded-lg transition-colors ${rate.featured ? 'bg-gold/20 text-gold' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}`}
+                                    className={`p-1.5 rounded-lg transition-colors ${rate.featured ? 'bg-blue-400/ text-blue-400' : 'text-muted-foreground hover:text-foreground hover:bg-white/5'}`}
                                     title="Toggle featured"
                                 >
                                     <Star className="w-4 h-4" fill={rate.featured ? 'currentColor' : 'none'} />

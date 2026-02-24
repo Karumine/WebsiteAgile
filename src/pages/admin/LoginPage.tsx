@@ -50,12 +50,12 @@ export function LoginPage() {
         <div className="min-h-screen gradient-hero flex items-center justify-center p-4">
             {/* Background effects */}
             <div className="absolute top-20 right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
-            <div className="absolute bottom-20 left-20 w-80 h-80 bg-gold/5 rounded-full blur-3xl" />
+            <div className="absolute bottom-20 left-20 w-80 h-80 bg-blue-400/ rounded-full blur-3xl" />
 
             <div className="relative w-full max-w-md">
                 {/* Logo */}
                 <div className="text-center mb-8">
-                    <div className="w-14 h-14 rounded-xl gradient-gold flex items-center justify-center mx-auto mb-4 shadow-lg shadow-gold/20">
+                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-400/20">
                         <TrendingUp className="w-7 h-7 text-white" />
                     </div>
                     <h1 className="text-2xl font-bold text-foreground">Management Portal</h1>
@@ -108,7 +108,7 @@ export function LoginPage() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl gradient-gold text-white font-semibold text-sm shadow-lg shadow-gold/20 hover:shadow-gold/40 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                            className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 text-white font-semibold text-sm shadow-lg shadow-blue-400/20 hover:shadow-blue-400/40 transition-all hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
                         >
                             {isLoading ? (
                                 <>

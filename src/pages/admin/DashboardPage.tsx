@@ -19,8 +19,8 @@ export function DashboardPage() {
             icon: Newspaper,
             label: 'Published Articles',
             value: settings.news.length,
-            color: 'text-gold',
-            bg: 'bg-gold/10',
+            color: 'text-blue-400',
+            bg: 'bg-blue-400/',
             to: '/management-portal/news',
         },
         {
@@ -84,8 +84,8 @@ export function DashboardPage() {
                             to={action.to}
                             className="glass rounded-xl p-5 hover:bg-white/[0.06] transition-all group"
                         >
-                            <action.icon className="w-5 h-5 text-gold mb-3" />
-                            <h3 className="text-sm font-semibold text-foreground group-hover:text-gold transition-colors">
+                            <action.icon className="w-5 h-5 text-blue-400 mb-3" />
+                            <h3 className="text-sm font-semibold text-foreground group-hover:text-blue-400 transition-colors">
                                 {action.label}
                             </h3>
                             <p className="text-xs text-muted-foreground mt-1">{action.desc}</p>
@@ -104,7 +104,7 @@ export function DashboardPage() {
                                 <p className="text-sm font-medium text-foreground truncate">{article.title}</p>
                                 <p className="text-xs text-muted-foreground mt-0.5">{formatDate(article.date)}</p>
                             </div>
-                            <span className="text-xs font-medium text-gold bg-gold/10 px-2.5 py-1 rounded-full flex-shrink-0">
+                            <span className="text-xs font-medium text-blue-400 bg-blue-400/ px-2.5 py-1 rounded-full flex-shrink-0">
                                 {article.category}
                             </span>
                         </div>
