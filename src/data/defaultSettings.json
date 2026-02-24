@@ -1,0 +1,111 @@
+{
+    "banner": {
+        "headline": "Invest with Confidence",
+        "subheadline": "Agile Assets — Trusted Lending & Investment Solutions Since 2010",
+        "ctaText": "Explore Our Rates",
+        "ctaLink": "#rates"
+    },
+    "interestRates": [
+        {
+            "id": "rate-001",
+            "product": "Personal Loan",
+            "rate": 5.99,
+            "term": "12–60 months",
+            "featured": true,
+            "description": "Flexible personal loans for any purpose with competitive rates and quick approval."
+        },
+        {
+            "id": "rate-002",
+            "product": "Business Loan",
+            "rate": 7.49,
+            "term": "12–84 months",
+            "featured": false,
+            "description": "Fuel your business growth with tailored financing solutions."
+        },
+        {
+            "id": "rate-003",
+            "product": "Mortgage",
+            "rate": 3.25,
+            "term": "15–30 years",
+            "featured": true,
+            "description": "Competitive mortgage rates to help you achieve your dream home."
+        },
+        {
+            "id": "rate-004",
+            "product": "Auto Loan",
+            "rate": 4.75,
+            "term": "24–72 months",
+            "featured": false,
+            "description": "Drive your dream car with affordable auto financing."
+        },
+        {
+            "id": "rate-005",
+            "product": "Equipment Finance",
+            "rate": 6.25,
+            "term": "12–60 months",
+            "featured": true,
+            "description": "Finance essential equipment to keep your operations running."
+        },
+        {
+            "id": "rate-006",
+            "product": "Line of Credit",
+            "rate": 8.99,
+            "term": "Revolving",
+            "featured": false,
+            "description": "Flexible access to funds whenever your business needs it."
+        }
+    ],
+    "news": [
+        {
+            "id": "news-001",
+            "title": "Q1 2026 Market Outlook: Opportunities in a Shifting Landscape",
+            "excerpt": "Our analysts break down the key trends shaping the financial market this quarter.",
+            "content": "As we enter Q1 2026, the global financial landscape presents both challenges and opportunities. Interest rates have stabilized, creating favorable conditions for borrowers and investors alike. Our team of analysts has identified key sectors poised for growth, including sustainable energy, technology infrastructure, and healthcare innovation. We recommend a diversified approach to portfolio management, with a focus on long-term value creation.",
+            "date": "2026-02-20",
+            "pinned": true,
+            "category": "Market Analysis"
+        },
+        {
+            "id": "news-002",
+            "title": "Agile Assets Launches Green Finance Initiative",
+            "excerpt": "New lending products designed to support sustainable business practices.",
+            "content": "Agile Assets is proud to announce the launch of our Green Finance Initiative, offering preferential rates for businesses investing in sustainable practices. This program includes reduced interest rates on loans for solar installations, energy-efficient equipment, and eco-friendly construction projects. We believe that sustainable business is good business, and we are committed to supporting our clients in making environmentally responsible choices.",
+            "date": "2026-02-15",
+            "pinned": false,
+            "category": "Company News"
+        },
+        {
+            "id": "news-003",
+            "title": "Understanding the Impact of Federal Reserve Decisions on Your Loans",
+            "excerpt": "A comprehensive guide to how Fed policy affects borrowing costs.",
+            "content": "The Federal Reserve's monetary policy decisions have a direct impact on the interest rates you pay on loans and earn on savings. In this article, we explain the relationship between the Fed funds rate and consumer borrowing costs, and provide practical advice on how to position yourself for success regardless of the direction of monetary policy.",
+            "date": "2026-02-10",
+            "pinned": false,
+            "category": "Education"
+        }
+    ],
+    "customFields": [
+        {
+            "id": "cf-001",
+            "label": "Spring Promotional Rate",
+            "type": "number",
+            "value": "4.49",
+            "campaign": "Spring 2026 Campaign"
+        },
+        {
+            "id": "cf-002",
+            "label": "Promotion End Date",
+            "type": "date",
+            "value": "2026-04-30",
+            "campaign": "Spring 2026 Campaign"
+        }
+    ],
+    "companyInfo": {
+        "name": "Agile Assets",
+        "phone": "+1 (800) 555-0199",
+        "email": "info@agileassets.com",
+        "address": "123 Finance District, New York, NY 10004",
+        "description": "Agile Assets is a premier lending and investment firm providing innovative financial solutions for individuals and businesses since 2010."
+    },
+    "lastUpdated": "2026-02-24T12:00:00Z"
+}
