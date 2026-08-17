@@ -12,6 +12,7 @@ import { AdminLayout } from '@/components/layout/AdminLayout';
 
 // Lazy loaded pages
 const HomePage = lazy(() => import('@/pages/public/HomePage').then(m => ({ default: m.HomePage })));
+const AboutPage = lazy(() => import('@/pages/public/AboutPage').then(m => ({ default: m.AboutPage })));
 const LoginPage = lazy(() => import('@/pages/admin/LoginPage').then(m => ({ default: m.LoginPage })));
 const DashboardPage = lazy(() => import('@/pages/admin/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const RatesEditor = lazy(() => import('@/pages/admin/RatesEditor').then(m => ({ default: m.RatesEditor })));
@@ -40,6 +41,8 @@ export default function App() {
                     <Routes>
                       {/* Public */}
                       <Route path="/" element={<HomePage />} />
+                      <Route path="/about" element={<AboutPage />} />
+                      <Route path="/our-story" element={<AboutPage />} />
 
                       {/* Hidden Admin Login */}
                       <Route path="/management-portal" element={<LoginPage />} />

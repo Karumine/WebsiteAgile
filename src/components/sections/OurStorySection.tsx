@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Download, BookOpen, Sparkles, TrendingUp, CheckCircle2, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
@@ -11,8 +12,9 @@ export function OurStorySection() {
     const { t, lang } = useLanguage();
     const { theme } = useTheme();
     const isDark = theme === 'dark';
+    const navigate = useNavigate();
 
-    const [activeModal, setActiveModal] = useState<'story' | 'newsletter' | null>(null);
+    const [activeModal, setActiveModal] = useState<'newsletter' | null>(null);
     const [downloadSuccess, setDownloadSuccess] = useState(false);
 
     const handleDownloadNewsletter = (e: React.FormEvent) => {
@@ -41,7 +43,7 @@ export function OurStorySection() {
             desc: t('story.card1.desc'),
             btnText: t('story.card1.btn'),
             icon: BookOpen,
-            action: () => setActiveModal('story'),
+            action: () => navigate('/about'),
         },
         {
             id: 'machinery',
@@ -203,58 +205,6 @@ export function OurStorySection() {
                     ))}
                 </div>
             </div>
-
-            {/* --- Interactive Story Detail Modal --- */}
-            {activeModal === 'story' && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
-                    <div className="relative w-full max-w-2xl rounded-3xl p-6 sm:p-8 bg-card border border-border shadow-2xl overflow-hidden animate-slide-up max-h-[90vh] overflow-y-auto">
-                        <button
-                            onClick={() => setActiveModal(null)}
-                            className="absolute top-5 right-5 p-2 rounded-full glass hover:bg-muted text-foreground transition-colors"
-                        >
-                            <X className="w-5 h-5" />
-                        </button>
-
-                        <div className="flex items-center gap-2 text-sky-500 font-bold text-xs uppercase mb-3">
-                            <Sparkles className="w-4 h-4" />
-                            <span>{t('story.badge')} • {lang === 'th' ? 'เรื่องราวของเรา' : 'Our Heritage'}</span>
-                        </div>
-
-                        <h3 className="text-2xl font-extrabold text-foreground mb-4 font-sans">
-                            {t('story.card1.title')}
-                        </h3>
-
-                        <div className="rounded-2xl overflow-hidden mb-6 aspect-video">
-                            <img src={storyOriginImg} alt="Agile Assets Origin" className="w-full h-full object-cover" />
-                        </div>
-
-                        <div className="space-y-4 text-sm text-muted-foreground leading-relaxed">
-                            <p className="font-semibold text-foreground text-base">
-                                {t('story.card1.quote')}
-                            </p>
-                            <p>
-                                {lang === 'th'
-                                    ? 'อาจิไลท์ แอสเซทส์ ก่อตั้งขึ้นจากทีมวิศวกรผู้เชี่ยวชาญด้านเทคโนโลยีเครื่องจักรอุตสาหกรรม เราเข้าใจอย่างลึกซึ้งถึงรอบการทำงาน การคืนทุน และความสำคัญของเครื่องจักรที่ทันสมัยต่อความสามารถในการแข่งขันของภาคการผลิต'
-                                    : 'Agile Assets was founded by a dedicated team of engineers with deep industrial tech expertise. We understand equipment lifecycles, ROI dynamics, and the pivotal role modern machinery plays in competitive manufacturing.'}
-                            </p>
-                            <p>
-                                {lang === 'th'
-                                    ? 'เรามุ่งมั่นทลายข้อจำกัดทางการเงินแบบเดิม ด้วยการสร้างโซลูชันสินเชื่อเช่าซื้อ (Leasing) และสินเชื่อเพื่อธุรกิจที่คล่องตัว อนุมัติไว โครงสร้างยืดหยุ่น เพื่อเป็นพลังขับเคลื่อนให้ผู้ประกอบการไทยเติบโตอย่างมั่นคง'
-                                    : 'We aim to break traditional financing barriers by delivering agile, fast-approval leasing and working capital solutions tailored to empower businesses to scale resiliently.'}
-                            </p>
-                        </div>
-
-                        <div className="mt-8 flex justify-end">
-                            <button
-                                onClick={() => setActiveModal(null)}
-                                className="px-6 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-semibold text-xs transition-colors"
-                            >
-                                {lang === 'th' ? 'ปิดหน้าต่าง' : 'Close'}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
 
             {/* --- Interactive Newsletter Download Modal --- */}
             {activeModal === 'newsletter' && (

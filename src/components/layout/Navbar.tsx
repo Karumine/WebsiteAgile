@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown, DollarSign, Sparkles, Building2, Stethoscope, Truck, Sun, RefreshCw, BarChart2, ShieldCheck, Newspaper, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -11,6 +12,8 @@ export function Navbar() {
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
     const [mobileOpenMenu, setMobileOpenMenu] = useState<string | null>(null);
     const { lang, setLang, t } = useLanguage();
+    const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -23,9 +26,18 @@ export function Navbar() {
     const handleNavClick = (href: string) => {
         setIsOpen(false);
         setActiveDropdown(null);
-        const el = document.querySelector(href);
-        if (el) {
-            el.scrollIntoView({ behavior: 'smooth' });
+        if (href.startsWith('/')) {
+            navigate(href);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (href.startsWith('#')) {
+            if (location.pathname !== '/') {
+                navigate('/' + href);
+            } else {
+                const el = document.querySelector(href);
+                if (el) {
+                    el.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
         }
     };
 
@@ -43,9 +55,9 @@ export function Navbar() {
     ];
 
     const irMenu = [
-        { icon: BarChart2, labelKey: 'menu.financialReports', href: '#about' },
-        { icon: ShieldCheck, labelKey: 'menu.governance', href: '#about' },
-        { icon: Award, labelKey: 'menu.shareholderInfo', href: '#about' },
+        { icon: BarChart2, labelKey: 'menu.financialReports', href: '/about' },
+        { icon: ShieldCheck, labelKey: 'menu.governance', href: '/about' },
+        { icon: Award, labelKey: 'menu.shareholderInfo', href: '/about' },
     ];
 
     const pressMenu = [
@@ -54,8 +66,8 @@ export function Navbar() {
     ];
 
     const aboutMenu = [
-        { icon: Building2, labelKey: 'menu.ourStory', href: '#about' },
-        { icon: Award, labelKey: 'menu.leadership', href: '#about' },
+        { icon: Building2, labelKey: 'menu.ourStory', href: '/about' },
+        { icon: Award, labelKey: 'menu.leadership', href: '/about' },
     ];
 
     return (
@@ -227,7 +239,7 @@ export function Navbar() {
                             onMouseLeave={() => setActiveDropdown(null)}
                         >
                             <button
-                                onClick={() => handleNavClick('#about')}
+                                onClick={() => handleNavClick('/about')}
                                 className={cn(
                                     'inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg transition-all duration-200',
                                     activeDropdown === 'about'
@@ -415,7 +427,7 @@ export function Navbar() {
 
                     {/* About Us */}
                     <button
-                        onClick={() => handleNavClick('#about')}
+                        onClick={() => handleNavClick('/about')}
                         className="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold text-foreground hover:bg-sky-500/10 transition-colors"
                     >
                         {t('nav.about')}

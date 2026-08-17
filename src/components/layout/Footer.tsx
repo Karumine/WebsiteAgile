@@ -1,3 +1,4 @@
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Phone, MapPin, ShieldCheck, ArrowRight } from 'lucide-react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -7,20 +8,31 @@ export function Footer() {
     const { settings } = useSiteSettings();
     const { companyInfo } = settings;
     const { t, lang } = useLanguage();
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const handleNavClick = (href: string) => {
-        const el = document.querySelector(href);
-        el?.scrollIntoView({ behavior: 'smooth' });
+        if (href.startsWith('/')) {
+            navigate(href);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (href.startsWith('#')) {
+            if (location.pathname !== '/') {
+                navigate('/' + href);
+            } else {
+                const el = document.querySelector(href);
+                el?.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
     };
 
     const quickLinks = [
-        { labelKey: 'nav.home', href: '#home' },
+        { labelKey: 'nav.home', href: '/' },
         { labelKey: 'nav.equipmentFinancing', href: '#financing' },
         { labelKey: 'nav.assetForSale', href: '#assets-for-sale' },
         { labelKey: 'nav.calculator', href: '#calculator' },
         { labelKey: 'nav.rates', href: '#rates' },
         { labelKey: 'nav.news', href: '#news' },
-        { labelKey: 'nav.about', href: '#about' },
+        { labelKey: 'nav.about', href: '/about' },
         { labelKey: 'nav.contact', href: '#contact' },
     ];
 
