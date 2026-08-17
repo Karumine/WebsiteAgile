@@ -1,0 +1,97 @@
+import { useState, useEffect } from 'react';
+import { ShieldCheck, X } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
+
+const COOKIE_CONSENT_KEY = 'agile_assets_cookie_consent';
+
+export function CookieConsent() {
+    const [visible, setVisible] = useState(false);
+    const { t, lang } = useLanguage();
+
+    useEffect(() => {
+        const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
+        if (!consent) {
+            // Small delay for smooth entry
+            const timer = setTimeout(() => setVisible(true), 1200);
+            return () => clearTimeout(timer);
+        }
+    }, []);
+
+    const handleAccept = () => {
+        localStorage.setItem(COOKIE_CONSENT_KEY, 'accepted');
+        setVisible(false);
+    };
+
+    const handleDecline = () => {
+        localStorage.setItem(COOKIE_CONSENT_KEY, 'declined');
+        setVisible(false);
+    };
+
+    const handleClose = () => {
+        setVisible(false);
+    };
+
+    if (!visible) return null;
+
+    return (
+        <div className="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-6 animate-slide-up">
+            <div className="max-w-6xl mx-auto rounded-2xl glass-card border border-sky-400/30 bg-slate-950/90 text-white shadow-2xl p-4 sm:p-5 backdrop-blur-2xl">
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+                    {/* Cookie Description matching original screenshot */}
+                    <div className="flex items-start gap-3 flex-1">
+                        <div className="w-9 h-9 rounded-xl bg-sky-500/20 flex items-center justify-center flex-shrink-0 text-sky-400 mt-0.5">
+                            <ShieldCheck className="w-5 h-5" />
+                        </div>
+                        <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-sans">
+                            {t('cookie.text')}{' '}
+                            <button
+                                onClick={() => {
+                                    const about = document.querySelector('#about');
+                                    about?.scrollIntoView({ behavior: 'smooth' });
+                                }}
+                                className="text-sky-400 underline hover:text-sky-300 font-semibold transition-colors inline"
+                            >
+                                {t('cookie.privacyLink')}
+                            </button>
+                        </p>
+                    </div>
+
+                    {/* Action Buttons matching original screenshot */}
+                    <div className="flex flex-wrap items-center gap-2 self-end lg:self-center">
+                        <button
+                            onClick={handleAccept}
+                            className="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs shadow-md shadow-sky-500/30 transition-all duration-200 hover:scale-105"
+                        >
+                            {t('cookie.accept')}
+                        </button>
+
+                        <button
+                            onClick={handleDecline}
+                            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-xs border border-slate-700 transition-all duration-200"
+                        >
+                            {t('cookie.decline')}
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                const about = document.querySelector('#about');
+                                about?.scrollIntoView({ behavior: 'smooth' });
+                            }}
+                            className="px-3.5 py-2 rounded-xl text-sky-300 hover:text-white text-xs font-semibold hover:bg-white/10 transition-all duration-200"
+                        >
+                            {t('cookie.readPolicy')}
+                        </button>
+
+                        <button
+                            onClick={handleClose}
+                            className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/10 transition-colors ml-1"
+                            aria-label="Close Cookie Notice"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
