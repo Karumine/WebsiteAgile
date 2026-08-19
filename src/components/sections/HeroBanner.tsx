@@ -17,6 +17,8 @@ export function HeroBanner() {
                     alt="Agile Assets Growth Tree"
                     className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                     loading="eager"
+                    fetchPriority="high"
+                    decoding="async"
                 />
                 {/* Dynamic Vignette & Ambient Light Overlays */}
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
