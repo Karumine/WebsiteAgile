@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ChevronUp, Phone, MessageSquare } from 'lucide-react';
+import { ChevronUp, MessageSquare } from 'lucide-react';
 
 export function QuickContactWidget() {
     const [showTopBtn, setShowTopBtn] = useState(false);

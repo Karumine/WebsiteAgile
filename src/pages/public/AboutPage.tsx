@@ -7,13 +7,11 @@ import {
     Award,
     TrendingUp,
     HeartHandshake,
-    CheckCircle2,
     ChevronDown,
     ChevronUp,
     Building2,
     Sun,
     Truck,
-    ArrowRight,
     Sparkles,
     Briefcase,
     GraduationCap,
@@ -26,12 +24,12 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 
 // Assets
-import aboutHeroImg from '@/assets/about_hero_network.jpg';
-import storyOriginImg from '@/assets/story_origin_engineers.jpg';
-import storyMachineryImg from '@/assets/story_machinery_finance.jpg';
-import advisorChairmanImg from '@/assets/advisor_chairman.jpg';
-import directorProfile1Img from '@/assets/director_profile_1.jpg';
-import directorProfile2Img from '@/assets/director_profile_2.jpg';
+import heroBg from '@/assets/Hero-Banner-Website-3-scaled.webp';
+import storyOriginImg from '@/assets/story_origin_engineers.webp';
+import storyMachineryImg from '@/assets/story_machinery_finance.webp';
+import advisorChairmanImg from '@/assets/advisor_chairman.webp';
+import directorProfile1Img from '@/assets/director_profile_1.webp';
+import directorProfile2Img from '@/assets/director_profile_2.webp';
 
 export function AboutPage() {
     const { lang } = useLanguage();
@@ -148,19 +146,24 @@ export function AboutPage() {
 
             <main className="flex-1">
                 {/* ─── 1. Top Sub-Hero Banner (About Us Header) ─── */}
-                <section className="relative min-h-[50vh] sm:min-h-[56vh] flex items-center justify-center overflow-hidden pt-28 pb-16 bg-slate-950">
+                <section className="relative min-h-[96vh] flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 pb-8 sm:pb-10">
                     {/* Background Graphic */}
                     <div className="absolute inset-0 z-0">
                         <img
-                            src={aboutHeroImg}
-                            alt="Agile Assets Digital Network"
-                            className="w-full h-full object-cover object-center opacity-70 animate-fade-in"
+                            src={heroBg}
+                            alt="Agile Assets About Us"
+                            className="w-full h-full object-cover object-center scale-105 animate-fade-in"
+                            loading="eager"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-background via-slate-950/70 to-slate-950/80" />
-                        <div className="absolute inset-0 bg-radial-at-c from-sky-500/15 via-transparent to-black/80" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
+                        <div className="absolute inset-0 bg-radial-at-c from-sky-500/10 via-transparent to-black/80" />
                     </div>
 
-                    <div className="relative z-10 max-w-5xl mx-auto px-4 text-center">
+                    {/* Ambient Glows */}
+                    <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-500/15 rounded-full blur-[140px] pointer-events-none animate-pulse-glow" />
+                    <div className="absolute bottom-1/3 left-10 w-96 h-96 bg-blue-600/15 rounded-full blur-[120px] pointer-events-none animate-float" />
+
+                    <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto">
                         <ScrollReveal animation="fade-down">
                             {/* Breadcrumb Badge */}
                             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-sky-400/30 text-xs font-semibold text-sky-400 mb-5 shadow-lg">
@@ -173,10 +176,13 @@ export function AboutPage() {
                         </ScrollReveal>
 
                         <ScrollReveal animation="fade-up" delay={100}>
-                            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-4 font-sans drop-shadow-md">
+                            <p className="text-xl sm:text-3xl font-semibold text-slate-100 mb-2 font-sans tracking-wide drop-shadow-md">
+                                Agile Assets
+                            </p>
+                            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-4 font-sans drop-shadow-2xl">
                                 ABOUT US
                             </h1>
-                            <p className="text-sm sm:text-lg text-sky-200/90 max-w-2xl mx-auto font-light leading-relaxed">
+                            <p className="text-sm sm:text-lg text-sky-200/90 max-w-2xl mx-auto font-light leading-relaxed drop-shadow-md">
                                 {lang === 'th'
                                     ? 'สะพานเชื่อมโอกาสทางการเงิน สู่การเติบโตอย่างมั่นคงและยั่งยืนของภาคธุรกิจไทย'
                                     : 'Bridging financial possibilities to drive tangible and resilient industrial growth across Thailand.'}

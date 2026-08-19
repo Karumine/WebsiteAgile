@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Mail, Phone, MapPin, ShieldCheck, ArrowRight } from 'lucide-react';
+import { Mail, Phone, MapPin, ShieldCheck } from 'lucide-react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { AgileAssetsLogo } from '@/components/ui/AgileAssetsLogo';
@@ -28,21 +28,21 @@ export function Footer() {
     const quickLinks = [
         { labelKey: 'nav.home', href: '/' },
         { labelKey: 'nav.equipmentFinancing', href: '#financing' },
-        { labelKey: 'nav.assetForSale', href: '#assets-for-sale' },
-        { labelKey: 'nav.calculator', href: '#calculator' },
-        { labelKey: 'nav.rates', href: '#rates' },
-        { labelKey: 'nav.news', href: '#news' },
-        { labelKey: 'nav.about', href: '/about' },
-        { labelKey: 'nav.contact', href: '#contact' },
+        { labelKey: 'nav.investorRelations', href: '/investor-relations' },
+        { labelKey: 'menu.projectsActivity', href: '/project' },
+        { labelKey: 'nav.about', href: '/about-us' },
+        { labelKey: 'nav.assetForSale', href: '/used-machine' },
+        { labelKey: 'nav.calculator', href: '/calculator' },
+        { labelKey: 'nav.faq', href: '/faq' },
+        { labelKey: 'nav.contact', href: '/contact' },
     ];
 
     const financingProducts = [
-        { name: lang === 'th' ? 'เครื่องจักรอุตสาหกรรม' : 'Industrial Machinery', href: '#financing' },
-        { name: lang === 'th' ? 'เครื่องมือและอุปกรณ์แพทย์' : 'Medical Equipment', href: '#financing' },
-        { name: lang === 'th' ? 'ยานพาหนะเชิงพาณิชย์' : 'Commercial Fleet', href: '#financing' },
-        { name: lang === 'th' ? 'พลังงานสะอาดและโซลาร์' : 'Clean Tech & Solar', href: '#financing' },
-        { name: lang === 'th' ? 'สินเชื่อแฟคตอริ่ง' : 'Factoring Solutions', href: '#financing' },
-        { name: lang === 'th' ? 'ขายและเช่ากลับ' : 'Sale & Leaseback', href: '#financing' },
+        { name: lang === 'th' ? 'Financing for Drinking Water Production' : 'Financing for Drinking Water Production', href: '/drinking-water-production' },
+        { name: lang === 'th' ? 'Financing for Livestock Farm' : 'Financing for Livestock Farm', href: '/livestock-farm' },
+        { name: lang === 'th' ? 'Financing for Food Processing' : 'Financing for Food Processing', href: '/food-processing' },
+        { name: lang === 'th' ? 'Financing for Biogas Production' : 'Financing for Biogas Production', href: '/biogas-production' },
+        { name: lang === 'th' ? 'Financing for Solar Power Generation' : 'Financing for Solar Power Generation', href: '/solar-power-generation' },
     ];
 
     return (

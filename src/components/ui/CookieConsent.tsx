@@ -6,7 +6,7 @@ const COOKIE_CONSENT_KEY = 'agile_assets_cookie_consent';
 
 export function CookieConsent() {
     const [visible, setVisible] = useState(false);
-    const { t, lang } = useLanguage();
+    const { t } = useLanguage();
 
     useEffect(() => {
         const consent = localStorage.getItem(COOKIE_CONSENT_KEY);

@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Download, BookOpen, Sparkles, TrendingUp, CheckCircle2, X } from 'lucide-react';
+import { ArrowRight, Download, BookOpen, TrendingUp, CheckCircle2, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
-import storyOriginImg from '@/assets/story_origin_engineers.jpg';
-import storyMachineryImg from '@/assets/story_machinery_finance.jpg';
-import storyGrowthImg from '@/assets/story_growth_team.jpg';
+import storyOriginImg from '@/assets/story_origin_engineers.webp';
+import storyMachineryImg from '@/assets/story_machinery_finance.webp';
+import storyGrowthImg from '@/assets/story_growth_team.webp';
 
 export function OurStorySection() {
     const { t, lang } = useLanguage();
@@ -26,13 +26,6 @@ export function OurStorySection() {
         }, 2200);
     };
 
-    const handleScrollTo = (targetId: string) => {
-        const el = document.querySelector(targetId);
-        if (el) {
-            el.scrollIntoView({ behavior: 'smooth' });
-        }
-    };
-
     const storyCards = [
         {
             id: 'origin',
@@ -43,7 +36,7 @@ export function OurStorySection() {
             desc: t('story.card1.desc'),
             btnText: t('story.card1.btn'),
             icon: BookOpen,
-            action: () => navigate('/about'),
+            action: () => navigate('/about-us'),
         },
         {
             id: 'machinery',
@@ -65,7 +58,7 @@ export function OurStorySection() {
             desc: t('story.card3.desc'),
             btnText: t('story.card3.btn'),
             icon: TrendingUp,
-            action: () => handleScrollTo('#about'),
+            action: () => navigate('/investor-relations'),
         },
     ];
 

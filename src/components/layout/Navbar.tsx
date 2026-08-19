@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronDown, DollarSign, Sparkles, Building2, Stethoscope, Truck, Sun, RefreshCw, BarChart2, ShieldCheck, Newspaper, Award } from 'lucide-react';
+import { 
+    Menu, X, ChevronDown, ChevronRight, Sparkles, 
+    Newspaper, Award, Droplets, Wheat, Factory, Flame, Sun, Snowflake, 
+    Cog, Zap, Boxes, BookOpen, Mail, Leaf, Calculator, Percent, HelpCircle, Phone, Briefcase
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
@@ -10,7 +14,9 @@ export function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+    const [activeSubMenu, setActiveSubMenu] = useState<'industry' | 'industrial'>('industry');
     const [mobileOpenMenu, setMobileOpenMenu] = useState<string | null>(null);
+    const [mobileOpenSubMenu, setMobileOpenSubMenu] = useState<string | null>(null);
     const { lang, setLang, t } = useLanguage();
     const navigate = useNavigate();
     const location = useLocation();
@@ -30,12 +36,19 @@ export function Navbar() {
             navigate(href);
             window.scrollTo({ top: 0, behavior: 'smooth' });
         } else if (href.startsWith('#')) {
+            const [hash, query] = href.split('?');
+            const params = new URLSearchParams(query || '');
+            const itemId = params.get('item');
+
             if (location.pathname !== '/') {
                 navigate('/' + href);
             } else {
-                const el = document.querySelector(href);
+                const el = document.querySelector(hash);
                 if (el) {
                     el.scrollIntoView({ behavior: 'smooth' });
+                }
+                if (itemId) {
+                    window.dispatchEvent(new CustomEvent('selectFinancingProduct', { detail: { itemId } }));
                 }
             }
         }
@@ -45,30 +58,105 @@ export function Navbar() {
         setLang(lang === 'th' ? 'en' : 'th');
     };
 
-    const equipmentMenu = [
-        { icon: Building2, labelKey: 'menu.industrialMachinery', href: '#financing' },
-        { icon: Stethoscope, labelKey: 'menu.medicalEquipment', href: '#financing' },
-        { icon: Truck, labelKey: 'menu.commercialFleet', href: '#financing' },
-        { icon: Sun, labelKey: 'menu.cleanEnergy', href: '#financing' },
-        { icon: RefreshCw, labelKey: 'menu.factoring', href: '#financing' },
-        { icon: Sparkles, labelKey: 'menu.saleAndLeaseback', href: '#financing' },
-    ];
-
-    const irMenu = [
-        { icon: BarChart2, labelKey: 'menu.financialReports', href: '/about' },
-        { icon: ShieldCheck, labelKey: 'menu.governance', href: '/about' },
-        { icon: Award, labelKey: 'menu.shareholderInfo', href: '/about' },
+    const equipmentCategories = [
+        {
+            id: 'industry' as const,
+            titleKey: 'menu.industrySolutions',
+            icon: Factory,
+            items: [
+                { id: 'drinking-water', labelKey: 'menu.drinkingWater', icon: Droplets, href: '/drinking-water-production' },
+                { id: 'livestock-farm', labelKey: 'menu.livestockFarm', icon: Wheat, href: '/livestock-farm' },
+                { id: 'food-processing', labelKey: 'menu.foodProcessing', icon: Factory, href: '/food-processing' },
+                { id: 'biogas-production', labelKey: 'menu.biogasProduction', icon: Flame, href: '/biogas-production' },
+                { id: 'solar-power', labelKey: 'menu.solarPower', icon: Sun, href: '/solar-power-generation' },
+            ]
+        },
+        {
+            id: 'industrial' as const,
+            titleKey: 'menu.industrialEquipment',
+            icon: Boxes,
+            items: [
+                { id: 'chiller', labelKey: 'menu.chiller', icon: Snowflake, href: '/chiller' },
+                { id: 'injection-molding', labelKey: 'menu.injectionMolding', icon: Cog, href: '/injection-molding-machine' },
+                { id: 'generator-set', labelKey: 'menu.generatorSet', icon: Zap, href: '/generator-set' },
+            ]
+        }
     ];
 
     const pressMenu = [
-        { icon: Newspaper, labelKey: 'menu.pressReleases', href: '#news' },
-        { icon: Sparkles, labelKey: 'menu.mediaKit', href: '#news' },
+        { icon: Sparkles, labelKey: 'menu.projectsActivity', href: '/project' },
+        { icon: Award, labelKey: 'menu.successStory', href: '/success-story' },
+        { icon: BookOpen, labelKey: 'menu.knowledgeContents', href: '/knowledge' },
+        { icon: Newspaper, labelKey: 'menu.newsUpdate', href: '/news-update' },
+        { icon: Mail, labelKey: 'menu.newsletter', href: '/newsletter' },
     ];
 
     const aboutMenu = [
-        { icon: Building2, labelKey: 'menu.ourStory', href: '/about' },
-        { icon: Award, labelKey: 'menu.leadership', href: '/about' },
+        { icon: Leaf, labelKey: 'menu.sustainabilityCampaign', href: '/sustainability' },
+        { icon: Calculator, labelKey: 'menu.financingCalculator', href: '/calculator' },
+        { icon: Percent, labelKey: 'menu.interestRateConverter', href: '/interest-rate-conversion' },
+        { icon: HelpCircle, labelKey: 'menu.faq', href: '/faq' },
+        { icon: Phone, labelKey: 'menu.contactUs', href: '/contact' },
+        { icon: Briefcase, labelKey: 'menu.workForUs', href: '/#contact' },
     ];
+
+    const currentSubItems = equipmentCategories.find(c => c.id === activeSubMenu)?.items || equipmentCategories[0].items;
+
+    const isEquipmentActive = [
+        '/drinking-water-production',
+        '/livestock-farm',
+        '/food-processing',
+        '/biogas-production',
+        '/solar-power-generation',
+        '/solar-power-generation-en',
+        '/en/solar-power-generation-en',
+        '/chiller',
+        '/injection-molding-machine',
+        '/generator-set',
+    ].includes(location.pathname);
+
+    const isInvestorActive = [
+        '/investor-relations',
+        '/en/investor-relations',
+    ].includes(location.pathname);
+
+    const isPressActive = [
+        '/project',
+        '/project-activity',
+        '/success-story',
+        '/knowledge',
+        '/news-update',
+        '/newsletter',
+    ].includes(location.pathname);
+
+    const isAboutActive = [
+        '/about',
+        '/about-us',
+        '/en/about-us',
+        '/sustainability',
+        '/en/sustainability-2',
+        '/calculator',
+        '/interest-rate-conversion',
+        '/interest-rate-conversion-2',
+        '/en/interest-rate-conversion-2',
+        '/faq',
+        '/faq-2',
+        '/frequently-asked-questions',
+        '/en/faq-2',
+        '/contact',
+        '/contact-us',
+        '/contact-2',
+        '/en/contact-2',
+    ].includes(location.pathname);
+
+    const isAssetActive = [
+        '/used-machine',
+        '/used-machine-2',
+        '/asset-for-sale',
+        '/assets-for-sale',
+        '/asset-for-sale-en',
+        '/en/asset-for-sale-en',
+    ].includes(location.pathname);
 
     return (
         <header
@@ -79,14 +167,6 @@ export function Navbar() {
                     : 'bg-gradient-to-b from-black/60 via-black/25 to-transparent backdrop-blur-none shadow-none'
             )}
         >
-            {/* Bottom Border Line — Fades in/out in exact sync with background */}
-            <div
-                className={cn(
-                    'absolute bottom-0 left-0 right-0 h-[1px] bg-border/80 transition-opacity duration-300 pointer-events-none',
-                    scrolled ? 'opacity-100' : 'opacity-0'
-                )}
-            />
-
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 <div className="flex items-center justify-between h-20">
                     {/* Brand Logo */}
@@ -102,7 +182,7 @@ export function Navbar() {
                     </a>
 
                     {/* Desktop Navigation Links */}
-                    <nav className="hidden xl:flex items-center gap-1">
+                    <nav className="hidden xl:flex items-center gap-1.5">
                         {/* Equipment Financing Dropdown */}
                         <div
                             className="relative"
@@ -110,88 +190,116 @@ export function Navbar() {
                             onMouseLeave={() => setActiveDropdown(null)}
                         >
                             <button
-                                onClick={() => handleNavClick('#financing')}
+                                type="button"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setActiveDropdown(activeDropdown === 'equipment' ? null : 'equipment');
+                                }}
                                 className={cn(
-                                    'inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg transition-all duration-200',
-                                    activeDropdown === 'equipment'
-                                        ? 'text-sky-400 bg-sky-500/15'
+                                    'inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 cursor-default relative',
+                                    (isEquipmentActive || activeDropdown === 'equipment')
+                                        ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10 font-bold'
                                         : scrolled
                                         ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
                                         : 'text-slate-100 hover:text-white hover:bg-white/15'
                                 )}
                             >
                                 {t('nav.equipmentFinancing')}
-                                <ChevronDown className="w-3.5 h-3.5 opacity-70 transition-transform duration-200" />
+                                <ChevronDown className={cn("w-3.5 h-3.5 opacity-70 transition-transform duration-200", activeDropdown === 'equipment' && "rotate-180")} />
+                                {isEquipmentActive && (
+                                    <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
+                                )}
                             </button>
 
                             {activeDropdown === 'equipment' && (
-                                <div className="absolute top-full left-0 w-80 pt-2 animate-fade-in">
-                                    <div className="glass rounded-2xl p-3 shadow-2xl border border-sky-500/20 bg-card/95 backdrop-blur-2xl">
-                                        <div className="px-3 py-2 border-b border-border/60 mb-2">
-                                            <p className="text-xs font-semibold text-sky-400 uppercase tracking-wider">
-                                                {t('nav.equipmentFinancing')}
-                                            </p>
-                                            <p className="text-[11px] text-muted-foreground mt-0.5">
-                                                {t('nav.equipmentFinancing.desc')}
-                                            </p>
-                                        </div>
-                                        <div className="space-y-1">
-                                            {equipmentMenu.map((item) => (
+                                <div className="absolute top-full left-0 pt-2 animate-fade-in z-50">
+                                    <div className="glass rounded-2xl shadow-2xl border border-sky-500/20 bg-card/95 backdrop-blur-2xl p-2 flex gap-2">
+                                        {/* Left Column: Categories */}
+                                        <div className="w-56 space-y-1">
+                                            <div className="px-3 py-2 border-b border-border/60 mb-1">
+                                                <p className="text-[11px] font-bold text-sky-400 uppercase tracking-wider">
+                                                    {t('nav.equipmentFinancing')}
+                                                </p>
+                                            </div>
+                                            {equipmentCategories.map((cat) => (
                                                 <button
-                                                    key={item.labelKey}
-                                                    onClick={() => handleNavClick(item.href)}
-                                                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-xs font-medium text-foreground hover:bg-sky-500/15 hover:text-sky-400 transition-all"
+                                                    key={cat.id}
+                                                    onMouseEnter={() => setActiveSubMenu(cat.id)}
+                                                    onClick={() => setActiveSubMenu(cat.id)}
+                                                    className={cn(
+                                                        'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs font-semibold transition-all duration-150',
+                                                        activeSubMenu === cat.id
+                                                             ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
+                                                             : 'text-foreground hover:bg-sky-500/10 hover:text-sky-400 border border-transparent'
+                                                    )}
                                                 >
-                                                    <div className="w-7 h-7 rounded-lg bg-sky-500/10 flex items-center justify-center flex-shrink-0 text-sky-400">
-                                                        <item.icon className="w-4 h-4" />
+                                                    <div className="flex items-center gap-2.5">
+                                                        <cat.icon className="w-4 h-4 text-sky-400" />
+                                                        <span>{t(cat.titleKey)}</span>
                                                     </div>
-                                                    <span>{t(item.labelKey)}</span>
+                                                    <ChevronRight className="w-3.5 h-3.5 opacity-70" />
                                                 </button>
                                             ))}
                                         </div>
+
+                                        {/* Vertical Divider */}
+                                        <div className="w-[1px] bg-border/60 self-stretch my-1" />
+
+                                        {/* Right Column: Sub-items */}
+                                        <div className="w-72 space-y-1 p-1">
+                                            <div className="px-3 py-2 border-b border-border/60 mb-1">
+                                                <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                                                    {t(equipmentCategories.find(c => c.id === activeSubMenu)?.titleKey || 'menu.industrySolutions')}
+                                                </p>
+                                            </div>
+                                            {currentSubItems.map((item) => {
+                                                const isSubActive = location.pathname === item.href;
+                                                return (
+                                                    <button
+                                                        key={item.id}
+                                                        onClick={() => handleNavClick(item.href)}
+                                                        className={cn(
+                                                            "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium transition-all group",
+                                                            isSubActive
+                                                                ? "bg-sky-500/20 text-sky-400 font-bold border-l-2 border-sky-400 pl-3.5"
+                                                                : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                                        )}
+                                                    >
+                                                        <div className={cn(
+                                                            "w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors",
+                                                            isSubActive
+                                                                ? "bg-sky-500 text-white"
+                                                                : "bg-sky-500/10 text-sky-400 group-hover:bg-sky-500 group-hover:text-white"
+                                                        )}>
+                                                            <item.icon className="w-3.5 h-3.5" />
+                                                        </div>
+                                                        <span className="truncate">{t(item.labelKey)}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
                                     </div>
                                 </div>
                             )}
                         </div>
 
-                        {/* Investor Relations Dropdown */}
-                        <div
-                            className="relative"
-                            onMouseEnter={() => setActiveDropdown('ir')}
-                            onMouseLeave={() => setActiveDropdown(null)}
+                        {/* Investor Relations */}
+                        <button
+                            onClick={() => handleNavClick('/investor-relations')}
+                            className={cn(
+                                'px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 relative',
+                                isInvestorActive
+                                    ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10 font-bold'
+                                    : scrolled
+                                    ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
+                                    : 'text-slate-100 hover:text-white hover:bg-white/15'
+                            )}
                         >
-                            <button
-                                onClick={() => handleNavClick('#about')}
-                                className={cn(
-                                    'inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg transition-all duration-200',
-                                    activeDropdown === 'ir'
-                                        ? 'text-sky-400 bg-sky-500/15'
-                                        : scrolled
-                                        ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
-                                        : 'text-slate-100 hover:text-white hover:bg-white/15'
-                                )}
-                            >
-                                {t('nav.investorRelations')}
-                                <ChevronDown className="w-3.5 h-3.5 opacity-70" />
-                            </button>
-
-                            {activeDropdown === 'ir' && (
-                                <div className="absolute top-full left-0 w-64 pt-2 animate-fade-in">
-                                    <div className="glass rounded-2xl p-2 shadow-2xl border border-sky-500/20 bg-card/95 backdrop-blur-2xl space-y-1">
-                                        {irMenu.map((item) => (
-                                            <button
-                                                key={item.labelKey}
-                                                onClick={() => handleNavClick(item.href)}
-                                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium text-foreground hover:bg-sky-500/15 hover:text-sky-400 transition-all"
-                                            >
-                                                <item.icon className="w-4 h-4 text-sky-400" />
-                                                <span>{t(item.labelKey)}</span>
-                                            </button>
-                                        ))}
-                                    </div>
-                                </div>
+                            {t('nav.investorRelations')}
+                            {isInvestorActive && (
+                                <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
                             )}
-                        </div>
+                        </button>
 
                         {/* Press Center Dropdown */}
                         <div
@@ -200,33 +308,48 @@ export function Navbar() {
                             onMouseLeave={() => setActiveDropdown(null)}
                         >
                             <button
-                                onClick={() => handleNavClick('#news')}
+                                type="button"
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    setActiveDropdown(activeDropdown === 'press' ? null : 'press');
+                                }}
                                 className={cn(
-                                    'inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg transition-all duration-200',
-                                    activeDropdown === 'press'
-                                        ? 'text-sky-400 bg-sky-500/15'
+                                    'inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 cursor-default relative',
+                                    (isPressActive || activeDropdown === 'press')
+                                        ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10 font-bold'
                                         : scrolled
                                         ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
                                         : 'text-slate-100 hover:text-white hover:bg-white/15'
                                 )}
                             >
                                 {t('nav.pressCenter')}
-                                <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+                                <ChevronDown className={cn("w-3.5 h-3.5 opacity-70 transition-transform duration-200", activeDropdown === 'press' && "rotate-180")} />
+                                {isPressActive && (
+                                    <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
+                                )}
                             </button>
 
                             {activeDropdown === 'press' && (
                                 <div className="absolute top-full left-0 w-60 pt-2 animate-fade-in">
                                     <div className="glass rounded-2xl p-2 shadow-2xl border border-sky-500/20 bg-card/95 backdrop-blur-2xl space-y-1">
-                                        {pressMenu.map((item) => (
-                                            <button
-                                                key={item.labelKey}
-                                                onClick={() => handleNavClick(item.href)}
-                                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium text-foreground hover:bg-sky-500/15 hover:text-sky-400 transition-all"
-                                            >
-                                                <item.icon className="w-4 h-4 text-sky-400" />
-                                                <span>{t(item.labelKey)}</span>
-                                            </button>
-                                        ))}
+                                        {pressMenu.map((item) => {
+                                            const isSubActive = location.pathname === item.href;
+                                            return (
+                                                <button
+                                                    key={item.labelKey}
+                                                    onClick={() => handleNavClick(item.href)}
+                                                    className={cn(
+                                                        "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium transition-all",
+                                                        isSubActive
+                                                            ? "bg-sky-500/20 text-sky-400 font-bold border-l-2 border-sky-400 pl-3.5"
+                                                            : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                                    )}
+                                                >
+                                                    <item.icon className="w-4 h-4 text-sky-400" />
+                                                    <span>{t(item.labelKey)}</span>
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
@@ -239,33 +362,44 @@ export function Navbar() {
                             onMouseLeave={() => setActiveDropdown(null)}
                         >
                             <button
-                                onClick={() => handleNavClick('/about')}
+                                onClick={() => handleNavClick('/about-us')}
                                 className={cn(
-                                    'inline-flex items-center gap-1.5 px-3 py-2 text-sm font-semibold rounded-lg transition-all duration-200',
-                                    activeDropdown === 'about'
-                                        ? 'text-sky-400 bg-sky-500/15'
+                                    'inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 relative',
+                                    (isAboutActive || activeDropdown === 'about')
+                                        ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10 font-bold'
                                         : scrolled
                                         ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
                                         : 'text-slate-100 hover:text-white hover:bg-white/15'
                                 )}
                             >
                                 {t('nav.about')}
-                                <ChevronDown className="w-3.5 h-3.5 opacity-70" />
+                                <ChevronDown className={cn("w-3.5 h-3.5 opacity-70 transition-transform duration-200", activeDropdown === 'about' && "rotate-180")} />
+                                {isAboutActive && (
+                                    <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
+                                )}
                             </button>
 
                             {activeDropdown === 'about' && (
                                 <div className="absolute top-full left-0 w-64 pt-2 animate-fade-in">
                                     <div className="glass rounded-2xl p-2 shadow-2xl border border-sky-500/20 bg-card/95 backdrop-blur-2xl space-y-1">
-                                        {aboutMenu.map((item) => (
-                                            <button
-                                                key={item.labelKey}
-                                                onClick={() => handleNavClick(item.href)}
-                                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium text-foreground hover:bg-sky-500/15 hover:text-sky-400 transition-all"
-                                            >
-                                                <item.icon className="w-4 h-4 text-sky-400" />
-                                                <span>{t(item.labelKey)}</span>
-                                            </button>
-                                        ))}
+                                        {aboutMenu.map((item) => {
+                                            const isSubActive = location.pathname === item.href;
+                                            return (
+                                                <button
+                                                    key={item.labelKey}
+                                                    onClick={() => handleNavClick(item.href)}
+                                                    className={cn(
+                                                        "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium transition-all",
+                                                        isSubActive
+                                                            ? "bg-sky-500/20 text-sky-400 font-bold border-l-2 border-sky-400 pl-3.5"
+                                                            : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                                    )}
+                                                >
+                                                    <item.icon className="w-4 h-4 text-sky-400" />
+                                                    <span>{t(item.labelKey)}</span>
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
@@ -273,33 +407,25 @@ export function Navbar() {
 
                         {/* Asset for Sale */}
                         <button
-                            onClick={() => handleNavClick('#assets-for-sale')}
+                            onClick={() => handleNavClick('/used-machine')}
                             className={cn(
-                                'px-3 py-2 text-sm font-semibold rounded-lg transition-all duration-200',
-                                scrolled
+                                'px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 relative',
+                                isAssetActive
+                                    ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10 font-bold'
+                                    : scrolled
                                     ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
                                     : 'text-slate-100 hover:text-white hover:bg-white/15'
                             )}
                         >
                             {t('nav.assetForSale')}
-                        </button>
-
-                        {/* Rates & Calculator */}
-                        <button
-                            onClick={() => handleNavClick('#calculator')}
-                            className={cn(
-                                'px-3 py-2 text-sm font-semibold rounded-lg transition-all duration-200',
-                                scrolled
-                                    ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
-                                    : 'text-slate-100 hover:text-white hover:bg-white/15'
+                            {isAssetActive && (
+                                <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
                             )}
-                        >
-                            {t('nav.calculator')}
                         </button>
                     </nav>
 
-                    {/* Right Tools & CTA */}
-                    <div className="hidden lg:flex items-center gap-3">
+                    {/* Right Tools & Switchers (Desktop only, xl+) */}
+                    <div className="hidden xl:flex items-center gap-3">
                         {/* Theme Toggle */}
                         <ThemeToggle />
 
@@ -321,27 +447,24 @@ export function Navbar() {
                                 {lang.toUpperCase()}
                             </span>
                         </button>
-
-                        {/* Primary Action Button */}
-                        <button
-                            onClick={() => handleNavClick('#contact')}
-                            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-semibold text-xs tracking-wide shadow-lg shadow-sky-500/25 hover:shadow-sky-500/45 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
-                        >
-                            <DollarSign className="w-4 h-4" />
-                            {t('nav.financingWithUs')}
-                        </button>
                     </div>
 
-                    {/* Mobile Menu Trigger & Controls */}
+                    {/* Mobile Menu Trigger & Controls (Visible on < xl only) */}
                     <div className="flex items-center gap-2 xl:hidden">
                         <ThemeToggle />
 
                         <button
                             onClick={toggleLang}
-                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-full glass text-xs font-semibold text-foreground"
+                            className={cn(
+                                'flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs font-semibold transition-all duration-200',
+                                scrolled
+                                    ? 'glass border-border text-foreground'
+                                    : 'bg-black/30 border-white/20 text-white backdrop-blur-md'
+                            )}
+                            title="Toggle Thai / English"
                         >
-                            <span className="text-sm">{lang === 'th' ? '🇹🇭' : '🇺🇸'}</span>
-                            <span className="text-sky-400">{lang.toUpperCase()}</span>
+                            <span className="text-sm leading-none">{lang === 'th' ? '🇹🇭' : '🇺🇸'}</span>
+                            <span className="font-bold text-sky-400">{lang.toUpperCase()}</span>
                         </button>
 
                         <button
@@ -358,8 +481,8 @@ export function Navbar() {
             {/* Mobile Drawer Navigation */}
             <div
                 className={cn(
-                    'xl:hidden overflow-hidden transition-all duration-300 border-t border-border/80 bg-background/95 backdrop-blur-2xl',
-                    isOpen ? 'max-h-[85vh] overflow-y-auto py-4 shadow-2xl' : 'max-h-0 py-0'
+                    'xl:hidden overflow-hidden transition-all duration-300 bg-background/95 backdrop-blur-2xl',
+                    isOpen ? 'max-h-[85vh] overflow-y-auto py-4 shadow-2xl border-t border-border/80' : 'max-h-0 py-0 border-none pointer-events-none'
                 )}
             >
                 <div className="max-w-7xl mx-auto px-4 space-y-2">
@@ -367,7 +490,12 @@ export function Navbar() {
                     <div>
                         <button
                             onClick={() => setMobileOpenMenu(mobileOpenMenu === 'equipment' ? null : 'equipment')}
-                            className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold text-foreground hover:bg-sky-500/10 transition-colors"
+                            className={cn(
+                                "w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors",
+                                isEquipmentActive
+                                    ? "text-sky-400 bg-sky-500/15 font-bold"
+                                    : "text-foreground hover:bg-sky-500/10"
+                            )}
                         >
                             <span>{t('nav.equipmentFinancing')}</span>
                             <ChevronDown
@@ -378,71 +506,148 @@ export function Navbar() {
                             />
                         </button>
                         {mobileOpenMenu === 'equipment' && (
-                            <div className="pl-4 pr-2 py-1 space-y-1">
-                                {equipmentMenu.map((item) => (
-                                    <button
-                                        key={item.labelKey}
-                                        onClick={() => handleNavClick(item.href)}
-                                        className="w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium text-muted-foreground hover:text-sky-400 hover:bg-white/5 rounded-lg transition-colors text-left"
-                                    >
-                                        <item.icon className="w-3.5 h-3.5 text-sky-400" />
-                                        <span>{t(item.labelKey)}</span>
-                                    </button>
+                            <div className="pl-3 pr-2 py-1 space-y-2">
+                                {equipmentCategories.map((cat) => (
+                                    <div key={cat.id} className="border-l-2 border-sky-500/30 pl-3 py-1 space-y-1">
+                                        <button
+                                            onClick={() => setMobileOpenSubMenu(mobileOpenSubMenu === cat.id ? null : cat.id)}
+                                            className="w-full flex items-center justify-between py-1 text-xs font-bold text-sky-400"
+                                        >
+                                            <div className="flex items-center gap-2">
+                                                <cat.icon className="w-3.5 h-3.5" />
+                                                <span>{t(cat.titleKey)}</span>
+                                            </div>
+                                            <ChevronDown className={cn('w-3.5 h-3.5 transition-transform duration-200', mobileOpenSubMenu === cat.id ? 'rotate-180' : '')} />
+                                        </button>
+                                        {(mobileOpenSubMenu === cat.id || !mobileOpenSubMenu) && (
+                                            <div className="space-y-1 pt-1">
+                                                {cat.items.map((item) => {
+                                                    const isSubActive = location.pathname === item.href;
+                                                    return (
+                                                        <button
+                                                            key={item.id}
+                                                            onClick={() => handleNavClick(item.href)}
+                                                            className={cn(
+                                                                "w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors text-left",
+                                                                isSubActive
+                                                                    ? "bg-sky-500/20 text-sky-400 font-bold"
+                                                                    : "text-muted-foreground hover:text-sky-400 hover:bg-white/5"
+                                                            )}
+                                                        >
+                                                            <item.icon className="w-3 h-3 text-sky-400 flex-shrink-0" />
+                                                            <span className="truncate">{t(item.labelKey)}</span>
+                                                        </button>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
                                 ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Investor Relations */}
+                    <button
+                        onClick={() => handleNavClick('/investor-relations')}
+                        className={cn(
+                            'w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-colors',
+                            isInvestorActive
+                                ? 'text-sky-400 bg-sky-500/15 font-bold'
+                                : 'text-foreground hover:bg-sky-500/10'
+                        )}
+                    >
+                        {t('nav.investorRelations')}
+                    </button>
+
+                    {/* Press Center Expandable Mobile Menu */}
+                    <div>
+                        <button
+                            onClick={() => setMobileOpenMenu(mobileOpenMenu === 'press' ? null : 'press')}
+                            className={cn(
+                                "w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors",
+                                isPressActive
+                                    ? "text-sky-400 bg-sky-500/15 font-bold"
+                                    : "text-foreground hover:bg-sky-500/10"
+                            )}
+                        >
+                            <span>{t('nav.pressCenter')}</span>
+                            <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", mobileOpenMenu === 'press' && "rotate-180")} />
+                        </button>
+                        {mobileOpenMenu === 'press' && (
+                            <div className="pl-4 pr-2 py-2 space-y-1 bg-sky-500/5 rounded-xl mt-1">
+                                {pressMenu.map((item) => {
+                                    const isSubActive = location.pathname === item.href;
+                                    return (
+                                        <button
+                                            key={item.labelKey}
+                                            onClick={() => handleNavClick(item.href)}
+                                            className={cn(
+                                                "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left",
+                                                isSubActive
+                                                    ? "bg-sky-500/20 text-sky-400 font-bold"
+                                                    : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                            )}
+                                        >
+                                            <item.icon className="w-3.5 h-3.5 text-sky-400" />
+                                            <span>{t(item.labelKey)}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* About Us Expandable Mobile Menu */}
+                    <div>
+                        <button
+                            onClick={() => setMobileOpenMenu(mobileOpenMenu === 'about' ? null : 'about')}
+                            className={cn(
+                                "w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors",
+                                isAboutActive
+                                    ? "text-sky-400 bg-sky-500/15 font-bold"
+                                    : "text-foreground hover:bg-sky-500/10"
+                            )}
+                        >
+                            <span>{t('nav.about')}</span>
+                            <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", mobileOpenMenu === 'about' && "rotate-180")} />
+                        </button>
+                        {mobileOpenMenu === 'about' && (
+                            <div className="pl-4 pr-2 py-2 space-y-1 bg-sky-500/5 rounded-xl mt-1">
+                                {aboutMenu.map((item) => {
+                                    const isSubActive = location.pathname === item.href;
+                                    return (
+                                        <button
+                                            key={item.labelKey}
+                                            onClick={() => handleNavClick(item.href)}
+                                            className={cn(
+                                                "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left",
+                                                isSubActive
+                                                    ? "bg-sky-500/20 text-sky-400 font-bold"
+                                                    : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                            )}
+                                        >
+                                            <item.icon className="w-3.5 h-3.5 text-sky-400" />
+                                            <span>{t(item.labelKey)}</span>
+                                        </button>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
 
                     {/* Asset for Sale */}
                     <button
-                        onClick={() => handleNavClick('#assets-for-sale')}
-                        className="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold text-foreground hover:bg-sky-500/10 transition-colors"
+                        onClick={() => handleNavClick('/used-machine')}
+                        className={cn(
+                            'w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-colors',
+                            isAssetActive
+                                ? 'text-sky-400 bg-sky-500/15 font-bold'
+                                : 'text-foreground hover:bg-sky-500/10'
+                        )}
                     >
                         {t('nav.assetForSale')}
                     </button>
-
-                    {/* Calculator */}
-                    <button
-                        onClick={() => handleNavClick('#calculator')}
-                        className="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold text-foreground hover:bg-sky-500/10 transition-colors"
-                    >
-                        {t('nav.calculator')}
-                    </button>
-
-                    {/* Rates */}
-                    <button
-                        onClick={() => handleNavClick('#rates')}
-                        className="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold text-foreground hover:bg-sky-500/10 transition-colors"
-                    >
-                        {t('nav.rates')}
-                    </button>
-
-                    {/* Press Center */}
-                    <button
-                        onClick={() => handleNavClick('#news')}
-                        className="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold text-foreground hover:bg-sky-500/10 transition-colors"
-                    >
-                        {t('nav.pressCenter')}
-                    </button>
-
-                    {/* About Us */}
-                    <button
-                        onClick={() => handleNavClick('/about')}
-                        className="w-full text-left px-4 py-3 rounded-xl text-sm font-semibold text-foreground hover:bg-sky-500/10 transition-colors"
-                    >
-                        {t('nav.about')}
-                    </button>
-
-                    {/* Contact CTA */}
-                    <div className="pt-2">
-                        <button
-                            onClick={() => handleNavClick('#contact')}
-                            className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 text-white font-bold text-sm shadow-lg shadow-sky-500/30"
-                        >
-                            <DollarSign className="w-4 h-4" />
-                            {t('nav.financingWithUs')}
-                        </button>
-                    </div>
                 </div>
             </div>
         </header>

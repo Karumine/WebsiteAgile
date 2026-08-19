@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Newspaper, Pin, CalendarDays, ArrowRight, ChevronLeft, ChevronRight, X, Sparkles } from 'lucide-react';
+import { Newspaper, Pin, CalendarDays, ArrowRight, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { formatDate } from '@/lib/utils';

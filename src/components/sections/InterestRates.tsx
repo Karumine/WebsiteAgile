@@ -1,4 +1,4 @@
-import { TrendingUp, Star, ArrowRight, ShieldCheck } from 'lucide-react';
+import { TrendingUp, Star, ArrowRight } from 'lucide-react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { formatRate } from '@/lib/utils';

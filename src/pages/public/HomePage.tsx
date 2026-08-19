@@ -3,12 +3,12 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { HeroBanner } from '@/components/sections/HeroBanner';
 import { OurStorySection } from '@/components/sections/OurStorySection';
-import { EquipmentFinancingSection } from '@/components/sections/EquipmentFinancingSection';
-import { LoanCalculatorSection } from '@/components/sections/LoanCalculatorSection';
-import { AssetsForSaleSection } from '@/components/sections/AssetsForSaleSection';
-import { InterestRates } from '@/components/sections/InterestRates';
-import { NewsFeed } from '@/components/sections/NewsFeed';
-import { AboutSection } from '@/components/sections/AboutSection';
+import { ServicesRangeSection } from '@/components/sections/ServicesRangeSection';
+import { WhatWeDoSection } from '@/components/sections/WhatWeDoSection';
+import { KeyFinancingServicesSection } from '@/components/sections/KeyFinancingServicesSection';
+import { CustomerEligibilitySection } from '@/components/sections/CustomerEligibilitySection';
+import { OurProjectsSection } from '@/components/sections/OurProjectsSection';
+import { OurPartnerSection } from '@/components/sections/OurPartnerSection';
 import { ContactSection } from '@/components/sections/ContactSection';
 import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
@@ -33,43 +33,45 @@ export function HomePage() {
                 <meta property="og:description" content={description} />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="https://agileassets.co.th/" />
-                <meta property="og:image" content="/assets/Hero-Banner-Website-3-scaled.png" />
+                <meta property="og:image" content="/assets/Hero-Banner-Website-3-scaled.webp" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={title} />
                 <meta name="twitter:description" content={description} />
             </Helmet>
 
+            {/* Top Navigation */}
             <Navbar />
 
             <main className="flex-1">
-                {/* 1. Hero Banner with Growth Tree & AA Central Logo */}
+                {/* 1. Hero Banner with Central AA Logo & Single CTA */}
                 <HeroBanner />
 
-                {/* 2. Our Story (เรื่องราวของเรา - 3 Pillars of Agile Assets) */}
+                {/* 2. OUR STORY (เรื่องราวของเรา - 3 Pillars) */}
                 <OurStorySection />
 
-                {/* 3. Core Equipment Financing Products */}
-                <EquipmentFinancingSection />
+                {/* 3. OUR FINANCING SERVICES (โซลูชั่นทางการเงินของเราในอุตสาหกรรม - 3 Cards Carousel) */}
+                <ServicesRangeSection />
 
-                {/* 3. Interactive Loan & Installment Calculator */}
-                <LoanCalculatorSection />
+                {/* 4. WHAT WE DO (ก้าวแรกของการเติบโต / ABOUT AGILE ASSETS / CLOSE • CARING • FLEXIBLE) */}
+                <WhatWeDoSection />
 
-                {/* 4. Assets for Sale (ทรัพย์รอการขาย) */}
-                <AssetsForSaleSection />
+                {/* 5. KEY FINANCING SERVICES (บริการสินเชื่อเช่าซื้อเครื่องจักรอุตสาหกรรม - 3 Machinery Carousel) */}
+                <KeyFinancingServicesSection />
 
-                {/* 5. Live Interest Rates Table / Cards */}
-                <InterestRates />
+                {/* 6. CUSTOMER ELIGIBILITY CRITERIAS (เกณฑ์การเป็นลูกค้า + สถิติ 40 โรงงาน / 50 สัญญา / 400 MB) */}
+                <CustomerEligibilitySection />
 
-                {/* 6. Press Center & Latest Market Updates */}
-                <NewsFeed />
+                {/* 7. OUR PROJECTS (โครงการของเรา - 12 Photographic Activity Grid) */}
+                <OurProjectsSection />
 
-                {/* 7. About Us, Corporate Values & 16-Year Timeline */}
-                <AboutSection />
+                {/* 8. OUR PARTNER & MACHINE (คู่ค้าและเครื่องจักรที่เราให้บริการ - 4 Brand Carousel) */}
+                <OurPartnerSection />
 
-                {/* 8. Contact & Financing Consultation Form */}
+                {/* 9. BUSINESS PARTNERSHIP INQUIRIES (Consultation Form) */}
                 <ContactSection />
             </main>
 
+            {/* Footer */}
             <Footer />
 
             {/* Bottom PDPA Cookie Consent Banner */}
