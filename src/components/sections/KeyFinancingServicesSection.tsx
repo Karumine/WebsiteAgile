@@ -156,7 +156,9 @@ export function KeyFinancingServicesSection() {
                                             className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-500"
                                             loading="lazy"
                                             onError={(e) => {
-                                                (e.target as HTMLImageElement).src = item.fallbackImage;
+                                                const target = e.target as HTMLImageElement;
+                                                target.onerror = null;
+                                                target.src = item.fallbackImage;
                                             }}
                                         />
                                     </div>

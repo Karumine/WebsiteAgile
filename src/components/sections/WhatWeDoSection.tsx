@@ -44,9 +44,9 @@ export function WhatWeDoSection() {
                                 className="w-full h-[360px] sm:h-[460px] object-cover object-center group-hover:scale-105 transition-transform duration-700"
                                 loading="lazy"
                                 onError={(e) => {
-                                    // High-res fallback if ShortPixel CDN fails
-                                    (e.target as HTMLImageElement).src =
-                                        'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=1000&q=80';
+                                    const target = e.target as HTMLImageElement;
+                                    target.onerror = null;
+                                    target.src = 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?w=1000&q=80';
                                 }}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />

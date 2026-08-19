@@ -106,7 +106,9 @@ export function OurProjectsSection() {
                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                     loading="lazy"
                                     onError={(e) => {
-                                        (e.target as HTMLImageElement).src = photo.fallback;
+                                        const target = e.target as HTMLImageElement;
+                                        target.onerror = null;
+                                        target.src = photo.fallback;
                                     }}
                                 />
                                 <div className="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300 pointer-events-none" />

@@ -52,7 +52,9 @@ function ProjectImageCarousel({ images, title }: { images: string[]; title: stri
                         className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                         loading="lazy"
                         onError={(e) => {
-                            (e.target as HTMLImageElement).src =
+                            const target = e.target as HTMLImageElement;
+                            target.onerror = null;
+                            target.src =
                                 'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?w=700&q=80';
                         }}
                     />

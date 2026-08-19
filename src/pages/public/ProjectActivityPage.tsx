@@ -60,8 +60,9 @@ function CompanySlideshowCard({
                             className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
                             loading="lazy"
                             onError={(e) => {
-                                (e.target as HTMLImageElement).src =
-                                    'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=500&q=80';
+                                const target = e.target as HTMLImageElement;
+                                target.onerror = null;
+                                target.src = 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=500&q=80';
                             }}
                         />
                     </div>
@@ -340,8 +341,9 @@ export function ProjectActivityPage() {
                                             className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-500"
                                             loading="lazy"
                                             onError={(e) => {
-                                                (e.target as HTMLImageElement).src =
-                                                    'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=500&q=80';
+                                                const target = e.target as HTMLImageElement;
+                                                target.onerror = null;
+                                                target.src = 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=500&q=80';
                                             }}
                                         />
                                         <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2.5">
