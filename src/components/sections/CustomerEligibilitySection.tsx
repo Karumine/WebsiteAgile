@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Building, Cog, Clock, ShieldCheck, TrendingUp } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 
 function useCounter(end: number, duration: number = 2000, trigger: boolean = false) {
@@ -28,6 +29,7 @@ function useCounter(end: number, duration: number = 2000, trigger: boolean = fal
 
 export function CustomerEligibilitySection() {
     const { lang } = useLanguage();
+    const { settings } = useSiteSettings();
     const navigate = useNavigate();
 
     const [isVisible, setIsVisible] = useState(false);
@@ -49,9 +51,13 @@ export function CustomerEligibilitySection() {
         return () => observer.disconnect();
     }, []);
 
-    const factoryCount = useCounter(40, 1600, isVisible);
-    const contractsCount = useCounter(50, 1800, isVisible);
-    const valueCount = useCounter(400, 2000, isVisible);
+    const factoriesTarget = parseInt(settings.impactStats?.factoriesServed || '40', 10) || 40;
+    const contractsTarget = parseInt(settings.impactStats?.totalContractsCount || '50', 10) || 50;
+    const valueTarget = parseInt(settings.impactStats?.totalCreditValueMB || '400', 10) || 400;
+
+    const factoryCount = useCounter(factoriesTarget, 1600, isVisible);
+    const contractsCount = useCounter(contractsTarget, 1800, isVisible);
+    const valueCount = useCounter(valueTarget, 2000, isVisible);
 
     const criterias = [
         {
@@ -98,7 +104,7 @@ export function CustomerEligibilitySection() {
             <div className="absolute top-1/4 -right-20 w-96 h-96 bg-sky-500/15 rounded-full blur-3xl pointer-events-none" />
             <div className="absolute bottom-1/3 -left-20 w-96 h-96 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 @container">
                 {/* Header */}
                 <ScrollReveal animation="fade-up">
                     <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-16">
@@ -112,28 +118,34 @@ export function CustomerEligibilitySection() {
                 </ScrollReveal>
 
                 {/* 6-Card Grid (5 Criteria Cards + 1 CTA Card) */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 mb-16 sm:mb-20">
-                    {criterias.map((item, index) => (
-                        <ScrollReveal
-                            key={index}
-                            animation="fade-up"
-                            delay={index * 80}
-                            className="flex flex-col h-full"
-                        >
-                            <div className="group flex flex-col h-full rounded-3xl p-7 sm:p-8 bg-white text-slate-900 shadow-xl border border-white/20 hover:shadow-2xl hover:border-sky-400/60 transition-all duration-300 hover:-translate-y-1">
-                                <h3 className="text-lg sm:text-xl font-extrabold text-sky-900 font-sans mb-3 group-hover:text-sky-600 transition-colors">
-                                    {item.title}
-                                </h3>
-                                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-                                    {item.desc}
-                                </p>
-                            </div>
-                        </ScrollReveal>
-                    ))}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 @[500px]:grid-cols-2 @[800px]:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-16 sm:mb-20">
+                    {criterias.map((item, index) => {
+                        const IconComp = item.icon;
+                        return (
+                            <ScrollReveal
+                                key={index}
+                                animation="fade-up"
+                                delay={index * 80}
+                                className="flex flex-col h-full"
+                            >
+                                <div className="group flex flex-col h-full rounded-3xl p-7 sm:p-8 bg-white text-slate-900 shadow-xl border border-white/20 hover:shadow-2xl hover:border-sky-400/60 transition-all duration-300 hover:-translate-y-1">
+                                    <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-sky-500/10 text-sky-600 border border-sky-500/20 flex items-center justify-center mb-5 group-hover:scale-110 group-hover:bg-sky-500 group-hover:text-white transition-all duration-300 shadow-sm shrink-0">
+                                        <IconComp className="w-6 h-6 sm:w-7 sm:h-7" />
+                                    </div>
+                                    <h3 className="text-lg sm:text-xl font-extrabold text-sky-900 font-sans mb-3 group-hover:text-sky-600 transition-colors">
+                                        {item.title}
+                                    </h3>
+                                    <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
+                                        {item.desc}
+                                    </p>
+                                </div>
+                            </ScrollReveal>
+                        );
+                    })}
 
                     {/* Card 6: CTA Card */}
                     <ScrollReveal animation="fade-up" delay={400} className="flex flex-col h-full">
-                        <div className="relative flex flex-col items-center justify-center text-center h-full rounded-3xl p-7 sm:p-8 bg-white text-slate-900 shadow-xl border border-white/20 hover:shadow-2xl transition-all duration-300 overflow-hidden hover:-translate-y-1">
+                        <div className="relative group flex flex-col items-center justify-center text-center h-full rounded-3xl p-7 sm:p-8 bg-white text-slate-900 shadow-xl border border-white/20 hover:shadow-2xl hover:border-sky-400/60 transition-all duration-300 overflow-hidden hover:-translate-y-1">
                             {/* Decorative Silk Ribbon Pattern */}
                             <div className="absolute inset-0 pointer-events-none opacity-35">
                                 <svg className="w-full h-full" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -142,7 +154,10 @@ export function CustomerEligibilitySection() {
                                 </svg>
                             </div>
 
-                            <div className="relative z-10 space-y-3">
+                            <div className="relative z-10 space-y-3 flex flex-col items-center">
+                                <div className="w-13 h-13 sm:w-14 sm:h-14 rounded-2xl bg-sky-500/10 text-sky-600 border border-sky-500/20 flex items-center justify-center mb-1 group-hover:scale-110 group-hover:bg-sky-500 group-hover:text-white transition-all duration-300 shadow-sm shrink-0">
+                                    <ArrowRight className="w-6 h-6 sm:w-7 sm:h-7" />
+                                </div>
                                 <h3 className="text-lg sm:text-xl font-extrabold text-sky-900 font-sans">
                                     {lang === 'th' ? 'ขอสินเชื่อกับ Agile Assets' : 'Apply with Agile Assets'}
                                 </h3>
@@ -169,7 +184,7 @@ export function CustomerEligibilitySection() {
                 {/* Floating Impact Stats Card at Bottom */}
                 <ScrollReveal animation="zoom-in" delay={200}>
                     <div className="rounded-3xl bg-white text-slate-900 p-8 sm:p-12 shadow-2xl border border-white/40 max-w-5xl mx-auto">
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 divide-y sm:divide-y-0 sm:divide-x divide-slate-200">
+                        <div className="grid grid-cols-1 @[500px]:grid-cols-3 gap-6 divide-y @[500px]:divide-y-0 @[500px]:divide-x divide-slate-200">
                             {/* Counter 1 */}
                             <div className="text-center pt-4 sm:pt-0 first:pt-0 sm:px-4">
                                 <div className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-sky-900 font-sans tracking-tight mb-2">

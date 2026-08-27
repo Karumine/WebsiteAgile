@@ -1,52 +1,56 @@
-import { BarChart3, Newspaper, Settings, Clock, ExternalLink } from 'lucide-react';
+import { BarChart3, Newspaper, Settings, Clock, ExternalLink, Image, ShoppingBag, HelpCircle, Building2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { formatDate } from '@/lib/utils';
 
 export function DashboardPage() {
     const { settings } = useSiteSettings();
+    const { lang } = useLanguage();
 
     const stats = [
         {
-            icon: BarChart3,
-            label: 'Interest Rate Products',
-            value: settings.interestRates.length,
-            color: 'text-primary',
-            bg: 'bg-primary/10',
-            to: '/management-portal/rates',
-        },
-        {
             icon: Newspaper,
-            label: 'Published Articles',
-            value: settings.news.length,
+            label: lang === 'th' ? 'ข่าวสาร & บทความ' : 'News & Articles',
+            value: settings.news?.length || 0,
             color: 'text-blue-400',
-            bg: 'bg-blue-400/',
+            bg: 'bg-blue-400/10',
             to: '/management-portal/news',
         },
         {
-            icon: Settings,
-            label: 'Custom Fields',
-            value: settings.customFields.length,
-            color: 'text-green-400',
-            bg: 'bg-green-400/10',
-            to: '/management-portal/custom',
+            icon: ShoppingBag,
+            label: lang === 'th' ? 'เครื่องจักรมือสอง/รอขาย' : 'Assets for Sale',
+            value: settings.usedMachinery?.length || 0,
+            color: 'text-emerald-400',
+            bg: 'bg-emerald-400/10',
+            to: '/management-portal/assets',
         },
         {
-            icon: Clock,
-            label: 'Last Updated',
-            value: settings.lastUpdated ? formatDate(settings.lastUpdated) : '—',
+            icon: BarChart3,
+            label: lang === 'th' ? 'ผลิตภัณฑ์สินเชื่อ' : 'Financing Rates',
+            value: settings.interestRates?.length || 0,
+            color: 'text-sky-400',
+            bg: 'bg-sky-400/10',
+            to: '/management-portal/rates',
+        },
+        {
+            icon: HelpCircle,
+            label: lang === 'th' ? 'คำถาม FAQ' : 'FAQ Items',
+            value: settings.faqs?.length || 0,
             color: 'text-purple-400',
             bg: 'bg-purple-400/10',
-            to: '',
+            to: '/management-portal/faq',
         },
     ];
 
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="text-2xl font-bold text-foreground">Dashboard</h1>
+                <h1 className="text-2xl font-bold text-foreground">
+                    {lang === 'th' ? 'แผงควบคุม CMS (Dashboard)' : 'Content Management Dashboard'}
+                </h1>
                 <p className="text-sm text-muted-foreground mt-1">
-                    Overview of your site content and quick actions.
+                    {lang === 'th' ? 'จัดการและอัปเดตคอนเทนต์ทั้งหมดของเว็บไซต์ Agile Assets' : 'Manage and control all content across Agile Assets website'}
                 </p>
             </div>
 
@@ -72,12 +76,17 @@ export function DashboardPage() {
 
             {/* Quick Actions */}
             <div>
-                <h2 className="text-lg font-semibold text-foreground mb-4">Quick Actions</h2>
+                <h2 className="text-lg font-semibold text-foreground mb-4">
+                    {lang === 'th' ? 'ทางลัดการจัดการคอนเทนต์' : 'Quick Actions'}
+                </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {[
-                        { label: 'Edit Interest Rates', desc: 'Update lending product rates', to: '/management-portal/rates', icon: BarChart3 },
-                        { label: 'Post New Article', desc: 'Create news or announcement', to: '/management-portal/news', icon: Newspaper },
-                        { label: 'Manage Custom Fields', desc: 'Add promotional campaign data', to: '/management-portal/custom', icon: Settings },
+                        { label: lang === 'th' ? 'จัดการข่าวสาร & กิจกรรม' : 'Manage News & Articles', desc: 'โพสต์ข่าวและภาพกิจกรรมใหม่', to: '/management-portal/news', icon: Newspaper },
+                        { label: lang === 'th' ? 'จัดการเครื่องจักรมือสอง' : 'Manage Used Machinery', desc: 'เพิ่มสินทรัพย์และอัปเดตราคา', to: '/management-portal/assets', icon: ShoppingBag },
+                        { label: lang === 'th' ? 'แก้ไขข้อมูลบริษัท & สถิติ' : 'Company Profile & Stats', desc: 'ปรับเบอร์โทร และสถิติผลงานโรงงาน', to: '/management-portal/company', icon: Building2 },
+                        { label: lang === 'th' ? 'แก้ไขแบนเนอร์หลัก' : 'Edit Hero Banner', desc: 'ปรับสโลแกนและภาพหน้าแรก', to: '/management-portal/banner', icon: Image },
+                        { label: lang === 'th' ? 'จัดการคำถามที่พบบ่อย' : 'Manage FAQ Items', desc: 'เพิ่มคำถามคำตอบสำหรับลูกค้า', to: '/management-portal/faq', icon: HelpCircle },
+                        { label: lang === 'th' ? 'แก้ไขอัตราดอกเบี้ย' : 'Edit Interest Rates', desc: 'ปรับอัตราดอกเบี้ยสินเชื่อ', to: '/management-portal/rates', icon: BarChart3 },
                     ].map((action) => (
                         <Link
                             key={action.label}

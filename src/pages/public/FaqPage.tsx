@@ -7,6 +7,7 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { cn } from '@/lib/utils';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.webp';
 
@@ -20,13 +21,14 @@ interface FaqItem {
 
 export function FaqPage() {
     const { lang } = useLanguage();
+    const { settings } = useSiteSettings();
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
     const toggleAccordion = (index: number) => {
         setOpenIndex(openIndex === index ? null : index);
     };
 
-    const faqs: FaqItem[] = [
+    const defaultFaqs: FaqItem[] = [
         {
             id: 'faq-1',
             questionTh: 'สินเชื่อเครื่องจักรคืออะไร',
@@ -84,6 +86,16 @@ export function FaqPage() {
             answerEn: 'Flat rates begin from 8.90% p.a. Specific rates depend upon machine asset class, term length, advance deposit, and overall creditworthiness. You can simulate rates via our online Financing Calculator.',
         },
     ];
+
+    const cmsFaqs: FaqItem[] = settings.faqs?.map((item) => ({
+        id: item.id,
+        questionTh: item.question,
+        questionEn: item.question_en || item.question,
+        answerTh: item.answer,
+        answerEn: item.answer_en || item.answer,
+    })) || [];
+
+    const faqs = [...cmsFaqs, ...defaultFaqs];
 
     const pageTitle = lang === 'th'
         ? 'คำถามที่พบบ่อย (Frequently Asked Questions - FAQ) | Agile Assets'

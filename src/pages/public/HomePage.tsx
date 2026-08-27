@@ -9,6 +9,7 @@ import { KeyFinancingServicesSection } from '@/components/sections/KeyFinancingS
 import { CustomerEligibilitySection } from '@/components/sections/CustomerEligibilitySection';
 import { OurProjectsSection } from '@/components/sections/OurProjectsSection';
 import { OurPartnerSection } from '@/components/sections/OurPartnerSection';
+import { LatestNewsSection } from '@/components/sections/LatestNewsSection';
 import { ContactSection } from '@/components/sections/ContactSection';
 import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
@@ -67,7 +68,10 @@ export function HomePage() {
                 {/* 8. OUR PARTNER & MACHINE (คู่ค้าและเครื่องจักรที่เราให้บริการ - 4 Brand Carousel) */}
                 <OurPartnerSection />
 
-                {/* 9. BUSINESS PARTNERSHIP INQUIRIES (Consultation Form) */}
+                {/* 9. LATEST NEWS & ACTIVITYS (ข่าวสารและกิจกรรมของบริษัท) */}
+                <LatestNewsSection />
+
+                {/* 10. BUSINESS PARTNERSHIP INQUIRIES (Consultation Form) */}
                 <ContactSection />
             </main>
 

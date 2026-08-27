@@ -40,6 +40,9 @@ const RatesEditor = lazy(() => import('@/pages/admin/RatesEditor').then(m => ({ 
 const BannerEditor = lazy(() => import('@/pages/admin/BannerEditor').then(m => ({ default: m.BannerEditor })));
 const NewsEditor = lazy(() => import('@/pages/admin/NewsEditor').then(m => ({ default: m.NewsEditor })));
 const CustomFieldsEditor = lazy(() => import('@/pages/admin/CustomFieldsEditor').then(m => ({ default: m.CustomFieldsEditor })));
+const AssetsEditor = lazy(() => import('@/pages/admin/AssetsEditor').then(m => ({ default: m.AssetsEditor })));
+const FaqEditor = lazy(() => import('@/pages/admin/FaqEditor').then(m => ({ default: m.FaqEditor })));
+const CompanyInfoEditor = lazy(() => import('@/pages/admin/CompanyInfoEditor').then(m => ({ default: m.CompanyInfoEditor })));
 
 // Loading Fallback
 const PageLoader = () => (
@@ -140,6 +143,9 @@ export default function App() {
                           <Route path="/management-portal/banner" element={<BannerEditor />} />
                           <Route path="/management-portal/news" element={<NewsEditor />} />
                           <Route path="/management-portal/custom" element={<CustomFieldsEditor />} />
+                          <Route path="/management-portal/assets" element={<AssetsEditor />} />
+                          <Route path="/management-portal/faq" element={<FaqEditor />} />
+                          <Route path="/management-portal/company" element={<CompanyInfoEditor />} />
                         </Route>
                       </Route>
                     </Routes>

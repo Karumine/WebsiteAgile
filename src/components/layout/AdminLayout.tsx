@@ -1,5 +1,7 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import {
     TrendingUp,
     LayoutDashboard,
@@ -10,22 +12,33 @@ import {
     LogOut,
     Menu,
     X,
+    ShoppingBag,
+    HelpCircle,
+    Building2,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
-const sidebarLinks = [
-    { to: '/management-portal/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { to: '/management-portal/rates', icon: BarChart3, label: 'Interest Rates' },
-    { to: '/management-portal/banner', icon: Image, label: 'Hero Banner' },
-    { to: '/management-portal/news', icon: Newspaper, label: 'News & Articles' },
-    { to: '/management-portal/custom', icon: Settings, label: 'Custom Fields' },
-];
+import logoCmyk from '@/assets/Logo_Agile Assets_CMYK.png';
 
 export function AdminLayout() {
     const { user, logout } = useAuth();
+    const { lang, setLang } = useLanguage();
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+
+    const toggleLang = () => setLang(lang === 'th' ? 'en' : 'th');
+
+    const sidebarLinks = [
+        { to: '/management-portal/dashboard', icon: LayoutDashboard, labelEn: 'Dashboard', labelTh: 'แผงควบคุม' },
+        { to: '/management-portal/banner', icon: Image, labelEn: 'Hero Banner', labelTh: 'แบนเนอร์หลัก' },
+        { to: '/management-portal/news', icon: Newspaper, labelEn: 'News & Articles', labelTh: 'ข่าวสารและบทความ' },
+        { to: '/management-portal/assets', icon: ShoppingBag, labelEn: 'Assets for Sale', labelTh: 'เครื่องจักรมือสอง' },
+        { to: '/management-portal/rates', icon: BarChart3, labelEn: 'Interest Rates', labelTh: 'อัตราดอกเบี้ย' },
+        { to: '/management-portal/faq', icon: HelpCircle, labelEn: 'FAQ & Help', labelTh: 'คำถามที่พบบ่อย (FAQ)' },
+        { to: '/management-portal/company', icon: Building2, labelEn: 'Company & Stats', labelTh: 'ข้อมูลบริษัท & สถิติ' },
+        { to: '/management-portal/custom', icon: Settings, labelEn: 'Custom Fields', labelTh: 'ข้อมูลโปรโมชัน' },
+    ];
 
     const handleLogout = () => {
         logout();
@@ -42,14 +55,12 @@ export function AdminLayout() {
                 )}
             >
                 {/* Logo */}
-                <div className="p-5 border-b border-border flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center">
-                            <TrendingUp className="w-4 h-4 text-white" />
-                        </div>
-                        <div>
-                            <span className="text-sm font-bold text-gradient">Agile Assets</span>
-                            <p className="text-[10px] text-muted-foreground">CMS Portal</p>
+                <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                        <img src={logoCmyk} alt="Agile Assets Logo" className="w-9 h-9 object-contain shrink-0 drop-shadow-sm" />
+                        <div className="min-w-0">
+                            <span className="text-sm font-extrabold text-slate-900 dark:text-white block truncate">Agile Assets</span>
+                            <p className="text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider leading-none mt-0.5">CMS Portal</p>
                         </div>
                     </div>
                     <button
@@ -71,13 +82,13 @@ export function AdminLayout() {
                                 cn(
                                     'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
                                     isActive
-                                        ? 'bg-primary/10 text-primary'
+                                        ? 'bg-primary/10 text-primary font-bold'
                                         : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
                                 )
                             }
                         >
                             <link.icon className="w-4.5 h-4.5" />
-                            {link.label}
+                            {lang === 'th' ? link.labelTh : link.labelEn}
                         </NavLink>
                     ))}
                 </nav>
@@ -98,7 +109,7 @@ export function AdminLayout() {
                         className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
                     >
                         <LogOut className="w-4.5 h-4.5" />
-                        Sign Out
+                        {lang === 'th' ? 'ออกจากระบบ' : 'Sign Out'}
                     </button>
                 </div>
             </aside>
@@ -114,14 +125,35 @@ export function AdminLayout() {
             {/* Main Content */}
             <div className="flex-1 flex flex-col min-h-screen">
                 {/* Top Bar */}
-                <header className="sticky top-0 z-30 h-14 glass border-b border-border flex items-center px-4 gap-3">
-                    <button
-                        onClick={() => setSidebarOpen(true)}
-                        className="lg:hidden text-muted-foreground hover:text-foreground"
-                    >
-                        <Menu className="w-5 h-5" />
-                    </button>
-                    <h1 className="text-sm font-semibold text-foreground">Content Management System</h1>
+                <header className="sticky top-0 z-30 h-14 glass border-b border-border flex items-center justify-between px-4 sm:px-6">
+                    <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setSidebarOpen(true)}
+                            className="lg:hidden text-muted-foreground hover:text-foreground"
+                        >
+                            <Menu className="w-5 h-5" />
+                        </button>
+                        <h1 className="text-sm sm:text-base font-semibold text-foreground">
+                            {lang === 'en' ? 'Content Management System (CMS)' : 'ระบบจัดการเนื้อหา (CMS)'}
+                        </h1>
+                    </div>
+
+                    {/* Right Tools: Theme & Language Switcher */}
+                    <div className="flex items-center gap-3">
+                        <ThemeToggle />
+                        <button
+                            onClick={toggleLang}
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border glass text-foreground text-xs font-semibold transition-all duration-200 hover:scale-105 hover:border-sky-400/50"
+                            title="Toggle Thai / English"
+                        >
+                            <span className="text-base leading-none">
+                                {lang === 'th' ? '🇹🇭' : '🇺🇸'}
+                            </span>
+                            <span className="font-bold tracking-wide text-sky-400">
+                                {lang.toUpperCase()}
+                            </span>
+                        </button>
+                    </div>
                 </header>
 
                 {/* Page Content */}
@@ -132,3 +164,4 @@ export function AdminLayout() {
         </div>
     );
 }
+

@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { PackageCheck, ArrowRight, CheckCircle2, PhoneCall } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 
 export function AssetsForSaleSection() {
     const { t, lang } = useLanguage();
+    const { settings } = useSiteSettings();
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-    const assets = [
+    const defaultAssets = [
         {
             id: 'ast-01',
             title: lang === 'th' ? 'เครื่อง CNC 5-Axis Milling Center (Mazak VARIAXIS)' : '5-Axis CNC Milling Center (Mazak VARIAXIS)',
@@ -70,6 +72,20 @@ export function AssetsForSaleSection() {
         },
     ];
 
+    const cmsAssets = settings.usedMachinery?.map((item) => ({
+        id: item.id,
+        title: lang === 'en' ? (item.title_en || item.title) : item.title,
+        category: 'machinery',
+        categoryName: item.category,
+        year: item.year,
+        condition: item.condition,
+        price: item.price,
+        image: item.image,
+        features: [item.description],
+    })) || [];
+
+    const assets = [...cmsAssets, ...defaultAssets];
+
     const filteredAssets = selectedCategory === 'all'
         ? assets
         : assets.filter((a) => a.category === selectedCategory);
@@ -130,7 +146,7 @@ export function AssetsForSaleSection() {
                 </ScrollReveal>
 
                 {/* Assets Grid */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="grid grid-cols-1 @[600px]:grid-cols-2 gap-6 sm:gap-8">
                     {filteredAssets.map((item, idx) => (
                         <ScrollReveal
                             key={item.id}

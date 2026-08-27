@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useNavigate, useLocation, Navigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { TrendingUp, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 
 export function LoginPage() {
     const { login, isAuthenticated } = useAuth();
+    const { lang, setLang } = useLanguage();
     const navigate = useNavigate();
     const location = useLocation();
     const [username, setUsername] = useState('');
@@ -12,6 +15,8 @@ export function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+
+    const toggleLang = () => setLang(lang === 'th' ? 'en' : 'th');
 
     const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/management-portal/dashboard';
 
@@ -24,11 +29,11 @@ export function LoginPage() {
         setError('');
 
         if (!username.trim()) {
-            setError('Username is required');
+            setError(lang === 'th' ? 'กรุณากรอก Username' : 'Username is required');
             return;
         }
         if (password.length < 6) {
-            setError('Password must be at least 6 characters');
+            setError(lang === 'th' ? 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร' : 'Password must be at least 6 characters');
             return;
         }
 
@@ -41,13 +46,29 @@ export function LoginPage() {
         if (success) {
             navigate(from, { replace: true });
         } else {
-            setError('Invalid credentials. Please try again.');
+            setError(lang === 'th' ? 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' : 'Invalid credentials. Please try again.');
         }
         setIsLoading(false);
     };
 
     return (
-        <div className="min-h-screen gradient-hero flex items-center justify-center p-4">
+        <div className="min-h-screen gradient-hero flex flex-col items-center justify-center p-4 relative">
+            {/* Top Right Header Controls (Theme & Language) */}
+            <div className="absolute top-4 right-4 z-20 flex items-center gap-3">
+                <ThemeToggle />
+                <button
+                    onClick={toggleLang}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border glass text-foreground text-xs font-semibold transition-all duration-200 hover:scale-105 hover:border-sky-400/50 shadow-md"
+                    title="Toggle Thai / English"
+                >
+                    <span className="text-base leading-none">
+                        {lang === 'th' ? '🇹🇭' : '🇺🇸'}
+                    </span>
+                    <span className="font-bold tracking-wide text-sky-400">
+                        {lang.toUpperCase()}
+                    </span>
+                </button>
+            </div>
             {/* Background effects */}
             <div className="absolute top-20 right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />
             <div className="absolute bottom-20 left-20 w-80 h-80 bg-blue-400/ rounded-full blur-3xl" />

@@ -113,11 +113,85 @@
         }
     ],
     "companyInfo": {
-        "name": "Agile Assets",
-        "phone": "+1 (800) 555-0199",
-        "email": "info@agileassets.com",
-        "address": "123 Finance District, New York, NY 10004",
-        "description": "Agile Assets is a premier lending and investment firm providing innovative financial solutions for individuals and businesses since 2010."
+        "name": "Agile Assets Co., Ltd.",
+        "phone": "02-123-4567",
+        "email": "contact@agileassets.co.th",
+        "address": "อาคารไซเบอร์เวิลด์ ทาวเวอร์ ชั้น 25 ถนนรัชดาภิเษก แขวงห้วยขวาง เขตห้วยขวาง กรุงเทพมหานคร 10310",
+        "description": "ผู้ให้บริการสินเชื่อเช่าซื้อเครื่องจักรอุตสาหกรรม ยานพาหนะเชิงพาณิชย์ เครื่องมือแพทย์ และโซลูชันเงินทุนเพื่อการเติบโตอย่างยั่งยืน",
+        "lineId": "@agileassets",
+        "facebook": "https://facebook.com/agileassetsth",
+        "mapUrl": "https://maps.google.com",
+        "operatingHours": "จันทร์ - ศุกร์: 08:30 - 17:30 น."
     },
-    "lastUpdated": "2026-02-24T12:00:00Z"
+    "impactStats": {
+        "factoriesServed": "40+",
+        "totalCreditValueMB": "400+",
+        "totalContractsCount": "50+",
+        "customerSatisfactionPct": "98%"
+    },
+    "usedMachinery": [
+        {
+            "id": "asset-001",
+            "title": "เครื่องบรรจุน้ำดื่มอัตโนมัติ 24 หัวจ่าย",
+            "title_en": "Automatic 24-Head Bottling Machine",
+            "category": "น้ำดื่ม & เครื่องดื่ม",
+            "price": "1,250,000 บาท",
+            "year": "2023",
+            "condition": "สภาพดีเยี่ยม 92% พร้อมใช้งาน",
+            "description": "เครื่องบรรจุน้ำดื่มความเร็วสูง 6,000 ขวด/ชั่วโมง โครงสร้างสแตนเลส 304 มาตรฐาน อย. ผ่านการตรวจเช็คสภาพโดยวิศวกรผู้เชี่ยวชาญ",
+            "image": "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=800&q=80",
+            "status": "available"
+        },
+        {
+            "id": "asset-002",
+            "title": "เครื่องฉีดพลาสติก Servo-Energy 220 Tons",
+            "title_en": "Servo-Energy Injection Molding 220 Tons",
+            "category": "พลาสติก & การขึ้นรูป",
+            "price": "1,880,000 บาท",
+            "year": "2024",
+            "condition": "สภาพใหม่ 95% ใช้งานน้อย",
+            "description": "ระบบมอเตอร์เซอร์โวประหยัดพลังงาน 40% พร้อมชุดควบคุมดิจิทัลความแม่นยำสูง เหมาะสำหรับชิ้นส่วนยานยนต์และบรรจุภัณฑ์",
+            "image": "https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800&q=80",
+            "status": "available"
+        },
+        {
+            "id": "asset-003",
+            "title": "เครื่องกำเนิดไฟฟ้าดีเซล 500 kVA Soundproof",
+            "title_en": "500 kVA Diesel Generator Set Soundproof",
+            "category": "พลังงาน & สำรองไฟฟ้า",
+            "price": "950,000 บาท",
+            "year": "2022",
+            "condition": "สภาพดี 88% มีประวัติเช็คระยะศูนย์",
+            "description": "ตู้เก็บเสียงมาตรฐานโรงงาน เครื่องยนต์ตระกูล Cummins พร้อมตู้ควบคุมอัตโนมัติ ATS สำหรับโรงงานอุตสาหกรรมและฟาร์มปศุสัตว์",
+            "image": "https://images.unsplash.com/photo-1498084393753-b411b2d26b34?w=800&q=80",
+            "status": "reserved"
+        }
+    ],
+    "faqs": [
+        {
+            "id": "faq-001",
+            "question": "สินเชื่อเช่าซื้อเครื่องจักรกับ Agile Assets ต่างจากธนาคารอย่างไร?",
+            "question_en": "How is Agile Assets machinery financing different from traditional banks?",
+            "answer": "Agile Assets เน้นความยืดหยุ่นและการอนุมัติที่รวดเร็ว พิจารณาจากศักยภาพของเครื่องจักรและโอกาสทางธุรกิจจริง ไม่จำกัดเฉพาะงบการเงินย้อนหลัง และมีโครงสร้างผ่อนชำระที่ปรับตามกระแสเงินสดของโรงงาน",
+            "answer_en": "Agile Assets offers higher flexibility and rapid approval processes focused on machine earning potential rather than strict historical bank ratios.",
+            "category": "การอนุมัติสินเชื่อ"
+        },
+        {
+            "id": "faq-002",
+            "question": "ต้องเตรียมเอกสารอะไรบ้างในการขอสินเชื่อ?",
+            "question_en": "What documents are required for application?",
+            "answer": "ใช้เพียง 1) หนังสือรับรองบริษัท 2) ภ.พ.30 ย้อนหลัง 6 เดือน 3) ใบเสนอราคาเครื่องจักร (Quotation) และ 4) แผนการใช้งานเครื่องจักรเบื้องต้น",
+            "answer_en": "Simple requirements: Company Registration, 6-month VAT/Bank Statements, Machine Quotation, and Brief Project Plan.",
+            "category": "เอกสารการสมัคร"
+        },
+        {
+            "id": "faq-003",
+            "question": "วงเงินสินเชื่อขั้นต่ำและสูงสุดอยู่ที่เท่าไหร่?",
+            "question_en": "What is the minimum and maximum loan limit?",
+            "answer": "วงเงินสินเชื่อตั้งแต่ 1 ล้านบาท ถึง 50 ล้านบาทต่อสัญญา ขึ้นอยู่กับประเภทเครื่องจักรและโครงการของลูกค้า",
+            "answer_en": "Credit limit ranges from 1 Million THB up to 50 Million THB per equipment financing contract.",
+            "category": "วงเงินสินเชื่อ"
+        }
+    ],
+    "lastUpdated": "2026-08-27T12:00:00Z"
 }

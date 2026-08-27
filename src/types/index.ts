@@ -36,12 +36,45 @@ export interface CustomField {
     campaign: string;
 }
 
+export interface ImpactStats {
+    factoriesServed: string;
+    totalCreditValueMB: string;
+    totalContractsCount: string;
+    customerSatisfactionPct: string;
+}
+
+export interface UsedMachineryItem {
+    id: string;
+    title: string;
+    title_en?: string;
+    category: string;
+    price: string;
+    year: string;
+    condition: string;
+    description: string;
+    image: string;
+    status: 'available' | 'reserved' | 'sold';
+}
+
+export interface FaqItem {
+    id: string;
+    question: string;
+    question_en?: string;
+    answer: string;
+    answer_en?: string;
+    category: string;
+}
+
 export interface CompanyInfo {
     name: string;
     phone: string;
     email: string;
     address: string;
     description: string;
+    lineId?: string;
+    facebook?: string;
+    mapUrl?: string;
+    operatingHours?: string;
 }
 
 export interface SiteSettings {
@@ -50,6 +83,9 @@ export interface SiteSettings {
     news: NewsItem[];
     customFields: CustomField[];
     companyInfo: CompanyInfo;
+    impactStats: ImpactStats;
+    usedMachinery: UsedMachineryItem[];
+    faqs: FaqItem[];
     lastUpdated: string;
 }
 

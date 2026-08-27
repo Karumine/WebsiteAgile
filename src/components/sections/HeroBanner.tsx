@@ -1,12 +1,19 @@
 import { useNavigate } from 'react-router-dom';
 import { DollarSign, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { AgileAssetsLogo } from '@/components/ui/AgileAssetsLogo';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.webp';
 
 export function HeroBanner() {
     const { t } = useLanguage();
+    const { settings } = useSiteSettings();
     const navigate = useNavigate();
+
+    const headline = settings.banner?.headline || 'Growth – Good Capital';
+    const subheadline = settings.banner?.subheadline || t('hero.titleTh');
+    const ctaText = settings.banner?.ctaText || t('hero.ctaFinancing');
+    const ctaLink = settings.banner?.ctaLink || '/leasing-application';
 
     return (
         <section id="home" className="relative min-h-[96vh] flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 pb-12 sm:pb-16">
@@ -39,27 +46,32 @@ export function HeroBanner() {
 
                 {/* Main Headline: Growth – Good Capital */}
                 <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-4 text-white drop-shadow-2xl font-sans">
-                    <span className="text-white">Growth – Good Capital</span>
+                    <span className="text-white">{headline}</span>
                 </h1>
 
                 {/* Thai Sub-headline with glowing soft tone */}
                 <p className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-white tracking-wide mb-10 drop-shadow-lg font-sans">
-                    {t('hero.titleTh')}
+                    {subheadline}
                 </p>
 
                 {/* Call-to-Action Action Button */}
                 <div className="flex items-center justify-center max-w-md mx-auto">
                     <button
                         onClick={() => {
-                            navigate('/leasing-application');
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                            if (ctaLink.startsWith('#')) {
+                                const elem = document.querySelector(ctaLink);
+                                if (elem) elem.scrollIntoView({ behavior: 'smooth' });
+                            } else {
+                                navigate(ctaLink);
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }
                         }}
                         className="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-400 via-sky-500 to-blue-600 text-white font-bold text-sm sm:text-base shadow-xl shadow-sky-500/35 hover:shadow-sky-400/60 hover:scale-105 active:scale-[0.98] transition-all duration-200 glow-cyan group"
                     >
                         <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
                             <DollarSign className="w-4 h-4 text-white" />
                         </div>
-                        <span>{t('hero.ctaFinancing')}</span>
+                        <span>{ctaText}</span>
                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </button>
                 </div>
