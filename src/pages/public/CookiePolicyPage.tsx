@@ -1,6 +1,6 @@
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Cookie, Sliders, RefreshCw, ChevronRight, ExternalLink, Globe, Lock } from 'lucide-react';
+import { ShieldCheck, ChevronRight, ExternalLink } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { CookieConsent } from '@/components/ui/CookieConsent';

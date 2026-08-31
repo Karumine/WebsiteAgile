@@ -1,4 +1,4 @@
-import { BarChart3, Newspaper, Settings, Clock, ExternalLink, Image, ShoppingBag, HelpCircle, Building2 } from 'lucide-react';
+import { BarChart3, Newspaper, ExternalLink, Image, ShoppingBag, HelpCircle, Building2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { useLanguage } from '@/contexts/LanguageContext';

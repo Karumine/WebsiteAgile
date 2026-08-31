@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { Monitor, Tablet, Smartphone, Maximize2, Minimize2, Sparkles, RefreshCw, ExternalLink, ZoomIn, ZoomOut } from 'lucide-react';
+import { Monitor, Tablet, Smartphone, Maximize2, Minimize2, Sparkles, RefreshCw, ExternalLink } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
 interface SplitPreviewContainerProps {

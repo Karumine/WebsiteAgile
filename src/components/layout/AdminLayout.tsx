@@ -3,7 +3,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import {
-    TrendingUp,
     LayoutDashboard,
     BarChart3,
     Image,
@@ -26,8 +25,6 @@ export function AdminLayout() {
     const { lang, setLang } = useLanguage();
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
-
-    const toggleLang = () => setLang(lang === 'th' ? 'en' : 'th');
 
     const sidebarLinks = [
         { to: '/management-portal/dashboard', icon: LayoutDashboard, labelEn: 'Dashboard', labelTh: 'แผงควบคุม' },

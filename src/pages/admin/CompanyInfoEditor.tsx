@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Save, Building2, Phone, Mail, MapPin, BarChart3 } from 'lucide-react';
+import { Save, Building2, BarChart3 } from 'lucide-react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { SplitPreviewContainer } from '@/components/admin/SplitPreviewContainer';

@@ -131,10 +131,6 @@ export function Navbar() {
         }
     }, [navigate, location.pathname]);
 
-    const toggleLang = useCallback(() => {
-        setLang(lang === 'th' ? 'en' : 'th');
-    }, [lang, setLang]);
-
     const currentSubItems = EQUIPMENT_CATEGORIES.find(c => c.id === activeSubMenu)?.items || EQUIPMENT_CATEGORIES[0].items;
 
     // Memoized active state checks

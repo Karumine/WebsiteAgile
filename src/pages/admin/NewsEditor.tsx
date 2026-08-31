@@ -164,8 +164,6 @@ export function NewsEditor() {
         toast.success('บันทึกข่าวสารเรียบร้อยแล้ว!');
     };
 
-    const categories = ['Company News', 'Market Analysis', 'Education', 'Product Update', 'Press Release'];
-
     return (
         <SplitPreviewContainer
             title={lang === 'th' ? 'จัดการข่าวสาร & บทความ (40/60 Live)' : 'News & Articles Editor (40/60 Split)'}
@@ -382,6 +380,14 @@ export function NewsEditor() {
                 })}
             </div>
 
+            {/* Hidden File Input for Image Upload */}
+            <input
+                ref={fileInputRef}
+                type="file"
+                className="hidden"
+                accept="image/*"
+                onChange={onFileChange}
+            />
             </div>
         </SplitPreviewContainer>
     );

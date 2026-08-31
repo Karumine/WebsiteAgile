@@ -16,8 +16,6 @@ export function LoginPage() {
     const [error, setError] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const toggleLang = () => setLang(lang === 'th' ? 'en' : 'th');
-
     const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/management-portal/dashboard';
 
     if (isAuthenticated) {
