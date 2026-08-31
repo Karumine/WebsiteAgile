@@ -78,8 +78,8 @@ export function NewsletterPage() {
             <Navbar />
 
             <main className="flex-1">
-                {/* ─── 1. Hero Banner (Same Exact Tree of Growth as Home & Project Pages) ─── */}
-                <section className="relative min-h-[96vh] flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 pb-8 sm:pb-10">
+                {/* ─── 1. Hero Banner ─── */}
+                <section className="relative min-h-[96vh] flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 pb-12 sm:pb-16">
                     {/* Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img
@@ -90,26 +90,39 @@ export function NewsletterPage() {
                         />
                         {/* Dynamic Vignette & Ambient Light Overlays */}
                         <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
-                        <div className="absolute inset-0 bg-radial-at-c from-sky-500/10 via-transparent to-black/80" />
+                        <div className="absolute inset-0 bg-radial-at-c from-sky-500/15 via-transparent to-black/80" />
                         
                         {/* Soft Bottom Fog/Fade Gradient into next section */}
-                        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none z-10" />
+                        <div className="absolute bottom-0 left-0 right-0 h-56 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-10" />
                     </div>
 
                     {/* Glowing Ambient Aura Particles */}
-                    <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-500/15 rounded-full blur-[140px] pointer-events-none animate-pulse-glow" />
-                    <div className="absolute bottom-1/3 left-10 w-96 h-96 bg-blue-600/15 rounded-full blur-[120px] pointer-events-none animate-float" />
-                    <div className="absolute top-1/3 right-10 w-80 h-80 bg-cyan-400/10 rounded-full blur-[100px] pointer-events-none animate-float" style={{ animationDelay: '3s' }} />
+                    <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-sky-500/20 rounded-full blur-[140px] pointer-events-none animate-pulse-glow" />
+                    <div className="absolute bottom-1/4 left-10 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] pointer-events-none animate-float" />
+                    <div className="absolute top-1/3 right-10 w-80 h-80 bg-cyan-400/15 rounded-full blur-[100px] pointer-events-none animate-float" style={{ animationDelay: '3s' }} />
 
                     {/* Hero Content */}
                     <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto">
-                        <ScrollReveal animation="fade-up">
-                            <p className="text-xl sm:text-3xl font-semibold text-slate-100 mb-3 font-sans tracking-wide drop-shadow-md">
+                        <ScrollReveal animation="fade-down">
+                            {/* Breadcrumb / Category Badge */}
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-sky-400/30 text-xs font-semibold text-sky-300 mb-5 shadow-lg shadow-sky-500/10">
+                                <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
+                                <span>Agile Newsletter · Annual Reports & Insights</span>
+                            </div>
+                        </ScrollReveal>
+
+                        <ScrollReveal animation="fade-up" delay={100}>
+                            <p className="text-xl sm:text-3xl font-semibold text-sky-200/90 mb-3 font-sans tracking-wide drop-shadow-md">
                                 Agile Assets
                             </p>
-                            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight drop-shadow-2xl font-sans mb-8">
+                            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight drop-shadow-2xl font-sans mb-4 bg-gradient-to-r from-white via-sky-100 to-sky-300 bg-clip-text text-transparent">
                                 Agile Newsletter
                             </h1>
+                            <p className="text-sm sm:text-lg text-slate-300 max-w-2xl mx-auto font-light leading-relaxed drop-shadow-md mb-8">
+                                {lang === 'th'
+                                    ? 'รวบรวมจดหมายข่าวประจำปี สรุปผลการดำเนินงาน และสาระความรู้สินเชื่อเครื่องจักรอุตสาหกรรม'
+                                    : 'Annual corporate newsletters, operational recaps, and specialized machinery finance reports.'}
+                            </p>
 
                             {/* Learn More Button */}
                             <div className="flex justify-center">
@@ -126,17 +139,44 @@ export function NewsletterPage() {
                 </section>
 
                 {/* ─── 2. จดหมายข่าวประจำปี (3 PDF Embed Documents Grid) ─── */}
-                <section id="newsletter" className="py-16 sm:py-24 bg-white dark:bg-slate-950">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <section id="newsletter" className="relative py-16 sm:py-24 overflow-hidden bg-background">
+                    {/* Subtle Silk Wave Gradients */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-40 dark:opacity-30">
+                        <svg className="absolute w-full h-full object-cover" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M-100,300 C400,100 900,600 1600,200" stroke="url(#nlWaveGrad1)" strokeWidth="1.5" strokeDasharray="6 6" />
+                            <path d="M-50,500 C450,250 950,750 1600,350" stroke="url(#nlWaveGrad2)" strokeWidth="2" />
+                            <defs>
+                                <linearGradient id="nlWaveGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.1" />
+                                    <stop offset="50%" stopColor="#0284c7" stopOpacity="0.5" />
+                                    <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.1" />
+                                </linearGradient>
+                                <linearGradient id="nlWaveGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.05" />
+                                    <stop offset="50%" stopColor="#38bdf8" stopOpacity="0.35" />
+                                    <stop offset="100%" stopColor="#0369a1" stopOpacity="0.05" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-sky-500/10 rounded-full blur-[140px]" />
+                        <div className="absolute bottom-10 right-10 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[150px]" />
+                    </div>
+
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                         {/* Section Header */}
                         <ScrollReveal animation="fade-up">
-                            <div className="text-center mb-12 sm:mb-16">
-                                <p className="text-sm sm:text-base font-semibold text-sky-600 dark:text-sky-400 mb-1">
+                            <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+                                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3 shadow-sm border border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-bold uppercase tracking-wider">
                                     Agile Newsletter
-                                </p>
-                                <h2 className="text-2xl sm:text-4xl font-extrabold text-blue-900 dark:text-blue-400 tracking-tight font-sans">
+                                </div>
+                                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-sans mb-4 bg-gradient-to-r from-blue-900 via-sky-600 to-blue-800 dark:from-white dark:via-sky-200 dark:to-sky-400 bg-clip-text text-transparent">
                                     {lang === 'th' ? 'จดหมายข่าวประจำปี' : 'Annual Newsletters'}
                                 </h2>
+                                <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
+                                    {lang === 'th'
+                                        ? 'ดาวน์โหลดและอ่านฉบับเต็มของจดหมายข่าว Agile Assets แบบ Interactive'
+                                        : 'Download and read full interactive editions of Agile Assets annual reports.'}
+                                </p>
                             </div>
                         </ScrollReveal>
 
@@ -144,9 +184,9 @@ export function NewsletterPage() {
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             {newsletters.map((item, idx) => (
                                 <ScrollReveal key={item.id} animation="fade-up" delay={idx * 80}>
-                                    <div className="flex flex-col h-full bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-2xl group transition-all duration-300 hover:border-sky-500/50">
+                                    <div className="flex flex-col h-full glass border border-slate-200/80 dark:border-slate-800/80 rounded-2xl overflow-hidden shadow-xl group transition-all duration-300 hover:border-sky-500/40 hover:shadow-2xl hover:shadow-sky-500/10">
                                         {/* Card Header Bar */}
-                                        <div className="p-4 bg-slate-950/80 border-b border-slate-800 flex items-center justify-between gap-3">
+                                        <div className="p-4 bg-slate-950/80 border-b border-slate-800/80 flex items-center justify-between gap-3">
                                             <div className="flex items-center gap-2.5 min-w-0">
                                                 <div className="w-8 h-8 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center shrink-0">
                                                     <FileText className="w-4 h-4" />
