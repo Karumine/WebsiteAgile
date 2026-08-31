@@ -141,18 +141,32 @@ export function AdminLayout() {
                     {/* Right Tools: Theme & Language Switcher */}
                     <div className="flex items-center gap-3">
                         <ThemeToggle />
-                        <button
-                            onClick={toggleLang}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border glass text-foreground text-xs font-semibold transition-all duration-200 hover:scale-105 hover:border-sky-400/50"
-                            title="Toggle Thai / English"
-                        >
-                            <span className="text-base leading-none">
-                                {lang === 'th' ? '🇹🇭' : '🇺🇸'}
-                            </span>
-                            <span className="font-bold tracking-wide text-sky-400">
-                                {lang.toUpperCase()}
-                            </span>
-                        </button>
+                        <div className="flex items-center p-0.5 rounded-full border border-border glass bg-card/80">
+                            <button
+                                type="button"
+                                onClick={() => setLang('th')}
+                                className={cn(
+                                    'px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-200',
+                                    lang === 'th'
+                                        ? 'bg-sky-500 text-white shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                )}
+                            >
+                                TH
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setLang('en')}
+                                className={cn(
+                                    'px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-200',
+                                    lang === 'en'
+                                        ? 'bg-sky-500 text-white shadow-sm'
+                                        : 'text-muted-foreground hover:text-foreground'
+                                )}
+                            >
+                                EN
+                            </button>
+                        </div>
                     </div>
                 </header>
 

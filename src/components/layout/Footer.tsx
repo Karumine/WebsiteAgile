@@ -38,11 +38,11 @@ export function Footer() {
     ];
 
     const financingProducts = [
-        { name: lang === 'th' ? 'Financing for Drinking Water Production' : 'Financing for Drinking Water Production', href: '/drinking-water-production' },
-        { name: lang === 'th' ? 'Financing for Livestock Farm' : 'Financing for Livestock Farm', href: '/livestock-farm' },
-        { name: lang === 'th' ? 'Financing for Food Processing' : 'Financing for Food Processing', href: '/food-processing' },
-        { name: lang === 'th' ? 'Financing for Biogas Production' : 'Financing for Biogas Production', href: '/biogas-production' },
-        { name: lang === 'th' ? 'Financing for Solar Power Generation' : 'Financing for Solar Power Generation', href: '/solar-power-generation' },
+        { name: lang === 'th' ? 'สินเชื่อโรงงานผลิตน้ำดื่ม' : 'Financing for Drinking Water Production', href: '/drinking-water-production' },
+        { name: lang === 'th' ? 'สินเชื่อฟาร์มปศุสัตว์' : 'Financing for Livestock Farm', href: '/livestock-farm' },
+        { name: lang === 'th' ? 'สินเชื่อโรงงานแปรรูปอาหาร' : 'Financing for Food Processing', href: '/food-processing' },
+        { name: lang === 'th' ? 'สินเชื่อโรงไฟฟ้าก๊าซชีวภาพ' : 'Financing for Biogas Production', href: '/biogas-production' },
+        { name: lang === 'th' ? 'สินเชื่อโรงไฟฟ้าพลังงานแสงอาทิตย์' : 'Financing for Solar Power Generation', href: '/solar-power-generation' },
     ];
 
     return (

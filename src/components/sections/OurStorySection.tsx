@@ -154,6 +154,9 @@ export function OurStorySection() {
                                             alt={card.title}
                                             className="w-full h-full object-cover object-center transform transition-transform duration-700 ease-out group-hover:scale-105"
                                             loading="lazy"
+                                            decoding="async"
+                                            width="900"
+                                            height="562"
                                         />
                                         {/* Subtle Gradient Shadow on Image Bottom */}
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-60 group-hover:opacity-40 transition-opacity" />

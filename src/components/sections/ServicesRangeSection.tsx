@@ -77,6 +77,7 @@ export function ServicesRangeSection() {
     const totalItems = solutions.length;
 
     useEffect(() => {
+        let resizeTimer: ReturnType<typeof setTimeout>;
         const updateVisibleCount = () => {
             if (window.innerWidth < 640) {
                 setVisibleCount(1);
@@ -87,8 +88,15 @@ export function ServicesRangeSection() {
             }
         };
         updateVisibleCount();
-        window.addEventListener('resize', updateVisibleCount);
-        return () => window.removeEventListener('resize', updateVisibleCount);
+        const debouncedResize = () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(updateVisibleCount, 150);
+        };
+        window.addEventListener('resize', debouncedResize);
+        return () => {
+            window.removeEventListener('resize', debouncedResize);
+            clearTimeout(resizeTimer);
+        };
     }, []);
 
     const nextSlide = useCallback(() => {
@@ -99,11 +107,13 @@ export function ServicesRangeSection() {
         setCurrentIndex((prev) => (prev - 1 + totalItems) % totalItems);
     }, [totalItems]);
 
-    // Auto-scroll every 4.5 seconds when not hovered
+    // Auto-scroll every 4.5 seconds when not hovered (pauses when tab hidden)
     useEffect(() => {
         if (isHovered) return;
         const interval = setInterval(() => {
-            nextSlide();
+            if (document.visibilityState === 'visible') {
+                nextSlide();
+            }
         }, 4500);
         return () => clearInterval(interval);
     }, [isHovered, nextSlide]);

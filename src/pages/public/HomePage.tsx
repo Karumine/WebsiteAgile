@@ -1,19 +1,22 @@
+import { lazy, Suspense } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { HeroBanner } from '@/components/sections/HeroBanner';
 import { OurStorySection } from '@/components/sections/OurStorySection';
-import { ServicesRangeSection } from '@/components/sections/ServicesRangeSection';
-import { WhatWeDoSection } from '@/components/sections/WhatWeDoSection';
-import { KeyFinancingServicesSection } from '@/components/sections/KeyFinancingServicesSection';
-import { CustomerEligibilitySection } from '@/components/sections/CustomerEligibilitySection';
-import { OurProjectsSection } from '@/components/sections/OurProjectsSection';
-import { OurPartnerSection } from '@/components/sections/OurPartnerSection';
-import { LatestNewsSection } from '@/components/sections/LatestNewsSection';
-import { ContactSection } from '@/components/sections/ContactSection';
 import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+// Below-the-fold sections — lazy loaded to reduce initial bundle
+const ServicesRangeSection = lazy(() => import('@/components/sections/ServicesRangeSection').then(m => ({ default: m.ServicesRangeSection })));
+const WhatWeDoSection = lazy(() => import('@/components/sections/WhatWeDoSection').then(m => ({ default: m.WhatWeDoSection })));
+const KeyFinancingServicesSection = lazy(() => import('@/components/sections/KeyFinancingServicesSection').then(m => ({ default: m.KeyFinancingServicesSection })));
+const CustomerEligibilitySection = lazy(() => import('@/components/sections/CustomerEligibilitySection').then(m => ({ default: m.CustomerEligibilitySection })));
+const OurProjectsSection = lazy(() => import('@/components/sections/OurProjectsSection').then(m => ({ default: m.OurProjectsSection })));
+const OurPartnerSection = lazy(() => import('@/components/sections/OurPartnerSection').then(m => ({ default: m.OurPartnerSection })));
+const LatestNewsSection = lazy(() => import('@/components/sections/LatestNewsSection').then(m => ({ default: m.LatestNewsSection })));
+const ContactSection = lazy(() => import('@/components/sections/ContactSection').then(m => ({ default: m.ContactSection })));
 
 export function HomePage() {
     const { lang } = useLanguage();
@@ -50,29 +53,32 @@ export function HomePage() {
                 {/* 2. OUR STORY (เรื่องราวของเรา - 3 Pillars) */}
                 <OurStorySection />
 
-                {/* 3. OUR FINANCING SERVICES (โซลูชั่นทางการเงินของเราในอุตสาหกรรม - 3 Cards Carousel) */}
-                <ServicesRangeSection />
+                {/* Below-the-fold sections — progressively loaded */}
+                <Suspense fallback={<div className="min-h-[200px]" />}>
+                    {/* 3. OUR FINANCING SERVICES */}
+                    <ServicesRangeSection />
 
-                {/* 4. WHAT WE DO (ก้าวแรกของการเติบโต / ABOUT AGILE ASSETS / CLOSE • CARING • FLEXIBLE) */}
-                <WhatWeDoSection />
+                    {/* 4. WHAT WE DO */}
+                    <WhatWeDoSection />
 
-                {/* 5. KEY FINANCING SERVICES (บริการสินเชื่อเช่าซื้อเครื่องจักรอุตสาหกรรม - 3 Machinery Carousel) */}
-                <KeyFinancingServicesSection />
+                    {/* 5. KEY FINANCING SERVICES */}
+                    <KeyFinancingServicesSection />
 
-                {/* 6. CUSTOMER ELIGIBILITY CRITERIAS (เกณฑ์การเป็นลูกค้า + สถิติ 40 โรงงาน / 50 สัญญา / 400 MB) */}
-                <CustomerEligibilitySection />
+                    {/* 6. CUSTOMER ELIGIBILITY CRITERIAS */}
+                    <CustomerEligibilitySection />
 
-                {/* 7. OUR PROJECTS (โครงการของเรา - 12 Photographic Activity Grid) */}
-                <OurProjectsSection />
+                    {/* 7. OUR PROJECTS */}
+                    <OurProjectsSection />
 
-                {/* 8. OUR PARTNER & MACHINE (คู่ค้าและเครื่องจักรที่เราให้บริการ - 4 Brand Carousel) */}
-                <OurPartnerSection />
+                    {/* 8. OUR PARTNER & MACHINE */}
+                    <OurPartnerSection />
 
-                {/* 9. LATEST NEWS & ACTIVITYS (ข่าวสารและกิจกรรมของบริษัท) */}
-                <LatestNewsSection />
+                    {/* 9. LATEST NEWS & ACTIVITYS */}
+                    <LatestNewsSection />
 
-                {/* 10. BUSINESS PARTNERSHIP INQUIRIES (Consultation Form) */}
-                <ContactSection />
+                    {/* 10. BUSINESS PARTNERSHIP INQUIRIES */}
+                    <ContactSection />
+                </Suspense>
             </main>
 
             {/* Footer */}

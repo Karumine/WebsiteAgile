@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ShieldCheck, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -7,6 +8,7 @@ const COOKIE_CONSENT_KEY = 'agile_assets_cookie_consent';
 export function CookieConsent() {
     const [visible, setVisible] = useState(false);
     const { t } = useLanguage();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const consent = localStorage.getItem(COOKIE_CONSENT_KEY);
@@ -31,6 +33,11 @@ export function CookieConsent() {
         setVisible(false);
     };
 
+    const handleOpenPolicy = () => {
+        navigate('/cookie-policy');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     if (!visible) return null;
 
     return (
@@ -45,11 +52,8 @@ export function CookieConsent() {
                         <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-200 leading-relaxed font-sans">
                             {t('cookie.text')}{' '}
                             <button
-                                onClick={() => {
-                                    const about = document.querySelector('#about');
-                                    about?.scrollIntoView({ behavior: 'smooth' });
-                                }}
-                                className="text-sky-600 dark:text-sky-400 underline hover:text-sky-700 dark:hover:text-sky-300 font-bold transition-colors inline ml-1"
+                                onClick={handleOpenPolicy}
+                                className="text-sky-600 dark:text-sky-400 underline hover:text-sky-700 dark:hover:text-sky-300 font-bold transition-colors inline ml-1 cursor-pointer"
                             >
                                 {t('cookie.privacyLink')}
                             </button>
@@ -73,11 +77,8 @@ export function CookieConsent() {
                         </button>
 
                         <button
-                            onClick={() => {
-                                const about = document.querySelector('#about');
-                                about?.scrollIntoView({ behavior: 'smooth' });
-                            }}
-                            className="px-3.5 py-2 rounded-xl text-sky-600 dark:text-sky-300 hover:text-sky-800 dark:hover:text-white text-xs font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-all duration-200"
+                            onClick={handleOpenPolicy}
+                            className="px-3.5 py-2 rounded-xl text-sky-600 dark:text-sky-300 hover:text-sky-800 dark:hover:text-white text-xs font-semibold hover:bg-slate-100 dark:hover:bg-white/10 transition-all duration-200 cursor-pointer"
                         >
                             {t('cookie.readPolicy')}
                         </button>

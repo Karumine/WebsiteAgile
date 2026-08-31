@@ -4,6 +4,9 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 
+// Cached formatter instance (avoids re-creation on every call)
+const thCurrencyFormatter = new Intl.NumberFormat('th-TH', { maximumFractionDigits: 0 });
+
 export function LoanCalculatorSection() {
     const { t, lang } = useLanguage();
     const { theme } = useTheme();
@@ -23,7 +26,7 @@ export function LoanCalculatorSection() {
     const monthlyPayment = Math.round(totalPayment / months);
 
     const formatCurrency = (val: number) => {
-        return new Intl.NumberFormat('th-TH', { maximumFractionDigits: 0 }).format(val);
+        return thCurrencyFormatter.format(val);
     };
 
     const presetAmounts = [1000000, 3000000, 5000000, 10000000, 20000000];

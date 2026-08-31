@@ -56,18 +56,22 @@ export function LoginPage() {
             {/* Top Right Header Controls (Theme & Language) */}
             <div className="absolute top-4 right-4 z-20 flex items-center gap-3">
                 <ThemeToggle />
-                <button
-                    onClick={toggleLang}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-border glass text-foreground text-xs font-semibold transition-all duration-200 hover:scale-105 hover:border-sky-400/50 shadow-md"
-                    title="Toggle Thai / English"
-                >
-                    <span className="text-base leading-none">
-                        {lang === 'th' ? '🇹🇭' : '🇺🇸'}
-                    </span>
-                    <span className="font-bold tracking-wide text-sky-400">
-                        {lang.toUpperCase()}
-                    </span>
-                </button>
+                <div className="flex items-center p-0.5 rounded-full border border-border glass bg-card/80 shadow-md">
+                    <button
+                        type="button"
+                        onClick={() => setLang('th')}
+                        className={lang === 'th' ? 'px-2.5 py-1 rounded-full text-xs font-bold bg-sky-500 text-white shadow-sm' : 'px-2.5 py-1 rounded-full text-xs font-bold text-muted-foreground hover:text-foreground transition-colors'}
+                    >
+                        TH
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setLang('en')}
+                        className={lang === 'en' ? 'px-2.5 py-1 rounded-full text-xs font-bold bg-sky-500 text-white shadow-sm' : 'px-2.5 py-1 rounded-full text-xs font-bold text-muted-foreground hover:text-foreground transition-colors'}
+                    >
+                        EN
+                    </button>
+                </div>
             </div>
             {/* Background effects */}
             <div className="absolute top-20 right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl" />

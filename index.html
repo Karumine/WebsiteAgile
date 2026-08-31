@@ -2,7 +2,7 @@
 <html lang="th">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_150/https://agileassets.co.th/wp-content/uploads/2022/02/Logo-Agile-512Px-150x150.png" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="Agile Assets — Premier equipment financing and bespoke capital solutions empowering enterprises with speed, transparency, and ESG-aligned growth." />
     <title>Agile Assets | Growth – Good Capital</title>
@@ -10,12 +10,18 @@
     <!-- DNS Prefetch & Preconnect for External Resources -->
     <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
     <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-    <link rel="dns-prefetch" href="https://sp-ao.shortpixel.ai" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     
-    <!-- Optimized Google Web Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <!-- Preload LCP Hero Image -->
+    <link rel="preload" as="image" type="image/webp" href="/Hero-Banner-Website-3-scaled.webp" fetchpriority="high" />
+
+    <!-- Non-render-blocking Google Fonts -->
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Prompt:wght@400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Prompt:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700&family=Prompt:wght@400;500;600;700&display=swap" />
+    </noscript>
   </head>
   <body>
     <div id="root"></div>

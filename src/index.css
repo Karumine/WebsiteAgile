@@ -351,3 +351,31 @@
   color: var(--color-muted-foreground);
   margin-bottom: 0.75em;
 }
+
+/* ─── Accessibility: Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-pulse-glow,
+  .animate-fade-in,
+  .animate-slide-up {
+    animation: none !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Mobile: Reduce GPU-heavy backdrop-filter blur ─── */
+@media (max-width: 768px) {
+  .glass,
+  .glass-card {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}

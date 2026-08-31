@@ -1,15 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronUp, MessageSquare } from 'lucide-react';
 
 export function QuickContactWidget() {
     const [showTopBtn, setShowTopBtn] = useState(false);
+    const rafRef = useRef<number>(0);
 
     useEffect(() => {
         const handleScroll = () => {
-            setShowTopBtn(window.scrollY > 400);
+            if (rafRef.current) return;
+            rafRef.current = requestAnimationFrame(() => {
+                setShowTopBtn(window.scrollY > 400);
+                rafRef.current = 0;
+            });
         };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        };
     }, []);
 
     const scrollToTop = () => {

@@ -1,8 +1,9 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react';
 import type { SiteSettings } from '@/types';
 import defaultSettingsData from '@/data/defaultSettings.json';
 
 const STORAGE_KEY = 'agile_assets_settings';
+const SAVE_DEBOUNCE_MS = 500;
 
 interface SiteSettingsContextType {
     settings: SiteSettings;
@@ -26,9 +27,17 @@ function loadSettings(): SiteSettings {
 
 export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     const [settings, setSettings] = useState<SiteSettings>(loadSettings);
+    const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
+    // Debounced localStorage write
     useEffect(() => {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+        if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = setTimeout(() => {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+        }, SAVE_DEBOUNCE_MS);
+        return () => {
+            if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+        };
     }, [settings]);
 
     const updateSettings = (newSettings: Partial<SiteSettings>) => {

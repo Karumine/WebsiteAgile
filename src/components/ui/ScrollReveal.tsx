@@ -12,6 +12,44 @@ interface ScrollRevealProps {
     once?: boolean;
 }
 
+// ─── Shared IntersectionObserver (single observer pattern) ───
+// Instead of creating one observer per ScrollReveal instance, we share a single
+// observer for all elements with the same threshold. This reduces O(n) observers → O(1).
+type ObserverCallback = (isIntersecting: boolean) => void;
+
+const observerMap = new Map<string, IntersectionObserver>();
+const callbackMap = new Map<Element, ObserverCallback>();
+
+function getSharedObserver(threshold: number, rootMargin: string): IntersectionObserver {
+    const key = `${threshold}|${rootMargin}`;
+    let observer = observerMap.get(key);
+    if (!observer) {
+        observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    const cb = callbackMap.get(entry.target);
+                    if (cb) {
+                        cb(entry.isIntersecting);
+                    }
+                });
+            },
+            { threshold, rootMargin }
+        );
+        observerMap.set(key, observer);
+    }
+    return observer;
+}
+
+function observeElement(element: Element, threshold: number, rootMargin: string, callback: ObserverCallback): () => void {
+    const observer = getSharedObserver(threshold, rootMargin);
+    callbackMap.set(element, callback);
+    observer.observe(element);
+    return () => {
+        observer.unobserve(element);
+        callbackMap.delete(element);
+    };
+}
+
 export const ScrollReveal: React.FC<ScrollRevealProps> = ({
     children,
     animation = 'fade-up',
@@ -23,33 +61,35 @@ export const ScrollReveal: React.FC<ScrollRevealProps> = ({
 }) => {
     const [isVisible, setIsVisible] = useState(false);
     const elementRef = useRef<HTMLDivElement>(null);
+    const unobserveRef = useRef<(() => void) | null>(null);
 
     useEffect(() => {
-        const observer = new IntersectionObserver(
-            ([entry]) => {
-                if (entry.isIntersecting) {
+        const currentEl = elementRef.current;
+        if (!currentEl) return;
+
+        const rootMargin = '0px 0px -40px 0px';
+
+        unobserveRef.current = observeElement(
+            currentEl,
+            threshold,
+            rootMargin,
+            (isIntersecting) => {
+                if (isIntersecting) {
                     setIsVisible(true);
-                    if (once && elementRef.current) {
-                        observer.unobserve(elementRef.current);
+                    if (once && unobserveRef.current) {
+                        unobserveRef.current();
+                        unobserveRef.current = null;
                     }
                 } else if (!once) {
                     setIsVisible(false);
                 }
-            },
-            {
-                threshold,
-                rootMargin: '0px 0px -40px 0px', // Triggers slightly before element reaches bottom
             }
         );
 
-        const currentEl = elementRef.current;
-        if (currentEl) {
-            observer.observe(currentEl);
-        }
-
         return () => {
-            if (currentEl) {
-                observer.unobserve(currentEl);
+            if (unobserveRef.current) {
+                unobserveRef.current();
+                unobserveRef.current = null;
             }
         };
     }, [threshold, once]);

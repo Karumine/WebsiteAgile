@@ -8,8 +8,10 @@ import { LanguageProvider } from '@/contexts/LanguageContext';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { lazy, Suspense } from 'react';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { AdminLayout } from '@/components/layout/AdminLayout';
 import { ScrollToTop } from '@/components/layout/ScrollToTop';
+
+// Lazy loaded admin layout (public users never need this)
+const AdminLayout = lazy(() => import('@/components/layout/AdminLayout').then(m => ({ default: m.AdminLayout })));
 
 // Lazy loaded pages
 const HomePage = lazy(() => import('@/pages/public/HomePage').then(m => ({ default: m.HomePage })));
@@ -34,6 +36,7 @@ const FaqPage = lazy(() => import('@/pages/public/FaqPage').then(m => ({ default
 const ContactPage = lazy(() => import('@/pages/public/ContactPage').then(m => ({ default: m.ContactPage })));
 const LeasingApplicationPage = lazy(() => import('@/pages/public/LeasingApplicationPage').then(m => ({ default: m.LeasingApplicationPage })));
 const AssetForSalePage = lazy(() => import('@/pages/public/AssetForSalePage').then(m => ({ default: m.AssetForSalePage })));
+const CookiePolicyPage = lazy(() => import('@/pages/public/CookiePolicyPage').then(m => ({ default: m.CookiePolicyPage })));
 const LoginPage = lazy(() => import('@/pages/admin/LoginPage').then(m => ({ default: m.LoginPage })));
 const DashboardPage = lazy(() => import('@/pages/admin/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const RatesEditor = lazy(() => import('@/pages/admin/RatesEditor').then(m => ({ default: m.RatesEditor })));
@@ -131,6 +134,12 @@ export default function App() {
                       <Route path="/assets-for-sale" element={<AssetForSalePage />} />
                       <Route path="/asset-for-sale-en" element={<AssetForSalePage />} />
                       <Route path="/en/asset-for-sale-en" element={<AssetForSalePage />} />
+
+                      {/* Cookie & Privacy Policy */}
+                      <Route path="/cookie-policy" element={<CookiePolicyPage />} />
+                      <Route path="/cookies-policy" element={<CookiePolicyPage />} />
+                      <Route path="/privacy-policy" element={<CookiePolicyPage />} />
+                      <Route path="/en/cookie-policy" element={<CookiePolicyPage />} />
 
                       {/* Hidden Admin Login */}
                       <Route path="/management-portal" element={<LoginPage />} />

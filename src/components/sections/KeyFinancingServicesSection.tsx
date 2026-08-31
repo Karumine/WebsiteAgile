@@ -57,6 +57,7 @@ export function KeyFinancingServicesSection() {
     const totalItems = machines.length;
 
     useEffect(() => {
+        let resizeTimer: ReturnType<typeof setTimeout>;
         const updateVisibleCount = () => {
             if (window.innerWidth < 640) {
                 setVisibleCount(1);
@@ -67,8 +68,15 @@ export function KeyFinancingServicesSection() {
             }
         };
         updateVisibleCount();
-        window.addEventListener('resize', updateVisibleCount);
-        return () => window.removeEventListener('resize', updateVisibleCount);
+        const debouncedResize = () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(updateVisibleCount, 150);
+        };
+        window.addEventListener('resize', debouncedResize);
+        return () => {
+            window.removeEventListener('resize', debouncedResize);
+            clearTimeout(resizeTimer);
+        };
     }, []);
 
     const nextSlide = useCallback(() => {
@@ -79,11 +87,13 @@ export function KeyFinancingServicesSection() {
         setCurrentIndex((prev) => (prev - 1 + totalItems) % totalItems);
     }, [totalItems]);
 
-    // Auto-scroll every 4.5 seconds
+    // Auto-scroll every 4.5 seconds (pauses when tab is hidden or hovered)
     useEffect(() => {
         if (isHovered) return;
         const interval = setInterval(() => {
-            nextSlide();
+            if (document.visibilityState === 'visible') {
+                nextSlide();
+            }
         }, 4500);
         return () => clearInterval(interval);
     }, [isHovered, nextSlide]);

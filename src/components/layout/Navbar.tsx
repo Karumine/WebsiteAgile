@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
     Menu, X, ChevronDown, ChevronRight, Sparkles, 
@@ -10,6 +10,74 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { AgileAssetsLogo } from '@/components/ui/AgileAssetsLogo';
 
+// ─── Static menu data (extracted outside component to avoid re-creation) ───
+const EQUIPMENT_CATEGORIES = [
+    {
+        id: 'industry' as const,
+        titleKey: 'menu.industrySolutions',
+        icon: Factory,
+        items: [
+            { id: 'drinking-water', labelKey: 'menu.drinkingWater', icon: Droplets, href: '/drinking-water-production' },
+            { id: 'livestock-farm', labelKey: 'menu.livestockFarm', icon: Wheat, href: '/livestock-farm' },
+            { id: 'food-processing', labelKey: 'menu.foodProcessing', icon: Factory, href: '/food-processing' },
+            { id: 'biogas-production', labelKey: 'menu.biogasProduction', icon: Flame, href: '/biogas-production' },
+            { id: 'solar-power', labelKey: 'menu.solarPower', icon: Sun, href: '/solar-power-generation' },
+        ]
+    },
+    {
+        id: 'industrial' as const,
+        titleKey: 'menu.industrialEquipment',
+        icon: Boxes,
+        items: [
+            { id: 'chiller', labelKey: 'menu.chiller', icon: Snowflake, href: '/chiller' },
+            { id: 'injection-molding', labelKey: 'menu.injectionMolding', icon: Cog, href: '/injection-molding-machine' },
+            { id: 'generator-set', labelKey: 'menu.generatorSet', icon: Zap, href: '/generator-set' },
+        ]
+    }
+];
+
+const PRESS_MENU = [
+    { icon: Sparkles, labelKey: 'menu.projectsActivity', href: '/project' },
+    { icon: Award, labelKey: 'menu.successStory', href: '/success-story' },
+    { icon: BookOpen, labelKey: 'menu.knowledgeContents', href: '/knowledge' },
+    { icon: Newspaper, labelKey: 'menu.newsUpdate', href: '/news-update' },
+    { icon: Mail, labelKey: 'menu.newsletter', href: '/newsletter' },
+];
+
+const ABOUT_MENU = [
+    { icon: Leaf, labelKey: 'menu.sustainabilityCampaign', href: '/sustainability' },
+    { icon: Calculator, labelKey: 'menu.financingCalculator', href: '/calculator' },
+    { icon: Percent, labelKey: 'menu.interestRateConverter', href: '/interest-rate-conversion' },
+    { icon: HelpCircle, labelKey: 'menu.faq', href: '/faq' },
+    { icon: Phone, labelKey: 'menu.contactUs', href: '/contact' },
+    { icon: Briefcase, labelKey: 'menu.workForUs', href: '/#contact' },
+];
+
+const EQUIPMENT_PATHS = new Set([
+    '/drinking-water-production', '/livestock-farm', '/food-processing',
+    '/biogas-production', '/solar-power-generation', '/solar-power-generation-en',
+    '/en/solar-power-generation-en', '/chiller', '/injection-molding-machine', '/generator-set',
+]);
+
+const INVESTOR_PATHS = new Set(['/investor-relations', '/en/investor-relations']);
+
+const PRESS_PATHS = new Set([
+    '/project', '/project-activity', '/success-story',
+    '/knowledge', '/news-update', '/newsletter',
+]);
+
+const ABOUT_PATHS = new Set([
+    '/about', '/about-us', '/en/about-us', '/sustainability',
+    '/en/sustainability-2', '/calculator', '/interest-rate-conversion',
+    '/interest-rate-conversion-2', '/en/interest-rate-conversion-2',
+    '/faq', '/faq-2', '/frequently-asked-questions', '/en/faq-2',
+    '/contact', '/contact-us', '/contact-2', '/en/contact-2',
+]);
+
+const ASSET_PATHS = new Set([
+    '/used-machine', '/used-machine-2', '/asset-for-sale',
+    '/assets-for-sale', '/asset-for-sale-en', '/en/asset-for-sale-en',
+]);
 export function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
@@ -20,16 +88,25 @@ export function Navbar() {
     const { lang, setLang, t } = useLanguage();
     const navigate = useNavigate();
     const location = useLocation();
+    const rafRef = useRef<number>(0);
 
+    // Throttled scroll handler using requestAnimationFrame
     useEffect(() => {
         const handleScroll = () => {
-            setScrolled(window.scrollY > 20);
+            if (rafRef.current) return;
+            rafRef.current = requestAnimationFrame(() => {
+                setScrolled(window.scrollY > 20);
+                rafRef.current = 0;
+            });
         };
-        window.addEventListener('scroll', handleScroll);
-        return () => window.removeEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => {
+            window.removeEventListener('scroll', handleScroll);
+            if (rafRef.current) cancelAnimationFrame(rafRef.current);
+        };
     }, []);
 
-    const handleNavClick = (href: string) => {
+    const handleNavClick = useCallback((href: string) => {
         setIsOpen(false);
         setActiveDropdown(null);
         if (href.startsWith('/')) {
@@ -52,111 +129,20 @@ export function Navbar() {
                 }
             }
         }
-    };
+    }, [navigate, location.pathname]);
 
-    const toggleLang = () => {
+    const toggleLang = useCallback(() => {
         setLang(lang === 'th' ? 'en' : 'th');
-    };
+    }, [lang, setLang]);
 
-    const equipmentCategories = [
-        {
-            id: 'industry' as const,
-            titleKey: 'menu.industrySolutions',
-            icon: Factory,
-            items: [
-                { id: 'drinking-water', labelKey: 'menu.drinkingWater', icon: Droplets, href: '/drinking-water-production' },
-                { id: 'livestock-farm', labelKey: 'menu.livestockFarm', icon: Wheat, href: '/livestock-farm' },
-                { id: 'food-processing', labelKey: 'menu.foodProcessing', icon: Factory, href: '/food-processing' },
-                { id: 'biogas-production', labelKey: 'menu.biogasProduction', icon: Flame, href: '/biogas-production' },
-                { id: 'solar-power', labelKey: 'menu.solarPower', icon: Sun, href: '/solar-power-generation' },
-            ]
-        },
-        {
-            id: 'industrial' as const,
-            titleKey: 'menu.industrialEquipment',
-            icon: Boxes,
-            items: [
-                { id: 'chiller', labelKey: 'menu.chiller', icon: Snowflake, href: '/chiller' },
-                { id: 'injection-molding', labelKey: 'menu.injectionMolding', icon: Cog, href: '/injection-molding-machine' },
-                { id: 'generator-set', labelKey: 'menu.generatorSet', icon: Zap, href: '/generator-set' },
-            ]
-        }
-    ];
+    const currentSubItems = EQUIPMENT_CATEGORIES.find(c => c.id === activeSubMenu)?.items || EQUIPMENT_CATEGORIES[0].items;
 
-    const pressMenu = [
-        { icon: Sparkles, labelKey: 'menu.projectsActivity', href: '/project' },
-        { icon: Award, labelKey: 'menu.successStory', href: '/success-story' },
-        { icon: BookOpen, labelKey: 'menu.knowledgeContents', href: '/knowledge' },
-        { icon: Newspaper, labelKey: 'menu.newsUpdate', href: '/news-update' },
-        { icon: Mail, labelKey: 'menu.newsletter', href: '/newsletter' },
-    ];
-
-    const aboutMenu = [
-        { icon: Leaf, labelKey: 'menu.sustainabilityCampaign', href: '/sustainability' },
-        { icon: Calculator, labelKey: 'menu.financingCalculator', href: '/calculator' },
-        { icon: Percent, labelKey: 'menu.interestRateConverter', href: '/interest-rate-conversion' },
-        { icon: HelpCircle, labelKey: 'menu.faq', href: '/faq' },
-        { icon: Phone, labelKey: 'menu.contactUs', href: '/contact' },
-        { icon: Briefcase, labelKey: 'menu.workForUs', href: '/#contact' },
-    ];
-
-    const currentSubItems = equipmentCategories.find(c => c.id === activeSubMenu)?.items || equipmentCategories[0].items;
-
-    const isEquipmentActive = [
-        '/drinking-water-production',
-        '/livestock-farm',
-        '/food-processing',
-        '/biogas-production',
-        '/solar-power-generation',
-        '/solar-power-generation-en',
-        '/en/solar-power-generation-en',
-        '/chiller',
-        '/injection-molding-machine',
-        '/generator-set',
-    ].includes(location.pathname);
-
-    const isInvestorActive = [
-        '/investor-relations',
-        '/en/investor-relations',
-    ].includes(location.pathname);
-
-    const isPressActive = [
-        '/project',
-        '/project-activity',
-        '/success-story',
-        '/knowledge',
-        '/news-update',
-        '/newsletter',
-    ].includes(location.pathname);
-
-    const isAboutActive = [
-        '/about',
-        '/about-us',
-        '/en/about-us',
-        '/sustainability',
-        '/en/sustainability-2',
-        '/calculator',
-        '/interest-rate-conversion',
-        '/interest-rate-conversion-2',
-        '/en/interest-rate-conversion-2',
-        '/faq',
-        '/faq-2',
-        '/frequently-asked-questions',
-        '/en/faq-2',
-        '/contact',
-        '/contact-us',
-        '/contact-2',
-        '/en/contact-2',
-    ].includes(location.pathname);
-
-    const isAssetActive = [
-        '/used-machine',
-        '/used-machine-2',
-        '/asset-for-sale',
-        '/assets-for-sale',
-        '/asset-for-sale-en',
-        '/en/asset-for-sale-en',
-    ].includes(location.pathname);
+    // Memoized active state checks
+    const isEquipmentActive = useMemo(() => EQUIPMENT_PATHS.has(location.pathname), [location.pathname]);
+    const isInvestorActive = useMemo(() => INVESTOR_PATHS.has(location.pathname), [location.pathname]);
+    const isPressActive = useMemo(() => PRESS_PATHS.has(location.pathname), [location.pathname]);
+    const isAboutActive = useMemo(() => ABOUT_PATHS.has(location.pathname), [location.pathname]);
+    const isAssetActive = useMemo(() => ASSET_PATHS.has(location.pathname), [location.pathname]);
 
     return (
         <header
@@ -221,7 +207,7 @@ export function Navbar() {
                                                     {t('nav.equipmentFinancing')}
                                                 </p>
                                             </div>
-                                            {equipmentCategories.map((cat) => (
+                                            {EQUIPMENT_CATEGORIES.map((cat) => (
                                                 <button
                                                     key={cat.id}
                                                     onMouseEnter={() => setActiveSubMenu(cat.id)}
@@ -249,7 +235,7 @@ export function Navbar() {
                                         <div className="w-72 space-y-1 p-1">
                                             <div className="px-3 py-2 border-b border-border/60 mb-1">
                                                 <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                                                    {t(equipmentCategories.find(c => c.id === activeSubMenu)?.titleKey || 'menu.industrySolutions')}
+                                                    {t(EQUIPMENT_CATEGORIES.find(c => c.id === activeSubMenu)?.titleKey || 'menu.industrySolutions')}
                                                 </p>
                                             </div>
                                             {currentSubItems.map((item) => {
@@ -332,7 +318,7 @@ export function Navbar() {
                             {activeDropdown === 'press' && (
                                 <div className="absolute top-full left-0 w-60 pt-2 animate-fade-in">
                                     <div className="glass rounded-2xl p-2 shadow-2xl border border-sky-500/20 bg-card/95 backdrop-blur-2xl space-y-1">
-                                        {pressMenu.map((item) => {
+                                        {PRESS_MENU.map((item) => {
                                             const isSubActive = location.pathname === item.href;
                                             return (
                                                 <button
@@ -382,7 +368,7 @@ export function Navbar() {
                             {activeDropdown === 'about' && (
                                 <div className="absolute top-full left-0 w-64 pt-2 animate-fade-in">
                                     <div className="glass rounded-2xl p-2 shadow-2xl border border-sky-500/20 bg-card/95 backdrop-blur-2xl space-y-1">
-                                        {aboutMenu.map((item) => {
+                                        {ABOUT_MENU.map((item) => {
                                             const isSubActive = location.pathname === item.href;
                                             return (
                                                 <button
@@ -429,43 +415,92 @@ export function Navbar() {
                         {/* Theme Toggle */}
                         <ThemeToggle />
 
-                        {/* Flag-based Language Switcher */}
-                        <button
-                            onClick={toggleLang}
+                        {/* Segmented Language Switcher [TH | EN] */}
+                        <div
                             className={cn(
-                                'flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-semibold transition-all duration-200 hover:scale-105',
+                                'flex items-center p-0.5 rounded-full border transition-all duration-200',
                                 scrolled
-                                    ? 'glass border-border hover:border-sky-400/50 text-foreground'
-                                    : 'bg-black/30 border-white/20 hover:border-sky-400/60 text-white backdrop-blur-md'
+                                    ? 'glass border-border bg-card/80'
+                                    : 'bg-black/40 border-white/20 backdrop-blur-md'
                             )}
-                            title="Toggle Thai / English"
                         >
-                            <span className="text-base leading-none">
-                                {lang === 'th' ? '🇹🇭' : '🇺🇸'}
-                            </span>
-                            <span className="font-bold tracking-wide text-sky-400">
-                                {lang.toUpperCase()}
-                            </span>
-                        </button>
+                            <button
+                                type="button"
+                                onClick={() => setLang('th')}
+                                className={cn(
+                                    'px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-200',
+                                    lang === 'th'
+                                        ? 'bg-sky-500 text-white shadow-sm shadow-sky-500/40'
+                                        : scrolled
+                                            ? 'text-muted-foreground hover:text-foreground'
+                                            : 'text-white/60 hover:text-white'
+                                )}
+                                title="ภาษาไทย"
+                            >
+                                TH
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setLang('en')}
+                                className={cn(
+                                    'px-2.5 py-1 rounded-full text-xs font-bold transition-all duration-200',
+                                    lang === 'en'
+                                        ? 'bg-sky-500 text-white shadow-sm shadow-sky-500/40'
+                                        : scrolled
+                                            ? 'text-muted-foreground hover:text-foreground'
+                                            : 'text-white/60 hover:text-white'
+                                )}
+                                title="English"
+                            >
+                                EN
+                            </button>
+                        </div>
                     </div>
 
                     {/* Mobile Menu Trigger & Controls (Visible on < xl only) */}
                     <div className="flex items-center gap-2 xl:hidden">
                         <ThemeToggle />
 
-                        <button
-                            onClick={toggleLang}
+                        {/* Mobile Segmented Language Switcher [TH | EN] */}
+                        <div
                             className={cn(
-                                'flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-xs font-semibold transition-all duration-200',
+                                'flex items-center p-0.5 rounded-full border transition-all duration-200',
                                 scrolled
-                                    ? 'glass border-border text-foreground'
-                                    : 'bg-black/30 border-white/20 text-white backdrop-blur-md'
+                                    ? 'glass border-border bg-card/80'
+                                    : 'bg-black/40 border-white/20 backdrop-blur-md'
                             )}
-                            title="Toggle Thai / English"
                         >
-                            <span className="text-sm leading-none">{lang === 'th' ? '🇹🇭' : '🇺🇸'}</span>
-                            <span className="font-bold text-sky-400">{lang.toUpperCase()}</span>
-                        </button>
+                            <button
+                                type="button"
+                                onClick={() => setLang('th')}
+                                className={cn(
+                                    'px-2 py-0.5 rounded-full text-[11px] font-bold transition-all duration-200',
+                                    lang === 'th'
+                                        ? 'bg-sky-500 text-white shadow-sm'
+                                        : scrolled
+                                            ? 'text-muted-foreground hover:text-foreground'
+                                            : 'text-white/60 hover:text-white'
+                                )}
+                                title="ภาษาไทย"
+                            >
+                                TH
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setLang('en')}
+                                className={cn(
+                                    'px-2 py-0.5 rounded-full text-[11px] font-bold transition-all duration-200',
+                                    lang === 'en'
+                                        ? 'bg-sky-500 text-white shadow-sm'
+                                        : scrolled
+                                            ? 'text-muted-foreground hover:text-foreground'
+                                            : 'text-white/60 hover:text-white'
+                                )}
+                                title="English"
+                            >
+                                EN
+                            </button>
+                        </div>
 
                         <button
                             onClick={() => setIsOpen(!isOpen)}
@@ -507,7 +542,7 @@ export function Navbar() {
                         </button>
                         {mobileOpenMenu === 'equipment' && (
                             <div className="pl-3 pr-2 py-1 space-y-2">
-                                {equipmentCategories.map((cat) => (
+                                {EQUIPMENT_CATEGORIES.map((cat) => (
                                     <div key={cat.id} className="border-l-2 border-sky-500/30 pl-3 py-1 space-y-1">
                                         <button
                                             onClick={() => setMobileOpenSubMenu(mobileOpenSubMenu === cat.id ? null : cat.id)}
@@ -576,7 +611,7 @@ export function Navbar() {
                         </button>
                         {mobileOpenMenu === 'press' && (
                             <div className="pl-4 pr-2 py-2 space-y-1 bg-sky-500/5 rounded-xl mt-1">
-                                {pressMenu.map((item) => {
+                                {PRESS_MENU.map((item) => {
                                     const isSubActive = location.pathname === item.href;
                                     return (
                                         <button
@@ -614,7 +649,7 @@ export function Navbar() {
                         </button>
                         {mobileOpenMenu === 'about' && (
                             <div className="pl-4 pr-2 py-2 space-y-1 bg-sky-500/5 rounded-xl mt-1">
-                                {aboutMenu.map((item) => {
+                                {ABOUT_MENU.map((item) => {
                                     const isSubActive = location.pathname === item.href;
                                     return (
                                         <button

@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
+Disallow: /management-portal/
 
-Sitemap: https://agileassets.com/sitemap.xml
+Sitemap: https://agileassets.co.th/sitemap.xml
