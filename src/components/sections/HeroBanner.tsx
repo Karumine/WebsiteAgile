@@ -6,6 +6,7 @@ import { AgileAssetsLogo } from '@/components/ui/AgileAssetsLogo';
 
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.webp';
 import heroBgMobile from '@/assets/Hero-Banner-Website-3-mobile.webp';
+import heroBgPng from '@/assets/Hero-Banner-Website-3-scaled.png';
 
 export function HeroBanner() {
     const { t } = useLanguage();
@@ -19,18 +20,19 @@ export function HeroBanner() {
 
     return (
         <section id="home" className="relative min-h-[96vh] flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 pb-12 sm:pb-16">
-            {/* High-Resolution Tree of Growth Background */}
+            {/* High-Resolution Tree of Growth Background with PNG Fallback */}
             <div className="absolute inset-0 z-0">
-                <img
-                    src={heroBg}
-                    srcSet={`${heroBgMobile} 800w, ${heroBg} 1920w`}
-                    sizes="100vw"
-                    alt="Agile Assets Growth Tree"
-                    className="w-full h-full object-cover object-center scale-105 animate-fade-in"
-                    loading="eager"
-                    fetchPriority="high"
-                    decoding="async"
-                />
+                <picture className="w-full h-full block">
+                    <source srcSet={`${heroBgMobile} 800w, ${heroBg} 1920w`} type="image/webp" />
+                    <img
+                        src={heroBgPng}
+                        alt="Agile Assets Growth Tree"
+                        className="w-full h-full object-cover object-center scale-105 animate-fade-in"
+                        loading="eager"
+                        fetchPriority="high"
+                        decoding="async"
+                    />
+                </picture>
                 {/* Dynamic Vignette & Ambient Light Overlays */}
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
                 <div className="absolute inset-0 bg-radial-at-c from-sky-500/10 via-transparent to-black/80" />
