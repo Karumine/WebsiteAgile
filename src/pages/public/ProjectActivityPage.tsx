@@ -40,14 +40,17 @@ function CompanySlideshowCard({
     };
 
     return (
-        <div className="flex flex-col space-y-2.5">
+        <div className="flex flex-col space-y-3 p-3.5 rounded-2xl glass border border-slate-200/80 dark:border-slate-800/80 hover:border-sky-500/40 transition-all duration-300 shadow-md hover:shadow-xl hover:shadow-sky-500/10 group/card">
             {/* Company Title */}
-            <h3 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 line-clamp-1">
-                {title}
-            </h3>
+            <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-sky-400 flex-shrink-0" />
+                <h3 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100 line-clamp-1 group-hover/card:text-sky-400 transition-colors">
+                    {title}
+                </h3>
+            </div>
 
             {/* Slideshow Container */}
-            <div className="relative w-full h-44 sm:h-52 rounded-xl overflow-hidden shadow-md bg-slate-100 dark:bg-slate-800 group border border-slate-200 dark:border-slate-700">
+            <div className="relative w-full h-44 sm:h-52 rounded-xl overflow-hidden shadow-inner bg-slate-950 group">
                 {images.map((img, idx) => (
                     <div
                         key={idx}
@@ -255,7 +258,7 @@ export function ProjectActivityPage() {
         : 'Project & Activity | Agile Assets - Industrial Machinery Financing';
     const description = lang === 'th'
         ? 'ผลงานและกิจกรรมของ Agile Assets สะท้อนความเชี่ยวชาญ การเติบโตอย่างต่อเนื่อง ผ่านโครงการ ความร่วมมือและกิจกรรม ติดตามผลงานและกิจกรรมได้ที่นี่'
-        : 'Agile Assets Projects & Activity — Demonstrating our engineering heritage, financing trust, and nationwide project commissionings.';
+        : 'Agile Assets Projects & Activity — Demonstrating our 16+ years of engineering heritage, equipment financing trust, and nationwide project commissionings.';
 
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-sky-500 selection:text-white">
@@ -270,9 +273,9 @@ export function ProjectActivityPage() {
             <Navbar />
 
             <main className="flex-1">
-                {/* ─── 1. Hero Banner (Same Full Size as Home Page: min-h-[96vh]) ─── */}
-                <section className="relative min-h-[96vh] flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 pb-8 sm:pb-10">
-                    {/* Background Image: Same Exact Tree of Growth as Home Page */}
+                {/* ─── 1. Hero Banner ─── */}
+                <section className="relative min-h-[96vh] flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 pb-12 sm:pb-16">
+                    {/* Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img
                             src={heroBg}
@@ -282,42 +285,82 @@ export function ProjectActivityPage() {
                         />
                         {/* Dynamic Vignette & Ambient Light Overlays */}
                         <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
-                        <div className="absolute inset-0 bg-radial-at-c from-sky-500/10 via-transparent to-black/80" />
+                        <div className="absolute inset-0 bg-radial-at-c from-sky-500/15 via-transparent to-black/80" />
                         
                         {/* Soft Bottom Fog/Fade Gradient into next section */}
-                        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none z-10" />
+                        <div className="absolute bottom-0 left-0 right-0 h-56 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-10" />
                     </div>
 
                     {/* Glowing Ambient Aura Particles */}
-                    <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-500/15 rounded-full blur-[140px] pointer-events-none animate-pulse-glow" />
-                    <div className="absolute bottom-1/3 left-10 w-96 h-96 bg-blue-600/15 rounded-full blur-[120px] pointer-events-none animate-float" />
-                    <div className="absolute top-1/3 right-10 w-80 h-80 bg-cyan-400/10 rounded-full blur-[100px] pointer-events-none animate-float" style={{ animationDelay: '3s' }} />
+                    <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-sky-500/20 rounded-full blur-[140px] pointer-events-none animate-pulse-glow" />
+                    <div className="absolute bottom-1/4 left-10 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] pointer-events-none animate-float" />
+                    <div className="absolute top-1/3 right-10 w-80 h-80 bg-cyan-400/15 rounded-full blur-[100px] pointer-events-none animate-float" style={{ animationDelay: '3s' }} />
 
                     {/* Content */}
                     <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto">
-                        <ScrollReveal animation="fade-up">
-                            <p className="text-xl sm:text-3xl font-semibold text-slate-100 mb-3 font-sans tracking-wide drop-shadow-md">
+                        <ScrollReveal animation="fade-down">
+                            {/* Breadcrumb / Category Badge */}
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-sky-400/30 text-xs font-semibold text-sky-300 mb-5 shadow-lg shadow-sky-500/10">
+                                <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
+                                <span>Agile Assets · Experience & Trust</span>
+                            </div>
+                        </ScrollReveal>
+
+                        <ScrollReveal animation="fade-up" delay={100}>
+                            <p className="text-xl sm:text-3xl font-semibold text-sky-200/90 mb-3 font-sans tracking-wide drop-shadow-md">
                                 Agile Assets
                             </p>
-                            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight drop-shadow-2xl font-sans">
+                            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight drop-shadow-2xl font-sans mb-4 bg-gradient-to-r from-white via-sky-100 to-sky-300 bg-clip-text text-transparent">
                                 Project & Activity
                             </h1>
+                            <p className="text-sm sm:text-lg text-slate-300 max-w-2xl mx-auto font-light leading-relaxed drop-shadow-md">
+                                {lang === 'th'
+                                    ? 'ผลงานส่งมอบเครื่องจักร ความร่วมมือทางธุรกิจ และกิจกรรมเพื่อสังคมที่สะท้อนความเชี่ยวชาญกว่า 16 ปี'
+                                    : 'Demonstrating our 16+ years of engineering heritage, equipment financing trust, and nationwide project commissionings.'}
+                            </p>
                         </ScrollReveal>
                     </div>
                 </section>
 
                 {/* ─── 2. โครงการและกิจกรรมของเรา (8 Company Projects 4-Column Grid) ─── */}
-                <section className="py-16 sm:py-24 bg-white dark:bg-slate-950">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <section className="relative py-16 sm:py-24 overflow-hidden bg-background">
+                    {/* Subtle Silk Wave Gradients */}
+                    <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-40 dark:opacity-30">
+                        <svg className="absolute w-full h-full object-cover" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M-100,300 C400,100 900,600 1600,200" stroke="url(#projWaveGrad1)" strokeWidth="1.5" strokeDasharray="6 6" />
+                            <path d="M-50,500 C450,250 950,750 1600,350" stroke="url(#projWaveGrad2)" strokeWidth="2" />
+                            <defs>
+                                <linearGradient id="projWaveGrad1" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.1" />
+                                    <stop offset="50%" stopColor="#0284c7" stopOpacity="0.5" />
+                                    <stop offset="100%" stopColor="#38bdf8" stopOpacity="0.1" />
+                                </linearGradient>
+                                <linearGradient id="projWaveGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stopColor="#0ea5e9" stopOpacity="0.05" />
+                                    <stop offset="50%" stopColor="#38bdf8" stopOpacity="0.35" />
+                                    <stop offset="100%" stopColor="#0369a1" stopOpacity="0.05" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-sky-500/10 rounded-full blur-[140px]" />
+                        <div className="absolute bottom-10 right-10 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[150px]" />
+                    </div>
+
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                         {/* Section Header */}
                         <ScrollReveal animation="fade-up">
-                            <div className="text-center mb-12">
-                                <p className="text-sm sm:text-base font-semibold text-sky-600 dark:text-sky-400 mb-1">
+                            <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+                                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3 shadow-sm border border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-bold uppercase tracking-wider">
                                     Project & Activity
-                                </p>
-                                <h2 className="text-2xl sm:text-4xl font-extrabold text-blue-900 dark:text-blue-400 tracking-tight font-sans">
+                                </div>
+                                <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-sans mb-4 bg-gradient-to-r from-blue-900 via-sky-600 to-blue-800 dark:from-white dark:via-sky-200 dark:to-sky-400 bg-clip-text text-transparent">
                                     {lang === 'th' ? 'โครงการและกิจกรรมของเรา' : 'Our Projects & Activities'}
                                 </h2>
+                                <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
+                                    {lang === 'th'
+                                        ? 'ร่วมขับเคลื่อนธุรกิจภาคอุตสาหกรรม การผลิต และการเกษตรกรรมไทยให้เติบโตอย่างมั่นคง'
+                                        : 'Partnering with manufacturers, food producers, and agro-industrial enterprises across Thailand.'}
+                                </p>
                             </div>
                         </ScrollReveal>
 
@@ -337,7 +380,7 @@ export function ProjectActivityPage() {
                         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mb-16">
                             {collagePhotos.map((photo, idx) => (
                                 <ScrollReveal key={idx} animation="zoom-in" delay={idx * 30}>
-                                    <div className="relative aspect-4/3 rounded-xl overflow-hidden shadow-md bg-slate-200 dark:bg-slate-800 group border border-slate-200 dark:border-slate-800">
+                                    <div className="relative aspect-4/3 rounded-xl overflow-hidden shadow-lg bg-slate-900 group border border-white/10 dark:border-slate-800 hover:border-sky-500/40 transition-all duration-300">
                                         <img
                                             src={photo.src}
                                             alt={photo.alt}
@@ -349,8 +392,8 @@ export function ProjectActivityPage() {
                                                 target.src = 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=500&q=80';
                                             }}
                                         />
-                                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-2.5">
-                                            <p className="text-[11px] font-medium text-white line-clamp-1">
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
+                                            <p className="text-xs font-medium text-white line-clamp-1">
                                                 {photo.alt}
                                             </p>
                                         </div>
