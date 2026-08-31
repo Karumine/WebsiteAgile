@@ -9,7 +9,8 @@ export function QuickContactWidget() {
         const handleScroll = () => {
             if (rafRef.current) return;
             rafRef.current = requestAnimationFrame(() => {
-                setShowTopBtn(window.scrollY > 400);
+                const isOver = window.scrollY > 400;
+                setShowTopBtn(prev => (prev !== isOver ? isOver : prev));
                 rafRef.current = 0;
             });
         };

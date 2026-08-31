@@ -95,7 +95,8 @@ export function Navbar() {
         const handleScroll = () => {
             if (rafRef.current) return;
             rafRef.current = requestAnimationFrame(() => {
-                setScrolled(window.scrollY > 20);
+                const isOver = window.scrollY > 20;
+                setScrolled(prev => (prev !== isOver ? isOver : prev));
                 rafRef.current = 0;
             });
         };
@@ -153,9 +154,9 @@ export function Navbar() {
     return (
         <header
             className={cn(
-                'fixed top-0 left-0 right-0 z-50 transition-all duration-300',
+                'fixed top-0 left-0 right-0 z-50 transition-[background-color,backdrop-filter,box-shadow] duration-200',
                 scrolled
-                    ? 'bg-background/90 backdrop-blur-xl shadow-lg shadow-black/5'
+                    ? 'bg-background/90 backdrop-blur-md shadow-lg shadow-black/5'
                     : 'bg-gradient-to-b from-black/60 via-black/25 to-transparent backdrop-blur-none shadow-none'
             )}
         >
