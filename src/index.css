@@ -106,7 +106,7 @@
   }
 
   html {
-    scroll-behavior: smooth;
+    scroll-behavior: auto;
   }
 
   body {
@@ -195,10 +195,14 @@
 
   .animate-float {
     animation: float 6s ease-in-out infinite;
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
   }
 
   .animate-pulse-glow {
     animation: pulseGlow 3s ease-in-out infinite;
+    will-change: transform, opacity;
+    transform: translate3d(0, 0, 0);
   }
 
   .animate-fade-in {
@@ -213,23 +217,22 @@
 @keyframes pulseGlow {
   0%, 100% {
     opacity: 0.6;
-    transform: scale(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
   50% {
     opacity: 0.9;
-    transform: scale(1.05);
+    transform: translate3d(0, 0, 0) scale(1.05);
   }
 }
 
 @keyframes float {
-
   0%,
   100% {
-    transform: translateY(0px);
+    transform: translate3d(0, 0px, 0);
   }
 
   50% {
-    transform: translateY(-10px);
+    transform: translate3d(0, -10px, 0);
   }
 }
 
