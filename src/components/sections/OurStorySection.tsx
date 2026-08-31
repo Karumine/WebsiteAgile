@@ -4,9 +4,9 @@ import { ArrowRight, Download, BookOpen, TrendingUp, CheckCircle2, X } from 'luc
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
-import storyOriginImg from '@/assets/story_origin_engineers.webp';
-import storyMachineryImg from '@/assets/story_machinery_finance.webp';
-import storyGrowthImg from '@/assets/story_growth_team.webp';
+import storyOriginImg from '@/assets/story_origin_engineers.png';
+import storyMachineryImg from '@/assets/story_machinery_finance.png';
+import storyGrowthImg from '@/assets/story_growth_team.png';
 
 export function OurStorySection() {
     const { t, lang } = useLanguage();

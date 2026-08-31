@@ -8,7 +8,7 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
-import heroBg from '@/assets/Hero-Banner-Website-3-scaled.webp';
+import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
 interface KnowledgeArticle {
     id: string;

@@ -9,7 +9,7 @@ import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { cn } from '@/lib/utils';
-import heroBg from '@/assets/Hero-Banner-Website-3-scaled.webp';
+import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
 interface FaqItem {
     id: string;

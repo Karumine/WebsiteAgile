@@ -24,12 +24,12 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 
 // Assets
-import heroBg from '@/assets/Hero-Banner-Website-3-scaled.webp';
-import storyOriginImg from '@/assets/story_origin_engineers.webp';
-import storyMachineryImg from '@/assets/story_machinery_finance.webp';
-import advisorChairmanImg from '@/assets/advisor_chairman.webp';
-import directorProfile1Img from '@/assets/director_profile_1.webp';
-import directorProfile2Img from '@/assets/director_profile_2.webp';
+import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
+import storyOriginImg from '@/assets/story_origin_engineers.png';
+import storyMachineryImg from '@/assets/story_machinery_finance.png';
+import advisorChairmanImg from '@/assets/advisor_chairman.png';
+import directorProfile1Img from '@/assets/director_profile_1.png';
+import directorProfile2Img from '@/assets/director_profile_2.png';
 
 export function AboutPage() {
     const { lang } = useLanguage();

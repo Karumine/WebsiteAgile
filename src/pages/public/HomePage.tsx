@@ -37,7 +37,7 @@ export function HomePage() {
                 <meta property="og:description" content={description} />
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="https://agileassets.co.th/" />
-                <meta property="og:image" content="/assets/Hero-Banner-Website-3-scaled.webp" />
+                <meta property="og:image" content="/assets/Hero-Banner-Website-3-scaled.png" />
                 <meta name="twitter:card" content="summary_large_image" />
                 <meta name="twitter:title" content={title} />
                 <meta name="twitter:description" content={description} />
