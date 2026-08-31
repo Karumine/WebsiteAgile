@@ -109,6 +109,9 @@ export function NewsUpdatePage() {
                         {/* Dynamic Vignette & Ambient Light Overlays */}
                         <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
                         <div className="absolute inset-0 bg-radial-at-c from-sky-500/10 via-transparent to-black/80" />
+                        
+                        {/* Soft Bottom Fog/Fade Gradient into next section */}
+                        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none z-10" />
                     </div>
 
                     {/* Glowing Ambient Aura Particles */}
