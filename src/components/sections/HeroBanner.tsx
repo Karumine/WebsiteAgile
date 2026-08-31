@@ -4,8 +4,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { AgileAssetsLogo } from '@/components/ui/AgileAssetsLogo';
 
-// Hero image served from public/ for preload support (see index.html)
-const heroBg = '/Hero-Banner-Website-3-scaled.webp';
+import heroBg from '@/assets/Hero-Banner-Website-3-scaled.webp';
+import heroBgMobile from '@/assets/Hero-Banner-Website-3-mobile.webp';
 
 export function HeroBanner() {
     const { t } = useLanguage();
@@ -23,7 +23,7 @@ export function HeroBanner() {
             <div className="absolute inset-0 z-0">
                 <img
                     src={heroBg}
-                    srcSet="/Hero-Banner-Website-3-mobile.webp 800w, /Hero-Banner-Website-3-scaled.webp 1920w"
+                    srcSet={`${heroBgMobile} 800w, ${heroBg} 1920w`}
                     sizes="100vw"
                     alt="Agile Assets Growth Tree"
                     className="w-full h-full object-cover object-center scale-105 animate-fade-in"
