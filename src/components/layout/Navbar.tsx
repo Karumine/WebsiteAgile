@@ -109,6 +109,16 @@ export function Navbar() {
     const handleNavClick = useCallback((href: string) => {
         setIsOpen(false);
         setActiveDropdown(null);
+        if (href === '/' || href === '#home') {
+            if (location.pathname === '/') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                navigate('/');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            return;
+        }
+
         if (href.startsWith('/')) {
             navigate(href);
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -153,10 +163,17 @@ export function Navbar() {
                 <div className="flex items-center justify-between h-20">
                     {/* Brand Logo */}
                     <a
-                        href="#home"
+                        href="/"
                         onClick={(e) => {
                             e.preventDefault();
-                            handleNavClick('#home');
+                            setIsOpen(false);
+                            setActiveDropdown(null);
+                            if (location.pathname === '/') {
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            } else {
+                                navigate('/');
+                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                            }
                         }}
                         className="flex items-center gap-2 group transition-transform duration-200 hover:scale-[1.02]"
                     >

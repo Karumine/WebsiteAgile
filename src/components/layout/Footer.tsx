@@ -12,6 +12,15 @@ export function Footer() {
     const location = useLocation();
 
     const handleNavClick = (href: string) => {
+        if (href === '/' || href === '#home') {
+            if (location.pathname === '/') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else {
+                navigate('/');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            return;
+        }
         if (href.startsWith('/')) {
             navigate(href);
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -51,9 +60,21 @@ export function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
                     {/* Brand Column */}
                     <div className="lg:col-span-4 space-y-4">
-                        <div className="flex items-center gap-3">
+                        <a
+                            href="/"
+                            onClick={(e) => {
+                                e.preventDefault();
+                                if (location.pathname === '/') {
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                } else {
+                                    navigate('/');
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                }
+                            }}
+                            className="inline-flex items-center gap-3 hover:opacity-90 transition-opacity"
+                        >
                             <AgileAssetsLogo variant="full" />
-                        </div>
+                        </a>
                         <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
                             {lang === 'th'
                                 ? 'Agile Assets ผู้ให้บริการสินเชื่อเช่าซื้อเครื่องจักร ยานพาหนะเชิงพาณิชย์ และโซลูชันเงินทุนเพื่อการเติบโตอย่างยั่งยืน มุ่งมั่นเคียงข้างธุรกิจไทยตั้งแต่ปี 2010'
