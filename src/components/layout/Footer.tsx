@@ -40,7 +40,6 @@ export function Footer() {
         { labelKey: 'nav.investorRelations', href: '/investor-relations' },
         { labelKey: 'menu.projectsActivity', href: '/project' },
         { labelKey: 'nav.about', href: '/about-us' },
-        { labelKey: 'menu.ncNda', href: '/nc-nda' },
         { labelKey: 'nav.assetForSale', href: '/used-machine' },
         { labelKey: 'nav.calculator', href: '/calculator' },
         { labelKey: 'nav.faq', href: '/faq' },
