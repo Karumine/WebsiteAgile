@@ -41,8 +41,8 @@ export function CookieConsent() {
     if (!visible) return null;
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-6 animate-slide-up">
-            <div className="max-w-6xl mx-auto rounded-2xl border border-slate-200/80 dark:border-sky-500/30 bg-white/95 dark:bg-slate-950/95 text-slate-900 dark:text-white shadow-2xl p-4 sm:p-5 backdrop-blur-2xl">
+        <div className="fixed bottom-0 left-0 right-0 z-40 p-4 sm:p-6 pointer-events-none animate-slide-up sm:pr-24 lg:pr-28">
+            <div className="pointer-events-auto max-w-6xl mx-auto rounded-2xl border border-slate-200/80 dark:border-sky-500/30 bg-white/95 dark:bg-slate-950/95 text-slate-900 dark:text-white shadow-2xl p-4 sm:p-5 backdrop-blur-2xl">
                 <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                     {/* Cookie Description */}
                     <div className="flex items-start gap-3 flex-1">

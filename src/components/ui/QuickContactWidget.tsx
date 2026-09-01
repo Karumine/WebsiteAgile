@@ -111,7 +111,7 @@ export function QuickContactWidget() {
     ];
 
     return (
-        <div ref={widgetRef} className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 select-none">
+        <div ref={widgetRef} className="fixed bottom-6 right-6 z-[60] flex flex-col items-end gap-3 select-none">
             {/* Scroll To Top Button (Floats subtly above or beside) */}
             {showTopBtn && !isOpen && (
                 <button
