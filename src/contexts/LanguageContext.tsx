@@ -54,6 +54,7 @@ const translations: Record<string, Record<Lang, string>> = {
     'menu.faq': { en: 'Frequently Asked Questions (FAQ)', th: 'Frequently Asked Questions (FAQ)' },
     'menu.contactUs': { en: 'Contact Us', th: 'Contact Us' },
     'menu.workForUs': { en: 'Work for Us', th: 'Work for Us' },
+    'menu.ncNda': { en: 'NC-NDA (Non-Circumvention & NDA)', th: 'สัญญาการรักษาความลับ (NC-NDA)' },
     'menu.ourStory': { en: 'Our Vision & Heritage', th: 'ประวัติและวิสัยทัศน์องค์กร' },
     'menu.leadership': { en: 'Board of Directors & Executives', th: 'คณะกรรมการและผู้บริหาร' },
 

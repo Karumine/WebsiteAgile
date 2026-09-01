@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { 
     Menu, X, ChevronDown, ChevronRight, Sparkles, 
     Newspaper, Award, Droplets, Wheat, Factory, Flame, Sun, Snowflake, 
-    Cog, Zap, Boxes, BookOpen, Mail, Leaf, Calculator, Percent, HelpCircle, Phone, Briefcase
+    Cog, Zap, Boxes, BookOpen, Mail, Leaf, Calculator, Percent, HelpCircle, Phone, Briefcase, ShieldCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -48,6 +48,7 @@ const ABOUT_MENU = [
     { icon: Leaf, labelKey: 'menu.sustainabilityCampaign', href: '/sustainability' },
     { icon: Calculator, labelKey: 'menu.financingCalculator', href: '/calculator' },
     { icon: Percent, labelKey: 'menu.interestRateConverter', href: '/interest-rate-conversion' },
+    { icon: ShieldCheck, labelKey: 'menu.ncNda', href: '/nc-nda' },
     { icon: HelpCircle, labelKey: 'menu.faq', href: '/faq' },
     { icon: Phone, labelKey: 'menu.contactUs', href: '/contact' },
     { icon: Briefcase, labelKey: 'menu.workForUs', href: '/#contact' },
@@ -72,6 +73,7 @@ const ABOUT_PATHS = new Set([
     '/interest-rate-conversion-2', '/en/interest-rate-conversion-2',
     '/faq', '/faq-2', '/frequently-asked-questions', '/en/faq-2',
     '/contact', '/contact-us', '/contact-2', '/en/contact-2',
+    '/nc-nda', '/nda', '/non-disclosure-agreement', '/en/nc-nda',
 ]);
 
 const ASSET_PATHS = new Set([

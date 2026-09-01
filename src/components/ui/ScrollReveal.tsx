@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 type AnimationType = 'fade-up' | 'fade-down' | 'fade-left' | 'fade-right' | 'zoom-in' | 'fade';
 
@@ -12,143 +12,83 @@ interface ScrollRevealProps {
     once?: boolean;
 }
 
-// ─── Shared IntersectionObserver (single observer pattern) ───
-// Instead of creating one observer per ScrollReveal instance, we share a single
-// observer for all elements with the same threshold. This reduces O(n) observers → O(1).
-type ObserverCallback = (isIntersecting: boolean) => void;
+// ─── Single Shared IntersectionObserver (O(1) Memory & Zero React Re-render) ───
+let sharedObserver: IntersectionObserver | null = null;
+const elementsToCallback = new WeakMap<Element, (isIntersecting: boolean) => void>();
 
-const observerMap = new Map<string, IntersectionObserver>();
-const callbackMap = new Map<Element, ObserverCallback>();
-
-function getSharedObserver(threshold: number, rootMargin: string): IntersectionObserver {
-    const key = `${threshold}|${rootMargin}`;
-    let observer = observerMap.get(key);
-    if (!observer) {
-        observer = new IntersectionObserver(
+function getObserver(): IntersectionObserver {
+    if (!sharedObserver && typeof window !== 'undefined') {
+        sharedObserver = new IntersectionObserver(
             (entries) => {
-                entries.forEach((entry) => {
-                    const cb = callbackMap.get(entry.target);
+                for (let i = 0; i < entries.length; i++) {
+                    const entry = entries[i];
+                    const cb = elementsToCallback.get(entry.target);
                     if (cb) {
                         cb(entry.isIntersecting);
                     }
-                });
+                }
             },
-            { threshold, rootMargin }
+            {
+                rootMargin: '0px 0px -20px 0px',
+                threshold: 0.05,
+            }
         );
-        observerMap.set(key, observer);
     }
-    return observer;
-}
-
-function observeElement(element: Element, threshold: number, rootMargin: string, callback: ObserverCallback): () => void {
-    const observer = getSharedObserver(threshold, rootMargin);
-    callbackMap.set(element, callback);
-    observer.observe(element);
-    return () => {
-        observer.unobserve(element);
-        callbackMap.delete(element);
-    };
+    return sharedObserver!;
 }
 
 export const ScrollReveal: React.FC<ScrollRevealProps> = ({
     children,
     animation = 'fade-up',
     delay = 0,
-    duration = 600,
+    duration = 500,
     className = '',
-    threshold = 0.1,
     once = true,
 }) => {
-    const [isVisible, setIsVisible] = useState(false);
-    const [animationDone, setAnimationDone] = useState(false);
     const elementRef = useRef<HTMLDivElement>(null);
-    const unobserveRef = useRef<(() => void) | null>(null);
 
     useEffect(() => {
-        const currentEl = elementRef.current;
-        if (!currentEl) return;
+        const el = elementRef.current;
+        if (!el) return;
 
-        const rootMargin = '0px 0px -40px 0px';
+        // If already visible, no need to re-observe
+        if (el.classList.contains('scroll-reveal-visible')) return;
 
-        unobserveRef.current = observeElement(
-            currentEl,
-            threshold,
-            rootMargin,
-            (isIntersecting) => {
-                if (isIntersecting) {
-                    setIsVisible(true);
-                    if (once && unobserveRef.current) {
-                        unobserveRef.current();
-                        unobserveRef.current = null;
-                    }
-                } else if (!once) {
-                    setIsVisible(false);
-                    setAnimationDone(false);
+        const observer = getObserver();
+        const onIntersect = (isIntersecting: boolean) => {
+            if (isIntersecting) {
+                el.classList.add('scroll-reveal-visible');
+                if (once) {
+                    observer.unobserve(el);
+                    elementsToCallback.delete(el);
                 }
-            }
-        );
-
-        return () => {
-            if (unobserveRef.current) {
-                unobserveRef.current();
-                unobserveRef.current = null;
+            } else if (!once) {
+                el.classList.remove('scroll-reveal-visible');
             }
         };
-    }, [threshold, once]);
 
-    useEffect(() => {
-        if (isVisible && !animationDone) {
-            const timer = setTimeout(() => {
-                setAnimationDone(true);
-            }, delay + duration + 50);
-            return () => clearTimeout(timer);
-        }
-    }, [isVisible, animationDone, delay, duration]);
+        elementsToCallback.set(el, onIntersect);
+        observer.observe(el);
 
-    if (animationDone) {
-        return (
-            <div ref={elementRef} className={className}>
-                {children}
-            </div>
-        );
-    }
+        return () => {
+            observer.unobserve(el);
+            elementsToCallback.delete(el);
+        };
+    }, [once]);
 
-    let transform = 'none';
-    if (!isVisible) {
-        switch (animation) {
-            case 'fade-up':
-                transform = 'translate3d(0, 24px, 0)';
-                break;
-            case 'fade-down':
-                transform = 'translate3d(0, -24px, 0)';
-                break;
-            case 'fade-left':
-                transform = 'translate3d(-24px, 0, 0)';
-                break;
-            case 'fade-right':
-                transform = 'translate3d(24px, 0, 0)';
-                break;
-            case 'zoom-in':
-                transform = 'scale(0.95)';
-                break;
-            case 'fade':
-                transform = 'none';
-                break;
-        }
-    }
-
-    const style: React.CSSProperties = {
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translate3d(0, 0, 0)' : transform,
-        transition: isVisible
-            ? `opacity ${duration}ms cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms, transform ${duration}ms cubic-bezier(0.16, 1, 0.3, 1) ${delay}ms`
-            : 'none',
-        willChange: isVisible ? 'opacity, transform' : 'auto',
+    const transitionStyle: React.CSSProperties = {
+        transitionDuration: `${duration}ms`,
+        transitionDelay: delay > 0 ? `${delay}ms` : undefined,
     };
 
     return (
-        <div ref={elementRef} style={style} className={className}>
+        <div
+            ref={elementRef}
+            style={transitionStyle}
+            className={`scroll-reveal-init scroll-reveal-${animation} ${className}`}
+        >
             {children}
         </div>
     );
 };
+

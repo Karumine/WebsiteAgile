@@ -37,6 +37,7 @@ const ContactPage = lazy(() => import('@/pages/public/ContactPage').then(m => ({
 const LeasingApplicationPage = lazy(() => import('@/pages/public/LeasingApplicationPage').then(m => ({ default: m.LeasingApplicationPage })));
 const AssetForSalePage = lazy(() => import('@/pages/public/AssetForSalePage').then(m => ({ default: m.AssetForSalePage })));
 const CookiePolicyPage = lazy(() => import('@/pages/public/CookiePolicyPage').then(m => ({ default: m.CookiePolicyPage })));
+const NcNdaPage = lazy(() => import('@/pages/public/NcNdaPage').then(m => ({ default: m.NcNdaPage })));
 const LoginPage = lazy(() => import('@/pages/admin/LoginPage').then(m => ({ default: m.LoginPage })));
 const DashboardPage = lazy(() => import('@/pages/admin/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const RatesEditor = lazy(() => import('@/pages/admin/RatesEditor').then(m => ({ default: m.RatesEditor })));
@@ -140,6 +141,13 @@ export default function App() {
                       <Route path="/cookies-policy" element={<CookiePolicyPage />} />
                       <Route path="/privacy-policy" element={<CookiePolicyPage />} />
                       <Route path="/en/cookie-policy" element={<CookiePolicyPage />} />
+
+                      {/* NC-NDA (Non-Circumvention & Non-Disclosure Agreement) */}
+                      <Route path="/nc-nda" element={<NcNdaPage />} />
+                      <Route path="/nda" element={<NcNdaPage />} />
+                      <Route path="/customer-nda" element={<NcNdaPage />} />
+                      <Route path="/non-disclosure-agreement" element={<NcNdaPage />} />
+                      <Route path="/en/nc-nda" element={<NcNdaPage />} />
 
                       {/* Hidden Admin Login */}
                       <Route path="/management-portal" element={<LoginPage />} />

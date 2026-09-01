@@ -40,6 +40,7 @@ export function Footer() {
         { labelKey: 'nav.investorRelations', href: '/investor-relations' },
         { labelKey: 'menu.projectsActivity', href: '/project' },
         { labelKey: 'nav.about', href: '/about-us' },
+        { labelKey: 'menu.ncNda', href: '/nc-nda' },
         { labelKey: 'nav.assetForSale', href: '/used-machine' },
         { labelKey: 'nav.calculator', href: '/calculator' },
         { labelKey: 'nav.faq', href: '/faq' },
@@ -92,7 +93,7 @@ export function Footer() {
                             {t('footer.quickLinks')}
                         </h3>
                         <ul className="space-y-2 text-xs">
-                            {quickLinks.slice(0, 5).map((item) => (
+                            {quickLinks.slice(0, 6).map((item) => (
                                 <li key={item.href}>
                                     <button
                                         onClick={() => handleNavClick(item.href)}
@@ -150,11 +151,23 @@ export function Footer() {
                     </div>
                 </div>
 
-                <div className="mt-12 pt-8 border-t border-slate-800 text-center text-xs text-slate-500">
+                <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
                     <p>
-                        © {new Date().getFullYear()} {companyInfo.name}. {t('footer.copyright')} |{' '}
-                        {t('footer.license')}
+                        © {new Date().getFullYear()} {companyInfo.name}. {t('footer.copyright')}
                     </p>
+                    <div className="flex flex-wrap items-center gap-4 text-xs">
+                        <button onClick={() => handleNavClick('/nc-nda')} className="hover:text-sky-400 transition-colors">
+                            {lang === 'th' ? 'สัญญาการรักษาความลับ (NC-NDA)' : 'NC-NDA Agreement'}
+                        </button>
+                        <span>•</span>
+                        <button onClick={() => handleNavClick('/cookie-policy')} className="hover:text-sky-400 transition-colors">
+                            {lang === 'th' ? 'นโยบายคุกกี้' : 'Cookie Policy'}
+                        </button>
+                        <span>•</span>
+                        <button onClick={() => handleNavClick('/privacy-policy')} className="hover:text-sky-400 transition-colors">
+                            {lang === 'th' ? 'นโยบายความเป็นส่วนตัว' : 'Privacy Policy'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </footer>

@@ -96,7 +96,7 @@ export function AssetForSalePage() {
 
             <main className="flex-1">
                 {/* ─── 1. Hero Banner ─── */}
-                <section className="relative min-h-[96vh] flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 pb-8 sm:pb-10">
+                <section className="relative min-h-[96vh] flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 pb-12 sm:pb-16">
                     {/* Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img
@@ -105,51 +105,79 @@ export function AssetForSalePage() {
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
-                        <div className="absolute inset-0 bg-radial-at-c from-sky-500/10 via-transparent to-black/80" />
+                        {/* Dynamic Vignette & Ambient Light Overlays */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-background via-slate-950/75 to-slate-950/60" />
+                        <div className="absolute inset-0 bg-radial-at-c from-sky-500/15 via-transparent to-black/80" />
                         
                         {/* Soft Bottom Fog/Fade Gradient into next section */}
-                        <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none z-10" />
+                        <div className="absolute bottom-0 left-0 right-0 h-56 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-10" />
                     </div>
 
-                    {/* Ambient Glows */}
-                    <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-sky-500/15 rounded-full blur-[140px] pointer-events-none animate-pulse-glow" />
-                    <div className="absolute bottom-1/3 left-10 w-96 h-96 bg-blue-600/15 rounded-full blur-[120px] pointer-events-none animate-float" />
+                    {/* Glowing Ambient Aura Particles */}
+                    <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-sky-500/20 rounded-full blur-[140px] pointer-events-none animate-pulse-glow" />
+                    <div className="absolute bottom-1/4 left-10 w-96 h-96 bg-blue-600/20 rounded-full blur-[120px] pointer-events-none animate-float" />
+                    <div className="absolute top-1/3 right-10 w-80 h-80 bg-cyan-400/15 rounded-full blur-[100px] pointer-events-none animate-float" style={{ animationDelay: '3s' }} />
 
                     {/* Hero Content */}
                     <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto">
-                        <ScrollReveal animation="fade-up">
-                            <p className="text-xl sm:text-3xl font-semibold text-slate-100 mb-2 font-sans tracking-wide drop-shadow-md">
+                        <ScrollReveal animation="fade-down">
+                            {/* Category Badge */}
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-xl border border-sky-400/40 bg-slate-950/80 text-xs sm:text-sm font-bold text-sky-300 mb-6 shadow-lg shadow-sky-500/10">
+                                <div className="w-5 h-5 rounded-full flex items-center justify-center bg-sky-400/20 text-sky-300">
+                                    <Tag className="w-3.5 h-3.5" />
+                                </div>
+                                <span>Certified Pre-Owned Machinery & Equipment</span>
+                            </div>
+                        </ScrollReveal>
+
+                        <ScrollReveal animation="fade-up" delay={100}>
+                            <p className="text-xl sm:text-3xl font-semibold text-sky-200/90 mb-2 font-sans tracking-wide drop-shadow-md">
                                 Agile Assets
                             </p>
-                            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight drop-shadow-2xl font-sans mb-4">
-                                Asset For Sale
+                            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-4 text-white drop-shadow-2xl font-sans">
+                                <span className="bg-gradient-to-r from-white via-sky-100 to-sky-300 bg-clip-text text-transparent">
+                                    Asset For Sale
+                                </span>
                             </h1>
+                            <p className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-sky-200 tracking-wide mb-8 drop-shadow-lg font-sans">
+                                {lang === 'th' ? 'สินทรัพย์รอการขายและประมูลเครื่องจักรมือสอง' : 'Certified Used Industrial Machinery'}
+                            </p>
+
+                            {/* CTA Action Button */}
+                            <div className="flex justify-center">
+                                <a
+                                    href="#auction-section"
+                                    className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-sky-500/30 hover:shadow-sky-500/50 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
+                                >
+                                    <Tag className="w-4 h-4" />
+                                    <span>{lang === 'th' ? 'ดูรายการเครื่องจักรพร้อมส่งมอบ' : 'Explore Available Assets'}</span>
+                                </a>
+                            </div>
                         </ScrollReveal>
                     </div>
                 </section>
 
                 {/* ─── 2. Main Section Header & Category Banner ─── */}
-                <section className="py-14 sm:py-20 bg-white dark:bg-slate-950">
+                <section id="auction-section" className="py-14 sm:py-20 bg-background scroll-mt-24">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                         {/* Title */}
                         <ScrollReveal animation="fade-up">
                             <div className="text-center mb-10">
-                                <p className="text-sm sm:text-base font-semibold text-sky-600 dark:text-sky-400 mb-1">
+                                <p className="text-sm sm:text-base font-semibold text-sky-600 dark:text-sky-400 mb-1 font-mono uppercase tracking-wider">
                                     Asset for Sale
                                 </p>
-                                <h2 className="text-2xl sm:text-4xl font-extrabold text-blue-900 dark:text-blue-400 font-sans">
+                                <h2 className="text-2xl sm:text-4xl font-extrabold text-foreground font-sans">
                                     {lang === 'th' ? 'สินทรัพย์รอการขาย' : 'Assets for Sale'}
                                 </h2>
                             </div>
 
                             {/* Blue Category Banner */}
-                            <div className="bg-blue-900 dark:bg-slate-900 text-white rounded-2xl p-5 sm:p-7 shadow-md mb-10 border border-blue-800 dark:border-slate-800">
-                                <h3 className="text-lg sm:text-xl font-bold font-sans mb-1">
+                            <div className="bg-gradient-to-r from-blue-900 via-sky-950 to-blue-950 text-white rounded-2xl p-6 sm:p-8 shadow-xl mb-10 border border-sky-500/30 backdrop-blur-xl">
+                                <h3 className="text-lg sm:text-xl font-bold font-sans mb-1 text-white">
                                     {lang === 'th' ? 'ประมูลเครื่องจักรมือสอง คุณภาพดี' : 'High Quality Used Industrial Machinery Auction'}
                                 </h3>
                                 <p className="text-xs sm:text-sm text-sky-200 font-normal">
-                                    {lang === 'th' ? 'เครื่องจักรแนะนำที่ไม่ควรพลาด' : 'Featured Machinery & Equipment for Bidding'}
+                                    {lang === 'th' ? 'เครื่องจักรแนะนำที่ไม่ควรพลาด ตรวจเช็กมาตรฐานพร้อมใช้งานทันที' : 'Featured Machinery & Equipment for Bidding, thoroughly inspected and certified'}
                                 </p>
                             </div>
                         </ScrollReveal>
