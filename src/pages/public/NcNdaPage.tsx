@@ -1,8 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import { 
-    ShieldCheck, ChevronRight, Printer, CheckCircle2, 
+import {
+    ShieldCheck, ChevronRight, Printer, CheckCircle2,
     RefreshCw, PenTool, Share2, Check, Building2, User, Mail, CreditCard, Lock
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -318,11 +318,11 @@ export function NcNdaPage() {
                                             <div>
                                                 {lang === 'th' ? (
                                                     <span>
-                                                        <strong>บริษัท อาร์จิสท์ แอสเซ็ทส์ จำกัด</strong> (โดยนายพรรษา เริงศึกษา และ นายกอบพงศ์ อดิเรก กรรมการผู้มีอำนาจกระทำการแทนบริษัท) มีสำนักงานใหญ่ตั้งอยู่เลขที่ 20 หมู่ 1 ถนนสุขุมวิท ตำบลบางเมืองใหม่ อำเภอเมืองสมุทรปราการ จังหวัดสมุทรปราการ ทะเบียนนิติบุคคลเลขที่ 0115558012195 ซึ่งต่อไปนี้จะเรียกว่า (<strong>"ผู้ให้ข้อมูล"</strong>) ฝ่ายหนึ่ง กับ
+                                                        <strong>บริษัท อาร์จิสท์ แอสเซ็ทส์ จำกัด</strong> (โดยนายพรรษา เริงพิทยา และ นายกอบพงศ์ ตรีสุขี กรรมการผู้มีอำนาจกระทำการแทนบริษัท) มีสำนักงานใหญ่ตั้งอยู่เลขที่ 20 หมู่ 1 ถนนสุขุมวิท ตำบลบางเมืองใหม่ อำเภอเมืองสมุทรปราการ จังหวัดสมุทรปราการ ทะเบียนนิติบุคคลเลขที่ 0115558012195 ซึ่งต่อไปนี้จะเรียกว่า (<strong>"ผู้ให้ข้อมูล"</strong>) ฝ่ายหนึ่ง กับ
                                                     </span>
                                                 ) : (
                                                     <span>
-                                                        <strong>Agile Assets Co., Ltd.</strong> (represented by authorized directors Mr. Pansa Reongsuksa and Mr. Kobpong Adirek), having its principal office at 20 Moo 1, Sukhumvit Road, Bang Mueang Mai Subdistrict, Mueang Samut Prakan District, Samut Prakan Province, Corporate Registration No. 0115558012195 (hereinafter referred to as the <strong>"Disclosing Party"</strong>), of the one part; and
+                                                        <strong>Agile Assets Co., Ltd.</strong> (represented by authorized directors Mr. Pansa Reongpitaya and Mr. Kobpong Treerukeekee), having its principal office at 20 Moo 1, Sukhumvit Road, Bang Mueang Mai Subdistrict, Mueang Samut Prakan District, Samut Prakan Province, Corporate Registration No. 0115558012195 (hereinafter referred to as the <strong>"Disclosing Party"</strong>), of the one part; and
                                                     </span>
                                                 )}
                                             </div>
