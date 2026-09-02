@@ -214,10 +214,6 @@ export function NcNdaPage() {
                                     {lang === 'th' ? 'หน้าแรก' : 'Home'}
                                 </Link>
                                 <ChevronRight className="w-3.5 h-3.5 opacity-60" />
-                                <Link to="/about-us" className="hover:underline">
-                                    {lang === 'th' ? 'เกี่ยวกับเรา' : 'About Us'}
-                                </Link>
-                                <ChevronRight className="w-3.5 h-3.5 opacity-60" />
                                 <span>NC-NDA</span>
                             </div>
 

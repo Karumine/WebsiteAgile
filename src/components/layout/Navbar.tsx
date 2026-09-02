@@ -72,7 +72,6 @@ const ABOUT_PATHS = new Set([
     '/interest-rate-conversion-2', '/en/interest-rate-conversion-2',
     '/faq', '/faq-2', '/frequently-asked-questions', '/en/faq-2',
     '/contact', '/contact-us', '/contact-2', '/en/contact-2',
-    '/nc-nda', '/nda', '/non-disclosure-agreement', '/en/nc-nda',
 ]);
 
 const ASSET_PATHS = new Set([
