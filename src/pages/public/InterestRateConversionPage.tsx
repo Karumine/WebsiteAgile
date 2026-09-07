@@ -8,6 +8,7 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { InterestRates } from '@/components/sections/InterestRates';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
 export function InterestRateConversionPage() {
@@ -371,6 +372,9 @@ export function InterestRateConversionPage() {
                         </ScrollReveal>
                     </div>
                 </section>
+
+                {/* Live Interest Rates from CMS */}
+                <InterestRates />
             </main>
 
             <Footer />

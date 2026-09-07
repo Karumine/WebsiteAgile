@@ -36,6 +36,7 @@ export function CustomerEligibilitySection() {
     const sectionRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        const timer = setTimeout(() => setIsVisible(true), 350);
         const observer = new IntersectionObserver(
             ([entry]) => {
                 if (entry.isIntersecting) {
@@ -43,12 +44,15 @@ export function CustomerEligibilitySection() {
                     observer.disconnect();
                 }
             },
-            { threshold: 0.2 }
+            { threshold: 0.1 }
         );
         if (sectionRef.current) {
             observer.observe(sectionRef.current);
         }
-        return () => observer.disconnect();
+        return () => {
+            clearTimeout(timer);
+            observer.disconnect();
+        };
     }, []);
 
     const factoriesTarget = parseInt(settings.impactStats?.factoriesServed || '40', 10) || 40;
@@ -118,7 +122,7 @@ export function CustomerEligibilitySection() {
                 </ScrollReveal>
 
                 {/* 6-Card Grid (5 Criteria Cards + 1 CTA Card) */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 @[500px]:grid-cols-2 @[800px]:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-16 sm:mb-20">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-16 sm:mb-20">
                     {criterias.map((item, index) => {
                         const IconComp = item.icon;
                         return (
@@ -184,7 +188,7 @@ export function CustomerEligibilitySection() {
                 {/* Floating Impact Stats Card at Bottom */}
                 <ScrollReveal animation="zoom-in" delay={200}>
                     <div className="rounded-3xl bg-white text-slate-900 p-8 sm:p-12 shadow-2xl border border-white/40 max-w-5xl mx-auto">
-                        <div className="grid grid-cols-1 @[500px]:grid-cols-3 gap-6 divide-y @[500px]:divide-y-0 @[500px]:divide-x divide-slate-200">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-slate-200">
                             {/* Counter 1 */}
                             <div className="text-center pt-4 sm:pt-0 first:pt-0 sm:px-4">
                                 <div className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-sky-900 font-sans tracking-tight mb-2">

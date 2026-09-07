@@ -95,7 +95,7 @@ export function FaqPage() {
         answerEn: item.answer_en || item.answer,
     })) || [];
 
-    const faqs = [...cmsFaqs, ...defaultFaqs];
+    const faqs = cmsFaqs.length > 0 ? cmsFaqs : defaultFaqs;
 
     const pageTitle = lang === 'th'
         ? 'คำถามที่พบบ่อย (Frequently Asked Questions - FAQ) | Agile Assets'

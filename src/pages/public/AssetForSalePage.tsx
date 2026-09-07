@@ -8,15 +8,20 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { cn } from '@/lib/utils';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
 export function AssetForSalePage() {
     const { lang } = useLanguage();
+    const { settings } = useSiteSettings();
+    const machineryList = settings.usedMachinery || [];
+    const primaryAsset = machineryList[0];
+    const otherAssets = machineryList.slice(1);
 
     // Featured Machine Gallery slider
     const mainImages = [
-        'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img/https://agileassets.co.th/wp-content/uploads/2026/04/9522_0.jpg',
+        primaryAsset?.image || 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img/https://agileassets.co.th/wp-content/uploads/2026/04/9522_0.jpg',
         'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img/https://agileassets.co.th/wp-content/uploads/2026/04/20250515_111129-scaled.jpg',
         'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img/https://agileassets.co.th/wp-content/uploads/2026/04/9525_0.jpg',
     ];
@@ -157,7 +162,7 @@ export function AssetForSalePage() {
                     </div>
                 </section>
 
-                {/* ─── 2. Main Section Header & Category Banner ─── */}
+                {/* ─── 2. Featured Auction Machine & Gallery ─── */}
                 <section id="auction-section" className="py-14 sm:py-20 bg-background scroll-mt-24">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                         {/* Title */}
@@ -246,11 +251,16 @@ export function AssetForSalePage() {
                                         <div>
                                             <div className="mb-4">
                                                 <h3 className="text-xl sm:text-2xl font-extrabold text-blue-900 dark:text-sky-400 font-sans">
-                                                    Air Compressor
+                                                    {lang === 'en' ? (primaryAsset?.title_en || primaryAsset?.title || 'Air Compressor') : (primaryAsset?.title || 'Air Compressor')}
                                                 </h3>
                                                 <p className="text-xs sm:text-sm font-semibold text-slate-500 dark:text-slate-400">
-                                                    Doosan Model P415
+                                                    {primaryAsset?.category || 'Doosan Model P415'}
                                                 </p>
+                                                {primaryAsset?.price && (
+                                                    <span className="inline-block mt-2 px-3 py-1 rounded-full text-xs font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
+                                                        {primaryAsset.price}
+                                                    </span>
+                                                )}
                                             </div>
 
                                             {/* Specs Table */}
@@ -310,6 +320,83 @@ export function AssetForSalePage() {
                                 ))}
                             </div>
                         </ScrollReveal>
+
+                        {/* ─── 4. Additional Pre-Owned Machinery Catalog ─── */}
+                        {otherAssets.length > 0 && (
+                            <ScrollReveal animation="fade-up">
+                                <div className="mb-16">
+                                    <div className="text-center mb-8">
+                                        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 text-xs font-bold mb-2">
+                                            <Tag className="w-3 h-3" />
+                                            <span>Certified Pre-Owned Machinery</span>
+                                        </div>
+                                        <h3 className="text-2xl sm:text-3xl font-extrabold text-foreground font-sans mb-2">
+                                            {lang === 'th' ? 'รายการเครื่องจักรมือสองพร้อมส่งมอบอื่นๆ' : 'Available Industrial Machinery Catalog'}
+                                        </h3>
+                                        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+                                            {lang === 'th'
+                                                ? 'เครื่องจักรผ่านการตรวจสอบมาตรฐานโดยวิศวกรผู้เชี่ยวชาญ พร้อมใช้งานและรองรับสินเชื่อเช่าซื้อ'
+                                                : 'Certified industrial equipment inspected and ready for immediate operation and lease financing.'}
+                                        </p>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                        {otherAssets.map((asset) => (
+                                            <div
+                                                key={asset.id}
+                                                className="bg-white dark:bg-slate-900 rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl hover:border-sky-500/40 hover:shadow-2xl transition-all duration-300 flex flex-col justify-between group"
+                                            >
+                                                <div className="relative aspect-4/3 overflow-hidden bg-slate-950">
+                                                    <img
+                                                        src={asset.image}
+                                                        alt={asset.title}
+                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                        loading="lazy"
+                                                    />
+                                                    <div className="absolute inset-0 bg-black/10 flex items-center justify-center pointer-events-none">
+                                                        <span className="text-white/30 text-xs font-bold tracking-wider uppercase select-none">
+                                                            Agile Assets Co., Ltd.
+                                                        </span>
+                                                    </div>
+                                                    <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-blue-900/80 backdrop-blur-md text-white text-xs font-bold border border-white/20">
+                                                        {asset.category}
+                                                    </div>
+                                                    {asset.status === 'available' && (
+                                                        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-emerald-600/90 text-white text-[11px] font-bold shadow-md">
+                                                            {lang === 'th' ? 'พร้อมส่งมอบ' : 'Available'}
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <div className="p-6 flex-1 flex flex-col justify-between">
+                                                    <div>
+                                                        <h4 className="text-lg font-bold text-slate-900 dark:text-white font-sans mb-1 group-hover:text-sky-400 transition-colors">
+                                                            {lang === 'en' ? (asset.title_en || asset.title) : asset.title}
+                                                        </h4>
+                                                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 line-clamp-2 leading-relaxed">
+                                                            {asset.description || asset.condition}
+                                                        </p>
+                                                        <div className="inline-block px-3 py-1 rounded-full text-xs font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 mb-4">
+                                                            {asset.price}
+                                                        </div>
+                                                    </div>
+
+                                                    <a
+                                                        href="https://line.me/R/ti/p/%40884ukedb"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                        className="w-full py-3 px-4 rounded-xl bg-sky-400 hover:bg-sky-500 text-white font-bold text-xs sm:text-sm shadow-md transition-all text-center flex items-center justify-center gap-2 active:scale-95"
+                                                    >
+                                                        <Phone className="w-4 h-4" />
+                                                        <span>{lang === 'th' ? 'ติดต่อสอบถามเครื่องนี้' : 'Inquire This Machine'}</span>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </ScrollReveal>
+                        )}
 
                         {/* ─── 5. Comment Section (ใส่ความเห็น) ─── */}
                         <ScrollReveal animation="fade-up">

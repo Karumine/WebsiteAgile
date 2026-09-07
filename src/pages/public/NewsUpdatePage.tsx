@@ -6,6 +6,7 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { LatestNewsSection } from '@/components/sections/LatestNewsSection';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
 export function NewsUpdatePage() {
@@ -305,6 +306,9 @@ export function NewsUpdatePage() {
                         </ScrollReveal>
                     </div>
                 </section>
+
+                {/* ─── 5. CMS News & Articles Section ─── */}
+                <LatestNewsSection />
             </main>
 
             <Footer />

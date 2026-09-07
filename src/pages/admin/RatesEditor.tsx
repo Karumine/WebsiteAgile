@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import type { InterestRate } from '@/types';
 import { generateId, formatRate } from '@/lib/utils';
-import { Plus, Trash2, Save, Star } from 'lucide-react';
+import { Plus, Trash2, Save, Star, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export function RatesEditor() {
@@ -62,13 +62,25 @@ export function RatesEditor() {
                     <h1 className="text-2xl font-bold text-foreground">Interest Rates</h1>
                     <p className="text-sm text-muted-foreground mt-1">Manage lending product rates displayed on the public site.</p>
                 </div>
-                <button
-                    onClick={handleSave}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 text-white font-semibold text-sm shadow-lg shadow-blue-400/20 hover:shadow-blue-400/40 transition-all hover:scale-[1.01] active:scale-[0.99]"
-                >
-                    <Save className="w-4 h-4" />
-                    Save Changes
-                </button>
+                <div className="flex items-center gap-3">
+                    <a
+                        href="/interest-rate-conversion"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-semibold transition-all hover:scale-105 active:scale-95 shadow-sm"
+                        title="ดูหน้านี้บนเว็บจริง (/interest-rate-conversion) ในแท็บใหม่"
+                    >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>ดูหน้านี้บนเว็บจริง</span>
+                    </a>
+                    <button
+                        onClick={handleSave}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 text-white font-semibold text-sm shadow-lg shadow-blue-400/20 hover:shadow-blue-400/40 transition-all hover:scale-[1.01] active:scale-[0.99]"
+                    >
+                        <Save className="w-4 h-4" />
+                        Save Changes
+                    </button>
+                </div>
             </div>
 
             <div className="space-y-4">

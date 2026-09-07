@@ -8,6 +8,7 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { cn } from '@/lib/utils';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
@@ -21,6 +22,8 @@ interface FaqItem {
 
 export function ContactPage() {
     const { lang } = useLanguage();
+    const { settings } = useSiteSettings();
+    const companyInfo = settings.companyInfo;
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
     // Contact Form states
@@ -185,7 +188,16 @@ export function ContactPage() {
                                     </h3>
                                     <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 space-y-1 leading-relaxed">
                                         <p>
-                                            <a href="tel:020009392" className="hover:text-sky-600 transition-colors">02-0009392</a>,{' '}
+                                            <a href={`tel:${companyInfo?.phone?.replace(/[^0-9]/g, '') || '020009392'}`} className="hover:text-sky-600 transition-colors font-semibold text-slate-800 dark:text-slate-200">
+                                                {companyInfo?.phone || '02-0009392'}
+                                            </a>
+                                            {companyInfo?.operatingHours && (
+                                                <span className="block text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                                    เวลาทำการ: {companyInfo.operatingHours}
+                                                </span>
+                                            )}
+                                        </p>
+                                        <p>
                                             <a href="tel:020051599" className="hover:text-sky-600 transition-colors">02-0051599</a>
                                         </p>
                                         <p>
@@ -209,8 +221,8 @@ export function ContactPage() {
                                     </h3>
                                     <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 space-y-1.5 leading-relaxed">
                                         <p>
-                                            <a href="mailto:rattinun@agileassets.co.th" className="hover:text-sky-600 transition-colors">
-                                                rattinun@agileassets.co.th
+                                            <a href={`mailto:${companyInfo?.email || 'rattinun@agileassets.co.th'}`} className="hover:text-sky-600 transition-colors font-semibold text-slate-800 dark:text-slate-200">
+                                                {companyInfo?.email || 'rattinun@agileassets.co.th'}
                                             </a>
                                         </p>
                                         <p>
@@ -218,6 +230,11 @@ export function ContactPage() {
                                                 worathep@agileassets.co.th
                                             </a>
                                         </p>
+                                        {companyInfo?.lineId && (
+                                            <p className="text-sky-600 dark:text-sky-400 font-bold text-xs pt-1">
+                                                LINE: {companyInfo.lineId}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -230,7 +247,7 @@ export function ContactPage() {
                                         Head Office
                                     </h3>
                                     <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-xs">
-                                        <p>เลขที่ 20 หมู่ 1 ถ.สุขุมวิท ต.บางเมืองใหม่ อ.เมือง จ.สมุทรปราการ 10270</p>
+                                        <p>{companyInfo?.address || 'เลขที่ 20 หมู่ 1 ถ.สุขุมวิท ต.บางเมืองใหม่ อ.เมือง จ.สมุทรปราการ 10270'}</p>
                                     </div>
                                 </div>
                             </div>

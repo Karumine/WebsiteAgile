@@ -168,6 +168,7 @@ export function NewsEditor() {
         <SplitPreviewContainer
             title={lang === 'th' ? 'จัดการข่าวสาร & บทความ (40/60 Live)' : 'News & Articles Editor (40/60 Split)'}
             description={lang === 'th' ? 'จัดการข่าวสารและประกาศ รองรับภาษาไทย/อังกฤษ พร้อมพรีวิวผลลัพธ์บนการ์ดข่าวสารจริง' : 'Manage news items with real-time live preview.'}
+            liveUrl="/news-update"
             actionButtons={
                 <>
                     <button

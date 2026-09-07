@@ -14,6 +14,7 @@ import {
     ShoppingBag,
     HelpCircle,
     Building2,
+    ExternalLink,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -44,32 +45,45 @@ export function AdminLayout() {
 
     return (
         <div className="min-h-screen bg-background flex">
-            {/* Sidebar */}
+            {/* Sidebar (Always Fixed Full Height) */}
             <aside
                 className={cn(
-                    'fixed inset-y-0 left-0 z-50 w-64 bg-navy border-r border-border flex flex-col transition-transform duration-300 lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen',
-                    sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                    'fixed inset-y-0 left-0 z-40 w-64 bg-navy border-r border-border flex flex-col transition-transform duration-300 ease-in-out',
+                    sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
                 )}
             >
-                {/* Logo */}
-                <div className="p-4 sm:p-5 border-b border-border flex items-center justify-between">
+                {/* Logo & Live Website Link */}
+                <div className="p-3.5 sm:p-4 border-b border-border flex items-center justify-between gap-2 shrink-0">
                     <div className="flex items-center gap-2.5 min-w-0">
-                        <img src={logoCmyk} alt="Agile Assets Logo" className="w-9 h-9 object-contain shrink-0 drop-shadow-sm" />
+                        <img src={logoCmyk} alt="Agile Assets Logo" className="w-8 h-8 sm:w-9 sm:h-9 object-contain shrink-0 drop-shadow-sm" />
                         <div className="min-w-0">
                             <span className="text-sm font-extrabold text-slate-900 dark:text-white block truncate">Agile Assets</span>
                             <p className="text-[10px] font-bold text-sky-600 dark:text-sky-400 uppercase tracking-wider leading-none mt-0.5">CMS Portal</p>
                         </div>
                     </div>
-                    <button
-                        onClick={() => setSidebarOpen(false)}
-                        className="lg:hidden text-muted-foreground hover:text-foreground"
-                    >
-                        <X className="w-5 h-5" />
-                    </button>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        {/* Live Website Button Beside Company Name */}
+                        <a
+                            href="/"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 hover:text-sky-300 border border-sky-500/25 text-xs font-semibold transition-all hover:scale-105 active:scale-95 group shadow-sm"
+                            title={lang === 'th' ? 'เปิดหน้าเว็บจริงในแท็บใหม่' : 'Open live website in new tab'}
+                        >
+                            <ExternalLink className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                            <span className="text-[11px] whitespace-nowrap">{lang === 'th' ? 'เปิดเว็บจริง' : 'Live Site'}</span>
+                        </a>
+                        <button
+                            onClick={() => setSidebarOpen(false)}
+                            className="lg:hidden text-muted-foreground hover:text-foreground p-1"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
                 </div>
 
                 {/* Nav Links */}
-                <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+                <nav className="flex-1 p-3 space-y-1 overflow-y-auto min-h-0">
                     {sidebarLinks.map((link) => (
                         <NavLink
                             key={link.to}
@@ -84,20 +98,20 @@ export function AdminLayout() {
                                 )
                             }
                         >
-                            <link.icon className="w-4.5 h-4.5" />
-                            {lang === 'th' ? link.labelTh : link.labelEn}
+                            <link.icon className="w-4.5 h-4.5 shrink-0" />
+                            <span className="truncate">{lang === 'th' ? link.labelTh : link.labelEn}</span>
                         </NavLink>
                     ))}
                 </nav>
 
                 {/* User & Logout */}
-                <div className="p-3 border-t border-border">
+                <div className="p-3 border-t border-border shrink-0">
                     <div className="flex items-center gap-3 px-3 py-2 mb-2">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center text-white text-xs font-bold">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-blue-500 flex items-center justify-center text-white text-xs font-bold shrink-0">
                             {user?.username.charAt(0).toUpperCase()}
                         </div>
-                        <div>
-                            <p className="text-sm font-medium text-foreground">{user?.username}</p>
+                        <div className="min-w-0">
+                            <p className="text-sm font-medium text-foreground truncate">{user?.username}</p>
                             <p className="text-[10px] text-muted-foreground">Administrator</p>
                         </div>
                     </div>
@@ -105,8 +119,8 @@ export function AdminLayout() {
                         onClick={handleLogout}
                         className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
                     >
-                        <LogOut className="w-4.5 h-4.5" />
-                        {lang === 'th' ? 'ออกจากระบบ' : 'Sign Out'}
+                        <LogOut className="w-4.5 h-4.5 shrink-0" />
+                        <span>{lang === 'th' ? 'ออกจากระบบ' : 'Sign Out'}</span>
                     </button>
                 </div>
             </aside>
@@ -114,13 +128,13 @@ export function AdminLayout() {
             {/* Mobile sidebar overlay */}
             {sidebarOpen && (
                 <div
-                    className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+                    className="fixed inset-0 z-30 bg-black/50 lg:hidden"
                     onClick={() => setSidebarOpen(false)}
                 />
             )}
 
             {/* Main Content */}
-            <div className="flex-1 flex flex-col min-h-screen">
+            <div className="lg:pl-64 flex-1 flex flex-col min-h-screen min-w-0">
                 {/* Top Bar */}
                 <header className="sticky top-0 z-30 h-14 glass border-b border-border flex items-center justify-between px-4 sm:px-6">
                     <div className="flex items-center gap-3">
@@ -136,7 +150,17 @@ export function AdminLayout() {
                     </div>
 
                     {/* Right Tools: Theme & Language Switcher */}
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2.5 sm:gap-3">
+                        <a
+                            href="/"
+                            target="_blank"
+                            rel="noreferrer"
+                            className="lg:hidden inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/25 text-xs font-semibold"
+                            title={lang === 'th' ? 'เปิดหน้าเว็บจริง (แท็บใหม่)' : 'Open live website in new tab'}
+                        >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            <span className="text-[11px]">{lang === 'th' ? 'เว็บจริง' : 'Live'}</span>
+                        </a>
                         <ThemeToggle />
                         <div className="flex items-center p-0.5 rounded-full border border-border glass bg-card/80">
                             <button

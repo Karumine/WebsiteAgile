@@ -72,16 +72,25 @@ export function AssetsForSaleSection() {
         },
     ];
 
+    const getCategoryFilterId = (cat?: string) => {
+        if (!cat) return 'machinery';
+        const lower = cat.toLowerCase();
+        if (lower.includes('ยานพาหนะ') || lower.includes('รถ') || lower.includes('transport') || lower.includes('vehicle')) return 'vehicles';
+        if (lower.includes('แพทย์') || lower.includes('medical')) return 'medical';
+        if (lower.includes('พลังงาน') || lower.includes('ไฟฟ้า') || lower.includes('energy') || lower.includes('solar')) return 'energy';
+        return 'machinery';
+    };
+
     const cmsAssets = settings.usedMachinery?.map((item) => ({
         id: item.id,
         title: lang === 'en' ? (item.title_en || item.title) : item.title,
-        category: 'machinery',
+        category: getCategoryFilterId(item.category),
         categoryName: item.category,
         year: item.year,
         condition: item.condition,
         price: item.price,
         image: item.image,
-        features: [item.description],
+        features: item.description ? [item.description] : [],
     })) || [];
 
     const assets = [...cmsAssets, ...defaultAssets];
@@ -102,7 +111,7 @@ export function AssetsForSaleSection() {
     };
 
     return (
-        <section id="assets-for-sale" className="py-16 lg:py-20 relative overflow-hidden bg-background">
+        <section id="assets-for-sale" className="py-16 lg:py-20 relative overflow-hidden bg-background scroll-mt-24">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 {/* Section Header */}
                 <ScrollReveal animation="fade-up">

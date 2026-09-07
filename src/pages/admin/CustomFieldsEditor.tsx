@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import type { CustomField } from '@/types';
 import { generateId } from '@/lib/utils';
-import { Plus, Trash2, Save, Settings } from 'lucide-react';
+import { Plus, Trash2, Save, Settings, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const FIELD_TYPES: CustomField['type'][] = ['text', 'number', 'date', 'boolean', 'url'];
@@ -65,6 +65,16 @@ export function CustomFieldsEditor() {
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
+                    <a
+                        href="/"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-semibold transition-all hover:scale-105 active:scale-95 shadow-sm"
+                        title="ดูหน้านี้บนเว็บจริง (/) ในแท็บใหม่"
+                    >
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        <span>ดูหน้านี้บนเว็บจริง</span>
+                    </a>
                     <button
                         onClick={addField}
                         className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"

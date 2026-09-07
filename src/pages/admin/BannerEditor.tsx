@@ -44,6 +44,7 @@ export function BannerEditor() {
         <SplitPreviewContainer
             title={lang === 'th' ? 'จัดการ Hero Banner (40/60 Live)' : 'Hero Banner Editor (40/60 Split)'}
             description={lang === 'th' ? 'ปรับเปลี่ยนสโลแกน ข้อความ และปุ่มกดหน้าแรก โดยเห็นผลลัพธ์บนแบนเนอร์จริงทันที' : 'Edit homepage hero banner slogan and CTA with instant live preview.'}
+            liveUrl="/"
             actionButtons={
                 <button
                     onClick={handleSave}

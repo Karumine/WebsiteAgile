@@ -38,6 +38,7 @@ const LeasingApplicationPage = lazy(() => import('@/pages/public/LeasingApplicat
 const AssetForSalePage = lazy(() => import('@/pages/public/AssetForSalePage').then(m => ({ default: m.AssetForSalePage })));
 const CookiePolicyPage = lazy(() => import('@/pages/public/CookiePolicyPage').then(m => ({ default: m.CookiePolicyPage })));
 const NcNdaPage = lazy(() => import('@/pages/public/NcNdaPage').then(m => ({ default: m.NcNdaPage })));
+const NotFoundPage = lazy(() => import('@/pages/public/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
 const LoginPage = lazy(() => import('@/pages/admin/LoginPage').then(m => ({ default: m.LoginPage })));
 const DashboardPage = lazy(() => import('@/pages/admin/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const RatesEditor = lazy(() => import('@/pages/admin/RatesEditor').then(m => ({ default: m.RatesEditor })));
@@ -90,13 +91,16 @@ export default function App() {
                       <Route path="/en/generator-set-2" element={<GeneratorSetPage />} />
                       <Route path="/investor-relations" element={<InvestorRelationsPage />} />
                       <Route path="/investor-relations-2" element={<InvestorRelationsPage />} />
+                      <Route path="/en/investor-relations" element={<InvestorRelationsPage />} />
                       <Route path="/en/investor-relations-2" element={<InvestorRelationsPage />} />
                       <Route path="/sustainability" element={<SustainabilityPage />} />
                       <Route path="/sustainability-strategy" element={<SustainabilityPage />} />
                       <Route path="/sustainability-campaign" element={<SustainabilityPage />} />
                       <Route path="/en/sustainability" element={<SustainabilityPage />} />
+                      <Route path="/en/sustainability-2" element={<SustainabilityPage />} />
                       <Route path="/project" element={<ProjectActivityPage />} />
                       <Route path="/project-2" element={<ProjectActivityPage />} />
+                      <Route path="/project-activity" element={<ProjectActivityPage />} />
                       <Route path="/projects" element={<ProjectActivityPage />} />
                       <Route path="/projects-activity" element={<ProjectActivityPage />} />
                       <Route path="/en/project-2" element={<ProjectActivityPage />} />
@@ -107,6 +111,8 @@ export default function App() {
                       <Route path="/knowledge-2" element={<KnowledgePage />} />
                       <Route path="/knowledge-contents" element={<KnowledgePage />} />
                       <Route path="/en/knowledge-2" element={<KnowledgePage />} />
+                      <Route path="/news" element={<NewsUpdatePage />} />
+                      <Route path="/articles" element={<NewsUpdatePage />} />
                       <Route path="/news-update" element={<NewsUpdatePage />} />
                       <Route path="/news-update-2" element={<NewsUpdatePage />} />
                       <Route path="/en/news-update-2" element={<NewsUpdatePage />} />
@@ -165,6 +171,8 @@ export default function App() {
                           <Route path="/management-portal/company" element={<CompanyInfoEditor />} />
                         </Route>
                       </Route>
+                      {/* 404 Catch-All Route for Missing / Unloaded Pages */}
+                      <Route path="*" element={<NotFoundPage />} />
                     </Routes>
                   </Suspense>
                 </BrowserRouter>

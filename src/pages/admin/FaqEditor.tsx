@@ -1,49 +1,135 @@
 import { useState } from 'react';
-import { Plus, Edit2, Trash2, Save, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, Save, X, ChevronRight, PhoneCall } from 'lucide-react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { SplitPreviewContainer } from '@/components/admin/SplitPreviewContainer';
+import { cn } from '@/lib/utils';
 import type { FaqItem } from '@/types';
 import toast from 'react-hot-toast';
 
-function FaqLivePreview({ items }: { items: FaqItem[] }) {
+function FaqLivePreview({
+    items,
+    editingId,
+    formData = {},
+}: {
+    items: FaqItem[];
+    editingId?: string | null;
+    formData?: Partial<FaqItem>;
+}) {
     const { lang } = useLanguage();
     const [openIndex, setOpenIndex] = useState<number | null>(0);
 
+    // Merge items with live edits for instant reactive feedback
+    const displayItems: FaqItem[] = [...items];
+
+    if (editingId === 'new' && (formData.question || formData.answer)) {
+        displayItems.unshift({
+            id: 'new-draft',
+            question: formData.question || (lang === 'th' ? '(ระบุคำถาม...)' : '(Enter question...)'),
+            question_en: formData.question_en,
+            answer: formData.answer || (lang === 'th' ? '(ระบุคำตอบ...)' : '(Enter answer...)'),
+            answer_en: formData.answer_en,
+            category: formData.category || 'การอนุมัติสินเชื่อ',
+        });
+    } else if (editingId && editingId !== 'new') {
+        const idx = displayItems.findIndex((i) => i.id === editingId);
+        if (idx !== -1) {
+            displayItems[idx] = {
+                ...displayItems[idx],
+                ...formData,
+                question: formData.question?.trim() ? formData.question : displayItems[idx].question,
+                answer: formData.answer?.trim() ? formData.answer : displayItems[idx].answer,
+            };
+        }
+    }
+
     return (
-        <div className="p-6 bg-slate-950 text-white rounded-xl space-y-4">
-            <div className="text-center max-w-xl mx-auto mb-6">
-                <h2 className="text-xl font-bold text-white mb-1">
-                    {lang === 'th' ? 'คำถามที่พบบ่อย (FAQ Live Preview)' : 'Frequently Asked Questions'}
-                </h2>
-                <p className="text-xs text-slate-400">
-                    {lang === 'th' ? 'คำถามและคำตอบสำหรับการอนุมัติสินเชื่อเช่าซื้อเครื่องจักร' : 'Questions & Answers'}
+        <div className="py-8 sm:py-12 px-4 sm:px-6 max-w-4xl mx-auto bg-white dark:bg-slate-950 min-h-full transition-colors selection:bg-sky-500 selection:text-white">
+            {/* Section Header - 100% faithful to public FaqPage.tsx */}
+            <div className="text-center mb-8 sm:mb-12">
+                <p className="text-xs sm:text-sm font-semibold text-sky-600 dark:text-sky-400 mb-1">
+                    Frequently Asked Questions (FAQ)
                 </p>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-blue-900 dark:text-blue-400 tracking-tight font-sans">
+                    {lang === 'th' ? 'คำถามที่พบบ่อย' : 'Frequently Asked Questions'}
+                </h2>
             </div>
 
-            <div className="space-y-3">
-                {items.map((item, idx) => {
-                    const isOpen = openIndex === idx;
+            {/* Accordion List - Exactly identical to public FaqPage.tsx */}
+            <div className="space-y-3 sm:space-y-4">
+                {displayItems.map((item, idx) => {
+                    const isBeingEdited = editingId === item.id || (editingId === 'new' && item.id === 'new-draft');
+                    const isOpen = isBeingEdited || openIndex === idx;
                     const question = lang === 'en' ? (item.question_en || item.question) : item.question;
                     const answer = lang === 'en' ? (item.answer_en || item.answer) : item.answer;
 
                     return (
-                        <div key={item.id || idx} className="rounded-xl border border-slate-800 bg-slate-900/80 overflow-hidden">
+                        <div
+                            key={item.id || idx}
+                            className={cn(
+                                "rounded-2xl border transition-all duration-200 overflow-hidden",
+                                isBeingEdited
+                                    ? "ring-2 ring-sky-400 border-sky-400 bg-sky-50/70 dark:bg-slate-900 shadow-md"
+                                    : isOpen
+                                    ? "bg-sky-50/50 dark:bg-slate-900 border-sky-300 dark:border-sky-700 shadow-md"
+                                    : "bg-slate-50/80 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800/80 hover:border-slate-300 hover:bg-slate-100/70 dark:hover:bg-slate-900"
+                            )}
+                        >
                             <button
-                                onClick={() => setOpenIndex(isOpen ? null : idx)}
-                                className="w-full px-4 py-3 text-left font-semibold text-xs sm:text-sm text-slate-200 flex items-center justify-between hover:text-sky-400 transition-colors"
+                                type="button"
+                                onClick={() => setOpenIndex(isOpen && !isBeingEdited ? null : idx)}
+                                className="w-full px-5 sm:px-7 py-4 sm:py-5 flex items-center justify-between text-left gap-4 cursor-pointer"
                             >
-                                <span>{question}</span>
-                                <span className="text-sky-400 text-base">{isOpen ? '−' : '+'}</span>
+                                <span className="text-sm sm:text-base font-bold text-slate-800 dark:text-slate-100 font-sans leading-snug flex items-center gap-2">
+                                    <span>{question}</span>
+                                    {isBeingEdited && (
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 shrink-0">
+                                            {item.id === 'new-draft' ? 'กำลังเพิ่มใหม่' : 'กำลังแก้ไข'}
+                                        </span>
+                                    )}
+                                </span>
+                                <div
+                                    className={cn(
+                                        "w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-transform duration-300",
+                                        isOpen
+                                            ? "rotate-90 bg-sky-500 text-white shadow-sm"
+                                            : "bg-slate-200/80 dark:bg-slate-800 text-slate-500 dark:text-slate-400"
+                                    )}
+                                >
+                                    <ChevronRight className="w-4 h-4" />
+                                </div>
                             </button>
+
                             {isOpen && (
-                                <div className="px-4 pb-4 pt-1 text-xs text-slate-400 leading-relaxed border-t border-slate-800/60">
-                                    {answer}
+                                <div className="px-5 sm:px-7 pb-5 sm:pb-6 pt-1 animate-fade-in border-t border-sky-200/50 dark:border-slate-800">
+                                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed italic bg-white dark:bg-slate-950/60 p-4 rounded-xl border border-slate-200/60 dark:border-slate-800/60">
+                                        “{answer}”
+                                    </p>
                                 </div>
                             )}
                         </div>
                     );
                 })}
+            </div>
+
+            {/* Need More Assistance CTA Box - Matching public FaqPage.tsx */}
+            <div className="mt-10 sm:mt-14 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-blue-900 to-sky-900 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div className="space-y-1 text-center sm:text-left">
+                    <h3 className="text-base sm:text-lg font-bold font-sans">
+                        {lang === 'th' ? 'มีข้อสงสัยหรือต้องการสอบถามเพิ่มเติม?' : 'Need More Information or Personalized Advice?'}
+                    </h3>
+                    <p className="text-xs text-sky-200">
+                        {lang === 'th'
+                            ? 'ทีมงาน Agile Assets พร้อมให้คำปรึกษาและโครงสร้างสินเชื่อที่ตอบโจทย์ธุรกิจท่าน'
+                            : 'Our credit specialists are ready to tailor financial structures for your business.'}
+                    </p>
+                </div>
+                <div className="flex items-center gap-3 shrink-0">
+                    <div className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-white text-blue-900 font-bold text-xs shadow-md">
+                        <PhoneCall className="w-3.5 h-3.5 text-sky-600" />
+                        <span>02-000-9392</span>
+                    </div>
+                </div>
             </div>
         </div>
     );
@@ -114,6 +200,7 @@ export function FaqEditor() {
         <SplitPreviewContainer
             title={lang === 'th' ? 'จัดการคำถามที่พบบ่อย (40/60 Live)' : 'FAQ Editor (40/60 Split)'}
             description={lang === 'th' ? 'เพิ่มและแก้ไขคำถามคำตอบสำหรับหน้า FAQ โดยเห็นผลลัพธ์พรีวิวทันที' : 'Manage FAQ questions with instant real-time live preview.'}
+            liveUrl="/faq"
             actionButtons={
                 <button
                     onClick={handleAddNew}
@@ -123,12 +210,12 @@ export function FaqEditor() {
                     <span>{lang === 'th' ? 'เพิ่มคำถามใหม่' : 'Add FAQ'}</span>
                 </button>
             }
-            preview={<FaqLivePreview items={items} />}
+            preview={<FaqLivePreview items={items} editingId={editingId} formData={formData} />}
         >
             <div className="space-y-6">
                 {/* Form Editor */}
                 {editingId && (
-                    <div className="glass rounded-2xl p-4 border border-sky-400/40 space-y-3 bg-slate-900/60">
+                    <div className="glass rounded-2xl p-4 border border-sky-400/40 space-y-3 bg-card shadow-sm">
                         <div className="flex items-center justify-between pb-2 border-b border-border">
                             <h2 className="text-xs font-bold text-foreground">
                                 {editingId === 'new' ? (lang === 'th' ? 'เพิ่มคำถามใหม่' : 'Add New FAQ') : (lang === 'th' ? 'แก้ไขคำถาม' : 'Edit FAQ')}
@@ -139,21 +226,43 @@ export function FaqEditor() {
                         </div>
 
                         <div>
-                            <label className="block text-xs font-semibold text-muted-foreground mb-1">คำถาม (TH)</label>
+                            <label className="block text-xs font-semibold text-muted-foreground mb-1">คำถาม (TH) *</label>
                             <input
                                 type="text"
                                 value={formData.question || ''}
                                 onChange={(e) => setFormData({ ...formData, question: e.target.value })}
                                 className="w-full px-3 py-1.5 rounded-xl bg-background border border-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                placeholder="เช่น สินเชื่อเครื่องจักรคืออะไร"
                             />
                         </div>
                         <div>
-                            <label className="block text-xs font-semibold text-muted-foreground mb-1">คำตอบ (TH)</label>
+                            <label className="block text-xs font-semibold text-muted-foreground mb-1">คำถามภาษาอังกฤษ (EN)</label>
+                            <input
+                                type="text"
+                                value={formData.question_en || ''}
+                                onChange={(e) => setFormData({ ...formData, question_en: e.target.value })}
+                                className="w-full px-3 py-1.5 rounded-xl bg-background border border-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                placeholder="e.g. What is Machinery Financing?"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-muted-foreground mb-1">คำตอบ (TH) *</label>
                             <textarea
                                 rows={2}
                                 value={formData.answer || ''}
                                 onChange={(e) => setFormData({ ...formData, answer: e.target.value })}
                                 className="w-full px-3 py-1.5 rounded-xl bg-background border border-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                placeholder="คำอธิบายรายละเอียด..."
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-semibold text-muted-foreground mb-1">คำตอบภาษาอังกฤษ (EN)</label>
+                            <textarea
+                                rows={2}
+                                value={formData.answer_en || ''}
+                                onChange={(e) => setFormData({ ...formData, answer_en: e.target.value })}
+                                className="w-full px-3 py-1.5 rounded-xl bg-background border border-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                placeholder="English answer description..."
                             />
                         </div>
 

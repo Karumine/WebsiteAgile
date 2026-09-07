@@ -145,7 +145,7 @@ export function LatestNewsSection() {
 
     return (
         <>
-            <section className="py-16 sm:py-20 bg-slate-50/60 dark:bg-slate-900/40 relative overflow-hidden border-t border-slate-200/60 dark:border-slate-800/80">
+            <section id="news" className="py-16 sm:py-20 bg-slate-50/60 dark:bg-slate-900/40 relative overflow-hidden border-t border-slate-200/60 dark:border-slate-800/80 scroll-mt-20">
                 {/* Background ambient lighting */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-7xl h-full pointer-events-none opacity-40">
                     <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-sky-400/10 rounded-full filter blur-3xl" />
