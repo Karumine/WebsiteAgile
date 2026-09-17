@@ -77,6 +77,50 @@ export interface CompanyInfo {
     operatingHours?: string;
 }
 
+export interface ThemeSettings {
+    primaryColor: string;
+    gradientStart: string;
+    gradientEnd: string;
+    buttonTextColor: string;
+    buttonRadius: 'rounded-md' | 'rounded-xl' | 'rounded-2xl' | 'rounded-full';
+    buttonStyle: 'gradient' | 'solid' | 'glow';
+    accentColor: string;
+}
+
+export interface PageSectionItem {
+    id: string;
+    title: string;
+    titleEn?: string;
+    description: string;
+    descEn?: string;
+    badge?: string;
+    image?: string;
+    link?: string;
+}
+
+export interface PageCustomContent {
+    id: string;
+    pageName: string;
+    titleTh: string;
+    titleEn?: string;
+    metaTitle?: string;
+    metaDescription?: string;
+    heroBadgeTh?: string;
+    heroBadgeEn?: string;
+    heroTitleTh: string;
+    heroTitleEn?: string;
+    heroSubtitleTh: string;
+    heroSubtitleEn?: string;
+    heroImage?: string;
+    ctaTextTh?: string;
+    ctaTextEn?: string;
+    ctaLink?: string;
+    contentTh?: string;
+    contentEn?: string;
+    items?: PageSectionItem[];
+    lastUpdated?: string;
+}
+
 export interface SiteSettings {
     banner: BannerSettings;
     interestRates: InterestRate[];
@@ -86,6 +130,8 @@ export interface SiteSettings {
     impactStats: ImpactStats;
     usedMachinery: UsedMachineryItem[];
     faqs: FaqItem[];
+    themeSettings?: ThemeSettings;
+    pageContents?: Record<string, PageCustomContent>;
     lastUpdated: string;
 }
 

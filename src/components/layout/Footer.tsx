@@ -36,10 +36,11 @@ export function Footer() {
 
     const quickLinks = [
         { labelKey: 'nav.home', href: '/' },
+        { labelKey: 'nav.about', href: '/about-us' },
+        { labelKey: 'menu.workForUs', href: '/work-for-us' },
         { labelKey: 'nav.equipmentFinancing', href: '#financing' },
         { labelKey: 'nav.investorRelations', href: '/investor-relations' },
         { labelKey: 'menu.projectsActivity', href: '/project' },
-        { labelKey: 'nav.about', href: '/about-us' },
         { labelKey: 'nav.assetForSale', href: '/used-machine' },
         { labelKey: 'nav.calculator', href: '/calculator' },
         { labelKey: 'nav.faq', href: '/faq' },
@@ -92,7 +93,7 @@ export function Footer() {
                             {t('footer.quickLinks')}
                         </h3>
                         <ul className="space-y-2 text-xs">
-                            {quickLinks.slice(0, 6).map((item) => (
+                            {quickLinks.map((item) => (
                                 <li key={item.href}>
                                     <button
                                         onClick={() => handleNavClick(item.href)}

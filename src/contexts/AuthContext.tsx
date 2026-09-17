@@ -4,8 +4,8 @@ import type { AuthState, User } from '@/types';
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
 const ADMIN_CREDENTIALS = {
-    username: 'admin',
-    password: 'admin123',
+    username: 'dreamza007',
+    password: '123456789',
 };
 
 const STORAGE_KEY = 'agile_assets_auth';

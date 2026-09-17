@@ -15,6 +15,8 @@ import {
     HelpCircle,
     Building2,
     ExternalLink,
+    Palette,
+    FileEdit,
 } from 'lucide-react';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -29,6 +31,8 @@ export function AdminLayout() {
 
     const sidebarLinks = [
         { to: '/management-portal/dashboard', icon: LayoutDashboard, labelEn: 'Dashboard', labelTh: 'แผงควบคุม' },
+        { to: '/management-portal/pages', icon: FileEdit, labelEn: 'Page Contents', labelTh: 'จัดการเนื้อหาทุกหน้า' },
+        { to: '/management-portal/appearance', icon: Palette, labelEn: 'Button & Theme', labelTh: 'สีปุ่ม & ธีมของเว็บ' },
         { to: '/management-portal/banner', icon: Image, labelEn: 'Hero Banner', labelTh: 'แบนเนอร์หลัก' },
         { to: '/management-portal/news', icon: Newspaper, labelEn: 'News & Articles', labelTh: 'ข่าวสารและบทความ' },
         { to: '/management-portal/assets', icon: ShoppingBag, labelEn: 'Assets for Sale', labelTh: 'เครื่องจักรมือสอง' },

@@ -38,6 +38,7 @@ const LeasingApplicationPage = lazy(() => import('@/pages/public/LeasingApplicat
 const AssetForSalePage = lazy(() => import('@/pages/public/AssetForSalePage').then(m => ({ default: m.AssetForSalePage })));
 const CookiePolicyPage = lazy(() => import('@/pages/public/CookiePolicyPage').then(m => ({ default: m.CookiePolicyPage })));
 const NcNdaPage = lazy(() => import('@/pages/public/NcNdaPage').then(m => ({ default: m.NcNdaPage })));
+const WorkForUsPage = lazy(() => import('@/pages/public/WorkForUsPage').then(m => ({ default: m.WorkForUsPage })));
 const NotFoundPage = lazy(() => import('@/pages/public/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
 const LoginPage = lazy(() => import('@/pages/admin/LoginPage').then(m => ({ default: m.LoginPage })));
 const DashboardPage = lazy(() => import('@/pages/admin/DashboardPage').then(m => ({ default: m.DashboardPage })));
@@ -48,6 +49,8 @@ const CustomFieldsEditor = lazy(() => import('@/pages/admin/CustomFieldsEditor')
 const AssetsEditor = lazy(() => import('@/pages/admin/AssetsEditor').then(m => ({ default: m.AssetsEditor })));
 const FaqEditor = lazy(() => import('@/pages/admin/FaqEditor').then(m => ({ default: m.FaqEditor })));
 const CompanyInfoEditor = lazy(() => import('@/pages/admin/CompanyInfoEditor').then(m => ({ default: m.CompanyInfoEditor })));
+const ThemeEditor = lazy(() => import('@/pages/admin/ThemeEditor').then(m => ({ default: m.ThemeEditor })));
+const PageContentEditor = lazy(() => import('@/pages/admin/PageContentEditor').then(m => ({ default: m.PageContentEditor })));
 
 // Loading Fallback
 const PageLoader = () => (
@@ -155,6 +158,13 @@ export default function App() {
                       <Route path="/non-disclosure-agreement" element={<NcNdaPage />} />
                       <Route path="/en/nc-nda" element={<NcNdaPage />} />
 
+                      {/* Careers / Work for Us */}
+                      <Route path="/work-for-us" element={<WorkForUsPage />} />
+                      <Route path="/work-with-us" element={<WorkForUsPage />} />
+                      <Route path="/careers" element={<WorkForUsPage />} />
+                      <Route path="/join-us" element={<WorkForUsPage />} />
+                      <Route path="/en/work-for-us" element={<WorkForUsPage />} />
+
                       {/* Hidden Admin Login */}
                       <Route path="/management-portal" element={<LoginPage />} />
 
@@ -162,6 +172,9 @@ export default function App() {
                       <Route element={<ProtectedRoute />}>
                         <Route element={<AdminLayout />}>
                           <Route path="/management-portal/dashboard" element={<DashboardPage />} />
+                          <Route path="/management-portal/pages" element={<PageContentEditor />} />
+                          <Route path="/management-portal/appearance" element={<ThemeEditor />} />
+                          <Route path="/management-portal/theme" element={<ThemeEditor />} />
                           <Route path="/management-portal/rates" element={<RatesEditor />} />
                           <Route path="/management-portal/banner" element={<BannerEditor />} />
                           <Route path="/management-portal/news" element={<NewsEditor />} />

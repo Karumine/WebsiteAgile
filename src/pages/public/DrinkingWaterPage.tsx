@@ -11,9 +11,22 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
 
 export function DrinkingWaterPage() {
     const { lang } = useLanguage();
+    const { content } = usePageContent('drinking-water', {
+        heroBadgeTh: 'Financing Service • Industry Solutions',
+        heroBadgeEn: 'Financing Service • Industry Solutions',
+        heroTitleTh: 'Drinking Water Production',
+        heroTitleEn: 'Drinking Water Production',
+        heroSubtitleTh: 'สินเชื่อเครื่องจักรสำหรับธุรกิจผลิตน้ำดื่ม',
+        heroSubtitleEn: 'Machinery & Turnkey Line Financing',
+        heroImage: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=1920&q=85',
+        ctaTextTh: 'ขอสินเชื่อกับเรา',
+        ctaTextEn: 'Financing with Us',
+    });
+
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [formData, setFormData] = useState({
@@ -179,7 +192,7 @@ export function DrinkingWaterPage() {
                     {/* Unique Drinking Water Bottling Plant Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img 
-                            src="https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=1920&q=85" 
+                            src={content.heroImage || "https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=1920&q=85"} 
                             alt="Drinking Water Production Line" 
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
@@ -201,15 +214,15 @@ export function DrinkingWaterPage() {
                                 <div className="w-5 h-5 rounded-full flex items-center justify-center bg-sky-400/20 text-sky-300">
                                     <Droplets className="w-3.5 h-3.5" />
                                 </div>
-                                <span>Financing Service • Industry Solutions</span>
+                                <span>{lang === 'th' ? (content.heroBadgeTh || 'Financing Service • Industry Solutions') : (content.heroBadgeEn || 'Financing Service • Industry Solutions')}</span>
                             </div>
 
                             {/* Main Titles */}
                             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-4 text-white drop-shadow-2xl font-sans">
-                                Drinking Water Production
+                                {lang === 'th' ? (content.heroTitleTh || 'Drinking Water Production') : (content.heroTitleEn || 'Drinking Water Production')}
                             </h1>
                             <p className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-sky-200 tracking-wide mb-8 drop-shadow-lg font-sans">
-                                {lang === 'th' ? 'สินเชื่อเครื่องจักรสำหรับธุรกิจผลิตน้ำดื่ม' : 'Machinery & Turnkey Line Financing'}
+                                {lang === 'th' ? (content.heroSubtitleTh || 'สินเชื่อเครื่องจักรสำหรับธุรกิจผลิตน้ำดื่ม') : (content.heroSubtitleEn || 'Machinery & Turnkey Line Financing')}
                             </p>
 
                             {/* CTA Button */}
@@ -219,7 +232,7 @@ export function DrinkingWaterPage() {
                                     className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-sky-500/30 hover:shadow-sky-500/50 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
                                 >
                                     <DollarSign className="w-5 h-5" />
-                                    <span>{lang === 'th' ? 'ขอสินเชื่อกับเรา' : 'Financing with Us'}</span>
+                                    <span>{lang === 'th' ? (content.ctaTextTh || 'ขอสินเชื่อกับเรา') : (content.ctaTextEn || 'Financing with Us')}</span>
                                 </button>
                             </div>
                         </ScrollReveal>
@@ -248,7 +261,18 @@ export function DrinkingWaterPage() {
 
                         {/* 8 Machinery Cards Grid (4 columns on desktop, exactly like the original site) */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-16">
-                            {machines.map((m, idx) => (
+                            {((content.items && content.items.length > 0)
+                                ? content.items.map((item) => ({
+                                    id: item.id,
+                                    titleTh: item.title,
+                                    titleEn: item.titleEn || item.title,
+                                    descTh: item.description,
+                                    descEn: item.descEn || item.description,
+                                    image: item.image || 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=600&q=80',
+                                    badge: item.badge || 'เครื่องจักรมาตรฐาน',
+                                }))
+                                : machines
+                            ).map((m, idx) => (
                                 <ScrollReveal key={m.id} animation="fade-up" delay={idx * 50}>
                                     <div className="glass-card h-full rounded-3xl p-5 sm:p-6 border border-border/80 hover:border-sky-500/40 transition-all duration-300 hover:shadow-xl hover:shadow-sky-500/10 flex flex-col group">
                                         {/* Machine Image */}

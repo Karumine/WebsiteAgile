@@ -1,4 +1,4 @@
-import { BarChart3, Newspaper, ExternalLink, Image, ShoppingBag, HelpCircle, Building2 } from 'lucide-react';
+import { BarChart3, Newspaper, ExternalLink, Image, ShoppingBag, Building2, Palette, FileEdit } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -9,6 +9,14 @@ export function DashboardPage() {
     const { lang } = useLanguage();
 
     const stats = [
+        {
+            icon: FileEdit,
+            label: lang === 'th' ? 'จัดการเนื้อหาทุกหน้า' : 'Universal Pages',
+            value: Object.keys(settings.pageContents || {}).length > 0 ? `${Object.keys(settings.pageContents || {}).length} กำหนดเอง` : 'พร้อมแก้ไข',
+            color: 'text-sky-400',
+            bg: 'bg-sky-400/10',
+            to: '/management-portal/pages',
+        },
         {
             icon: Newspaper,
             label: lang === 'th' ? 'ข่าวสาร & บทความ' : 'News & Articles',
@@ -29,17 +37,9 @@ export function DashboardPage() {
             icon: BarChart3,
             label: lang === 'th' ? 'ผลิตภัณฑ์สินเชื่อ' : 'Financing Rates',
             value: settings.interestRates?.length || 0,
-            color: 'text-sky-400',
-            bg: 'bg-sky-400/10',
-            to: '/management-portal/rates',
-        },
-        {
-            icon: HelpCircle,
-            label: lang === 'th' ? 'คำถาม FAQ' : 'FAQ Items',
-            value: settings.faqs?.length || 0,
             color: 'text-purple-400',
             bg: 'bg-purple-400/10',
-            to: '/management-portal/faq',
+            to: '/management-portal/rates',
         },
     ];
 
@@ -81,12 +81,12 @@ export function DashboardPage() {
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     {[
+                        { label: lang === 'th' ? 'จัดการเนื้อหาทุกหน้าเว็บ' : 'Manage All Page Contents', desc: 'แก้ไขข้อความ รูปภาพ และหัวข้อทุกหน้า', to: '/management-portal/pages', icon: FileEdit },
+                        { label: lang === 'th' ? 'ปรับแต่งสีปุ่ม & ธีม' : 'Button & Theme Styles', desc: 'เปลี่ยนสีปุ่ม สีกราเดียนต์ และรูปทรง', to: '/management-portal/appearance', icon: Palette },
                         { label: lang === 'th' ? 'จัดการข่าวสาร & กิจกรรม' : 'Manage News & Articles', desc: 'โพสต์ข่าวและภาพกิจกรรมใหม่', to: '/management-portal/news', icon: Newspaper },
                         { label: lang === 'th' ? 'จัดการเครื่องจักรมือสอง' : 'Manage Used Machinery', desc: 'เพิ่มสินทรัพย์และอัปเดตราคา', to: '/management-portal/assets', icon: ShoppingBag },
                         { label: lang === 'th' ? 'แก้ไขข้อมูลบริษัท & สถิติ' : 'Company Profile & Stats', desc: 'ปรับเบอร์โทร และสถิติผลงานโรงงาน', to: '/management-portal/company', icon: Building2 },
                         { label: lang === 'th' ? 'แก้ไขแบนเนอร์หลัก' : 'Edit Hero Banner', desc: 'ปรับสโลแกนและภาพหน้าแรก', to: '/management-portal/banner', icon: Image },
-                        { label: lang === 'th' ? 'จัดการคำถามที่พบบ่อย' : 'Manage FAQ Items', desc: 'เพิ่มคำถามคำตอบสำหรับลูกค้า', to: '/management-portal/faq', icon: HelpCircle },
-                        { label: lang === 'th' ? 'แก้ไขอัตราดอกเบี้ย' : 'Edit Interest Rates', desc: 'ปรับอัตราดอกเบี้ยสินเชื่อ', to: '/management-portal/rates', icon: BarChart3 },
                     ].map((action) => (
                         <Link
                             key={action.label}

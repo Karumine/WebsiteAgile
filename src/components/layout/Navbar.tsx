@@ -50,7 +50,7 @@ const ABOUT_MENU = [
     { icon: Percent, labelKey: 'menu.interestRateConverter', href: '/interest-rate-conversion' },
     { icon: HelpCircle, labelKey: 'menu.faq', href: '/faq' },
     { icon: Phone, labelKey: 'menu.contactUs', href: '/contact' },
-    { icon: Briefcase, labelKey: 'menu.workForUs', href: '/#contact' },
+    { icon: Briefcase, labelKey: 'menu.workForUs', href: '/work-for-us' },
 ];
 
 const EQUIPMENT_PATHS = new Set([
@@ -72,6 +72,7 @@ const ABOUT_PATHS = new Set([
     '/interest-rate-conversion-2', '/en/interest-rate-conversion-2',
     '/faq', '/faq-2', '/frequently-asked-questions', '/en/faq-2',
     '/contact', '/contact-us', '/contact-2', '/en/contact-2',
+    '/work-for-us', '/work-with-us', '/careers', '/join-us',
 ]);
 
 const ASSET_PATHS = new Set([
