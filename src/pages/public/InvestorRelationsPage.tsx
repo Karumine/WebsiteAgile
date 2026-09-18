@@ -12,10 +12,13 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
 export function InvestorRelationsPage() {
     const { lang } = useLanguage();
+    const { content } = usePageContent('investor-relations', DEFAULT_PAGE_CONTENTS['investor-relations']);
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [formData, setFormData] = useState({
@@ -231,7 +234,7 @@ export function InvestorRelationsPage() {
                     {/* Deep Futuristic Global Network Background */}
                     <div className="absolute inset-0 z-0">
                         <img 
-                            src={heroBg} 
+                            src={content.heroImage || heroBg} 
                             alt="Agile Assets Investor Relations" 
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
@@ -256,15 +259,15 @@ export function InvestorRelationsPage() {
                                 <div className="w-5 h-5 rounded-full flex items-center justify-center bg-sky-400/20 text-sky-300">
                                     <TrendingUp className="w-3.5 h-3.5" />
                                 </div>
-                                <span>Investor Relations • นักลงทุนสัมพันธ์</span>
+                                <span>{(lang === 'th' ? (content.heroBadgeTh || content.heroBadgeEn) : (content.heroBadgeEn || content.heroBadgeTh)) || (lang === 'th' ? 'Investor Relations • นักลงทุนสัมพันธ์' : 'Investor Relations')}</span>
                             </div>
 
                             {/* Main Titles */}
                             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-4 text-white drop-shadow-2xl font-sans">
-                                Agile Assets
+                                {content.heroTitleEn || content.heroTitleTh || 'Agile Assets'}
                             </h1>
                             <p className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-sky-200 tracking-wide mb-8 drop-shadow-lg font-sans">
-                                Investor Relations
+                                {content.heroSubtitleTh || content.heroSubtitleEn || (lang === 'th' ? 'นักลงทุนสัมพันธ์' : 'Investor Relations')}
                             </p>
 
                             {/* CTA Button */}
@@ -273,7 +276,7 @@ export function InvestorRelationsPage() {
                                     onClick={scrollToForm}
                                     className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-sky-500/30 hover:shadow-sky-500/50 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
                                 >
-                                    <span>{lang === 'th' ? 'ติดต่อฝ่ายนักลงทุนสัมพันธ์' : 'Contact Investor Relations'}</span>
+                                    <span>{(lang === 'th' ? (content.ctaTextTh || content.ctaTextEn) : (content.ctaTextEn || content.ctaTextTh)) || (lang === 'th' ? 'ติดต่อฝ่ายนักลงทุนสัมพันธ์' : 'Contact Investor Relations')}</span>
                                     <ArrowRight className="w-4 h-4" />
                                 </button>
                             </div>

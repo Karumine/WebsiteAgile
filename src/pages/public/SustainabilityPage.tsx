@@ -12,6 +12,8 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 
 // Project Image Carousel with Auto-Slide & Manual Controls
 function ProjectImageCarousel({ images, title }: { images: string[]; title: string }) {
@@ -111,6 +113,7 @@ function ProjectImageCarousel({ images, title }: { images: string[]; title: stri
 
 export function SustainabilityPage() {
     const { lang } = useLanguage();
+    const { content } = usePageContent('sustainability', DEFAULT_PAGE_CONTENTS['sustainability']);
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [formData, setFormData] = useState({
@@ -266,7 +269,7 @@ export function SustainabilityPage() {
                     {/* Background: Sustainability & Global Green Innovation */}
                     <div className="absolute inset-0 z-0">
                         <img 
-                            src="https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?w=1920&q=85" 
+                            src={content.heroImage || "https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?w=1920&q=85"} 
                             alt="Agile Assets Sustainability Strategy" 
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in opacity-90"
                             loading="eager"
@@ -288,15 +291,15 @@ export function SustainabilityPage() {
                                 <div className="w-5 h-5 rounded-full flex items-center justify-center bg-sky-400/20 text-sky-300">
                                     <Leaf className="w-3.5 h-3.5" />
                                 </div>
-                                <span>ESG & Sustainability Strategy • ความยั่งยืน</span>
+                                <span>{lang === 'th' ? (content.heroBadgeTh || 'ESG & Sustainability Strategy • ความยั่งยืน') : (content.heroBadgeEn || 'ESG & Sustainability Strategy')}</span>
                             </div>
 
                             {/* Main Titles */}
                             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 text-white drop-shadow-2xl font-sans">
-                                {lang === 'th' ? 'กลยุทธ์และการพัฒนาความยั่งยืน' : 'Sustainability Strategy & ESG'}
+                                {lang === 'th' ? (content.heroTitleTh || 'กลยุทธ์และการพัฒนาความยั่งยืน') : (content.heroTitleEn || 'Sustainability Strategy & ESG')}
                             </h1>
                             <p className="text-xl sm:text-2xl lg:text-3xl font-semibold text-sky-200 tracking-wide mb-8 drop-shadow-lg font-sans">
-                                {lang === 'th' ? 'ความมุ่งมั่นและความตั้งใจของเรา' : 'Our Dedication to Sustainable Enterprise & Green Energy'}
+                                {lang === 'th' ? (content.heroSubtitleTh || 'ความมุ่งมั่นและความตั้งใจของเรา') : (content.heroSubtitleEn || 'Our Dedication to Sustainable Enterprise & Green Energy')}
                             </p>
 
                             {/* CTA Buttons */}

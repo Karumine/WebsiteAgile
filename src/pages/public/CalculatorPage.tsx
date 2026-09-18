@@ -7,10 +7,13 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
 export function CalculatorPage() {
     const { lang } = useLanguage();
+    const { content } = usePageContent('calculator', DEFAULT_PAGE_CONTENTS['calculator']);
 
     // Form state
     const [machinePrice, setMachinePrice] = useState<string>('5000000');
@@ -105,7 +108,7 @@ export function CalculatorPage() {
                     {/* Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img
-                            src={heroBg}
+                            src={content.heroImage || heroBg}
                             alt="Agile Assets Financing Calculator"
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
@@ -127,11 +130,16 @@ export function CalculatorPage() {
                     <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto">
                         <ScrollReveal animation="fade-up">
                             <p className="text-xl sm:text-3xl font-semibold text-slate-100 mb-2 font-sans tracking-wide drop-shadow-md">
-                                Financing Calculator
+                                {content.heroTitleEn || 'Financing Calculator'}
                             </p>
                             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight drop-shadow-2xl font-sans mb-4">
-                                โปรแกรมคำนวณสินเชื่อ
+                                {content.heroTitleTh || 'โปรแกรมคำนวณสินเชื่อ'}
                             </h1>
+                            {(content.heroSubtitleTh || content.heroSubtitleEn) && (
+                                <p className="text-sm sm:text-lg text-slate-300 max-w-2xl mx-auto font-light leading-relaxed drop-shadow-md">
+                                    {lang === 'th' ? (content.heroSubtitleTh || content.heroSubtitleEn) : (content.heroSubtitleEn || content.heroSubtitleTh)}
+                                </p>
+                            )}
                         </ScrollReveal>
                     </div>
                 </section>

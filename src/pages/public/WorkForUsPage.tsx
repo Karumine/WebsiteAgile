@@ -14,6 +14,7 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 
 interface JobPosition {
     id: string;
@@ -142,16 +143,7 @@ export function WorkForUsPage() {
     const { lang } = useLanguage();
 
     // Connect to universal page content system
-    const { content } = usePageContent('work-for-us', {
-        pageName: 'ร่วมงานกับเรา (Work For Us)',
-        heroBadgeTh: 'CAREERS & OPPORTUNITIES',
-        heroBadgeEn: 'CAREERS & OPPORTUNITIES',
-        heroTitleTh: 'ร่วมงานกับ Agile Assets',
-        heroTitleEn: 'Work with Agile Assets',
-        heroSubtitleTh: 'ร่วมขับเคลื่อนอนาคตอุตสาหกรรมไทยและพลังงานสะอาดไปพร้อมกับเรา เติบโตอย่างก้าวกระโดดด้วยวัฒนธรรมที่เปิดกว้างและสวัสดิการจัดเต็ม',
-        heroSubtitleEn: 'Join us to empower Thai manufacturing with clean tech and dynamic capital. Grow rapidly with an inclusive culture and top-tier benefits.',
-        heroImage: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&q=80',
-    });
+    const { content } = usePageContent('work-for-us', DEFAULT_PAGE_CONTENTS['work-for-us']);
 
     const [selectedDept, setSelectedDept] = useState<'all' | 'sales' | 'engineering' | 'tech' | 'finance'>('all');
 

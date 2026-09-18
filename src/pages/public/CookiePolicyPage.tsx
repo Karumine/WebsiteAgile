@@ -7,9 +7,12 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 
 export function CookiePolicyPage() {
     const { lang } = useLanguage();
+    const { content } = usePageContent('cookie-policy', DEFAULT_PAGE_CONTENTS['cookie-policy']);
 
     const browserGuides = [
         {
@@ -88,15 +91,15 @@ export function CookiePolicyPage() {
                             </div>
 
                             <p className="text-xs sm:text-sm font-bold text-sky-500 uppercase tracking-widest mb-2 font-mono">
-                                Cookies Policy
+                                {content.heroBadgeTh || content.heroBadgeEn || 'Cookies Policy'}
                             </p>
                             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight mb-4">
-                                {lang === 'th' ? 'นโยบายคุกกี้' : 'Cookies Policy'}
+                                {lang === 'th' ? (content.heroTitleTh || 'นโยบายคุกกี้') : (content.heroTitleEn || 'Cookies Policy')}
                             </h1>
                             <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                                 {lang === 'th'
-                                    ? 'การคุ้มครองความเป็นส่วนตัวและความโปร่งใสในการเก็บรวบรวมข้อมูลผ่านเว็บไซต์ agileassets.co.th'
-                                    : 'Privacy protection and transparency regarding data collection on agileassets.co.th'}
+                                    ? (content.heroSubtitleTh || 'การคุ้มครองความเป็นส่วนตัวและความโปร่งใสในการเก็บรวบรวมข้อมูลผ่านเว็บไซต์ agileassets.co.th')
+                                    : (content.heroSubtitleEn || 'Privacy protection and transparency regarding data collection on agileassets.co.th')}
                             </p>
                         </ScrollReveal>
                     </div>

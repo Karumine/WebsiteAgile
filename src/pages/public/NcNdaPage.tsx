@@ -12,9 +12,12 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 
 export function NcNdaPage() {
     const { lang } = useLanguage();
+    const { content } = usePageContent('nc-nda', DEFAULT_PAGE_CONTENTS['nc-nda']);
 
     // Form state
     const [fullName, setFullName] = useState('');
@@ -221,23 +224,23 @@ export function NcNdaPage() {
                             <div className="flex items-center justify-center gap-2 mb-3">
                                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-sky-500/15 border border-sky-400/30 text-sky-400">
                                     <ShieldCheck className="w-3.5 h-3.5" />
-                                    <span>NC-NDA AGREEMENT</span>
+                                    <span>{(lang === 'th' ? (content.heroBadgeTh || content.heroBadgeEn) : (content.heroBadgeEn || content.heroBadgeTh)) || 'NC-NDA AGREEMENT'}</span>
                                 </span>
                             </div>
 
                             {/* Title */}
                             <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight mb-4 font-sans">
                                 {lang === 'th'
-                                    ? 'สัญญาการรักษาความลับของลูกค้า'
-                                    : 'Customer Non-Disclosure Agreement'}
+                                    ? (content.heroTitleTh || 'สัญญาการรักษาความลับของลูกค้า')
+                                    : (content.heroTitleEn || 'Customer Non-Disclosure Agreement')}
                             </h1>
                             <p className="text-base sm:text-lg text-sky-400 font-semibold mb-2">
                                 (Non-Circumvention and Non-Disclosure Agreement)
                             </p>
                             <p className="text-sm text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                                 {lang === 'th'
-                                    ? 'ข้อตกลงและเงื่อนไขการคุ้มครองข้อมูลความลับทางการค้าและการไม่ก้าวข้ามหรือหลีกเลี่ยงผู้ให้ข้อมูล บริษัท อาร์จิสท์ แอสเซ็ทส์ จำกัด'
-                                    : 'Confidentiality terms and non-circumvention covenants of Agile Assets Co., Ltd.'}
+                                    ? (content.heroSubtitleTh || 'ข้อตกลงและเงื่อนไขการคุ้มครองข้อมูลความลับทางการค้าและการไม่ก้าวข้ามหรือหลีกเลี่ยงผู้ให้ข้อมูล บริษัท อาร์จิสท์ แอสเซ็ทส์ จำกัด')
+                                    : (content.heroSubtitleEn || 'Confidentiality terms and non-circumvention covenants of Agile Assets Co., Ltd.')}
                             </p>
 
                             {/* Action Bar */}

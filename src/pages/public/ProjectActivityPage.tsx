@@ -8,6 +8,8 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
 // Interactive Slideshow Card for Company Projects
@@ -121,6 +123,7 @@ function CompanySlideshowCard({
 export function ProjectActivityPage() {
     const { lang } = useLanguage();
     const navigate = useNavigate();
+    const { content } = usePageContent('projects', DEFAULT_PAGE_CONTENTS['projects']);
 
     // 8 Featured Company Project Slideshows (Exact matching reference screenshot)
     const companyProjects = [
@@ -278,7 +281,7 @@ export function ProjectActivityPage() {
                     {/* Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img
-                            src={heroBg}
+                            src={content.heroImage || heroBg}
                             alt="Agile Assets Project & Activity"
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
@@ -302,7 +305,7 @@ export function ProjectActivityPage() {
                             {/* Breadcrumb / Category Badge */}
                             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-sky-400/30 text-xs font-semibold text-sky-300 mb-5 shadow-lg shadow-sky-500/10">
                                 <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
-                                <span>Agile Assets · Experience & Trust</span>
+                                <span>{(lang === 'th' ? (content.heroBadgeTh || content.heroBadgeEn) : (content.heroBadgeEn || content.heroBadgeTh)) || (lang === 'th' ? 'ผลงานและกิจกรรม · Project & Activity' : 'Agile Assets · Experience & Trust')}</span>
                             </div>
                         </ScrollReveal>
 
@@ -311,12 +314,12 @@ export function ProjectActivityPage() {
                                 Agile Assets
                             </p>
                             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight drop-shadow-2xl font-sans mb-4 bg-gradient-to-r from-white via-sky-100 to-sky-300 bg-clip-text text-transparent">
-                                Project & Activity
+                                {content.heroTitleEn || content.heroTitleTh || 'Project & Activity'}
                             </h1>
                             <p className="text-sm sm:text-lg text-slate-300 max-w-2xl mx-auto font-light leading-relaxed drop-shadow-md">
-                                {lang === 'th'
+                                {content.heroSubtitleTh || content.heroSubtitleEn || (lang === 'th'
                                     ? 'ผลงานส่งมอบเครื่องจักร ความร่วมมือทางธุรกิจ และกิจกรรมเพื่อสังคมที่สะท้อนความเชี่ยวชาญกว่า 16 ปี'
-                                    : 'Demonstrating our 16+ years of engineering heritage, equipment financing trust, and nationwide project commissionings.'}
+                                    : 'Demonstrating our 16+ years of engineering heritage, equipment financing trust, and nationwide project commissionings.')}
                             </p>
                         </ScrollReveal>
                     </div>

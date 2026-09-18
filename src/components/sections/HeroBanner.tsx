@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { DollarSign, ArrowRight } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { AgileAssetsLogo } from '@/components/ui/AgileAssetsLogo';
 
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
@@ -9,19 +11,21 @@ import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 export function HeroBanner() {
     const { t } = useLanguage();
     const { settings } = useSiteSettings();
+    const { content } = usePageContent('home', DEFAULT_PAGE_CONTENTS['home']);
     const navigate = useNavigate();
 
-    const headline = settings.banner?.headline || 'Growth – Good Capital';
-    const subheadline = settings.banner?.subheadline || t('hero.titleTh');
-    const ctaText = settings.banner?.ctaText || t('hero.ctaFinancing');
-    const ctaLink = settings.banner?.ctaLink || '/leasing-application';
+    const headline = content.heroTitleEn || content.heroTitleTh || settings.banner?.headline || 'Growth – Good Capital';
+    const subheadline = content.heroSubtitleTh || settings.banner?.subheadline || t('hero.titleTh');
+    const ctaText = content.ctaTextTh || settings.banner?.ctaText || t('hero.ctaFinancing');
+    const ctaLink = content.ctaLink || settings.banner?.ctaLink || '/leasing-application';
+    const activeHeroImg = content.heroImage || heroBg;
 
     return (
         <section id="home" className="relative min-h-[96vh] flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 pb-12 sm:pb-16">
             {/* High-Resolution Tree of Growth Background */}
             <div className="absolute inset-0 z-0">
                 <img
-                    src={heroBg}
+                    src={activeHeroImg}
                     alt="Agile Assets Growth Tree"
                     className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                     loading="eager"

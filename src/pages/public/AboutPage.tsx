@@ -22,6 +22,8 @@ import { Footer } from '@/components/layout/Footer';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 
 // Assets
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
@@ -33,6 +35,7 @@ import directorProfile2Img from '@/assets/director_profile_2.png';
 
 export function AboutPage() {
     const { lang } = useLanguage();
+    const { content } = usePageContent('about', DEFAULT_PAGE_CONTENTS['about']);
     const { theme } = useTheme();
     const isDark = theme === 'dark';
     const navigate = useNavigate();
@@ -183,12 +186,12 @@ export function AboutPage() {
                                 Agile Assets
                             </p>
                             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-4 font-sans drop-shadow-2xl">
-                                ABOUT US
+                                {content.heroTitleEn || 'ABOUT US'}
                             </h1>
                             <p className="text-sm sm:text-lg text-sky-200/90 max-w-2xl mx-auto font-light leading-relaxed drop-shadow-md">
                                 {lang === 'th'
-                                    ? 'สะพานเชื่อมโอกาสทางการเงิน สู่การเติบโตอย่างมั่นคงและยั่งยืนของภาคธุรกิจไทย'
-                                    : 'Bridging financial possibilities to drive tangible and resilient industrial growth across Thailand.'}
+                                    ? (content.heroSubtitleTh || content.heroTitleTh || 'สะพานเชื่อมโอกาสทางการเงิน สู่การเติบโตอย่างมั่นคงและยั่งยืนของภาคธุรกิจไทย')
+                                    : (content.heroSubtitleEn || 'Bridging financial possibilities to drive tangible and resilient industrial growth across Thailand.')}
                             </p>
                         </ScrollReveal>
                     </div>

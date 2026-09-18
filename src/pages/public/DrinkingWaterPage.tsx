@@ -12,20 +12,11 @@ import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 
 export function DrinkingWaterPage() {
     const { lang } = useLanguage();
-    const { content } = usePageContent('drinking-water', {
-        heroBadgeTh: 'Financing Service • Industry Solutions',
-        heroBadgeEn: 'Financing Service • Industry Solutions',
-        heroTitleTh: 'Drinking Water Production',
-        heroTitleEn: 'Drinking Water Production',
-        heroSubtitleTh: 'สินเชื่อเครื่องจักรสำหรับธุรกิจผลิตน้ำดื่ม',
-        heroSubtitleEn: 'Machinery & Turnkey Line Financing',
-        heroImage: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=1920&q=85',
-        ctaTextTh: 'ขอสินเชื่อกับเรา',
-        ctaTextEn: 'Financing with Us',
-    });
+    const { content } = usePageContent('drinking-water', DEFAULT_PAGE_CONTENTS['drinking-water']);
 
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
@@ -219,10 +210,10 @@ export function DrinkingWaterPage() {
 
                             {/* Main Titles */}
                             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-4 text-white drop-shadow-2xl font-sans">
-                                {lang === 'th' ? (content.heroTitleTh || 'Drinking Water Production') : (content.heroTitleEn || 'Drinking Water Production')}
+                                {content.heroTitleEn || 'Drinking Water Production'}
                             </h1>
                             <p className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-sky-200 tracking-wide mb-8 drop-shadow-lg font-sans">
-                                {lang === 'th' ? (content.heroSubtitleTh || 'สินเชื่อเครื่องจักรสำหรับธุรกิจผลิตน้ำดื่ม') : (content.heroSubtitleEn || 'Machinery & Turnkey Line Financing')}
+                                {lang === 'th' ? (content.heroSubtitleTh || content.heroTitleTh || 'สินเชื่อเครื่องจักรสำหรับธุรกิจผลิตน้ำดื่ม') : (content.heroSubtitleEn || 'Machinery & Turnkey Line Financing')}
                             </p>
 
                             {/* CTA Button */}

@@ -10,9 +10,12 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 
 export function InjectionMoldingPage() {
     const { lang } = useLanguage();
+    const { content } = usePageContent('injection-molding', DEFAULT_PAGE_CONTENTS['injection-molding']);
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [formData, setFormData] = useState({
@@ -111,7 +114,7 @@ export function InjectionMoldingPage() {
                     {/* Unique Injection Molding & Preforms Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img 
-                            src="https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=1920&q=85" 
+                            src={content.heroImage || "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=1920&q=85"} 
                             alt="Plastic Injection Molding System" 
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
@@ -133,15 +136,15 @@ export function InjectionMoldingPage() {
                                 <div className="w-5 h-5 rounded-full flex items-center justify-center bg-sky-400/20 text-sky-300">
                                     <Cog className="w-3.5 h-3.5" />
                                 </div>
-                                <span>Financing Service • Industrial Equipment</span>
+                                <span>{lang === 'th' ? (content.heroBadgeTh || 'Financing Service • Industrial Equipment') : (content.heroBadgeEn || 'Financing Service • Industrial Equipment')}</span>
                             </div>
 
                             {/* Main Titles */}
                             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-4 text-white drop-shadow-2xl font-sans">
-                                Financing Service For Injection Molding Machine
+                                {content.heroTitleEn || 'Injection Molding Machine'}
                             </h1>
                             <p className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-sky-200 tracking-wide mb-8 drop-shadow-lg font-sans">
-                                {lang === 'th' ? 'เครื่องฉีดพลาสติก' : 'Injection Molding Machine Financing'}
+                                {lang === 'th' ? (content.heroSubtitleTh || content.heroTitleTh || 'เครื่องฉีดพลาสติก') : (content.heroSubtitleEn || 'Injection Molding Machine Financing')}
                             </p>
 
                             {/* CTA Button */}
@@ -151,7 +154,7 @@ export function InjectionMoldingPage() {
                                     className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-sky-500/30 hover:shadow-sky-500/50 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
                                 >
                                     <DollarSign className="w-5 h-5" />
-                                    <span>{lang === 'th' ? 'ขอสินเชื่อกับเรา' : 'Financing with Us'}</span>
+                                    <span>{lang === 'th' ? (content.ctaTextTh || 'ขอสินเชื่อกับเรา') : (content.ctaTextEn || 'Financing with Us')}</span>
                                 </button>
                             </div>
                         </ScrollReveal>
@@ -187,7 +190,18 @@ export function InjectionMoldingPage() {
 
                         {/* 4 Related Industry Cards Grid */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 mb-16">
-                            {relatedIndustries.map((m, idx) => (
+                            {((content.items && content.items.length > 0)
+                                ? content.items.map((item) => ({
+                                    id: item.id,
+                                    titleTh: item.title,
+                                    titleEn: item.titleEn || item.title,
+                                    descTh: item.description,
+                                    descEn: item.descEn || item.description,
+                                    image: item.image || 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=600&q=80',
+                                    badge: item.badge || 'ขึ้นรูปความเร็วสูง',
+                                }))
+                                : relatedIndustries
+                            ).map((m, idx) => (
                                 <ScrollReveal key={m.id} animation="fade-up" delay={idx * 60}>
                                     <div className="glass-card h-full rounded-3xl p-5 sm:p-6 border border-border/80 hover:border-sky-500/40 transition-all duration-300 hover:shadow-xl hover:shadow-sky-500/10 flex flex-col group">
                                         {/* Image */}

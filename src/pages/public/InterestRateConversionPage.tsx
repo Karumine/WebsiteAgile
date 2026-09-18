@@ -8,12 +8,15 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { InterestRates } from '@/components/sections/InterestRates';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
 export function InterestRateConversionPage() {
     const { lang } = useLanguage();
     const navigate = useNavigate();
+    const { content } = usePageContent('interest-rate', DEFAULT_PAGE_CONTENTS['interest-rate']);
 
     // Form states
     const [conversionType, setConversionType] = useState<'flatToEff' | 'effToFlat'>('flatToEff');
@@ -128,7 +131,7 @@ export function InterestRateConversionPage() {
                     {/* Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img
-                            src={heroBg}
+                            src={content.heroImage || heroBg}
                             alt="Agile Assets Interest Rate Converter"
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
@@ -148,11 +151,16 @@ export function InterestRateConversionPage() {
                     <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto">
                         <ScrollReveal animation="fade-up">
                             <p className="text-xl sm:text-3xl font-semibold text-slate-100 mb-2 font-sans tracking-wide drop-shadow-md">
-                                Interest Rate Converter
+                                {content.heroTitleEn || 'Interest Rate Converter'}
                             </p>
                             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight drop-shadow-2xl font-sans mb-4">
-                                โปรแกรมแปลงดอกเบี้ย
+                                {content.heroTitleTh || 'โปรแกรมแปลงดอกเบี้ย'}
                             </h1>
+                            {(content.heroSubtitleTh || content.heroSubtitleEn) && (
+                                <p className="text-sm sm:text-lg text-slate-300 max-w-2xl mx-auto font-light leading-relaxed drop-shadow-md">
+                                    {lang === 'th' ? (content.heroSubtitleTh || content.heroSubtitleEn) : (content.heroSubtitleEn || content.heroSubtitleTh)}
+                                </p>
+                            )}
                         </ScrollReveal>
                     </div>
                 </section>
