@@ -136,14 +136,55 @@ export interface SiteSettings {
 }
 
 export interface User {
+    id?: string | number;
     username: string;
     role: 'admin';
+    fullName?: string;
+    email?: string;
+}
+
+export interface ApiResponse<T = unknown> {
+    success: boolean;
+    data?: T;
+    message?: string;
+    error?: {
+        code: string;
+        message: string;
+        details?: unknown;
+    };
+}
+
+export interface LoginResponseData {
+    user: User;
+    accessToken: string;
+    refreshToken?: string;
+    expiresIn?: number;
+}
+
+export interface JobApplicationCreate {
+    fullName: string;
+    email: string;
+    phone: string;
+    positionId?: string;
+    positionTitle?: string;
+    experienceYears?: string;
+    expectedSalary?: string;
+    resumeUrl?: string;
+    coverLetter?: string;
+}
+
+export interface JobApplication extends JobApplicationCreate {
+    id: string;
+    status: 'pending' | 'reviewing' | 'interview' | 'accepted' | 'rejected';
+    createdAt: string;
+    notes?: string;
 }
 
 export interface AuthState {
     user: User | null;
     isAuthenticated: boolean;
     isLoading: boolean;
-    login: (username: string, password: string) => boolean;
+    login: (username: string, password: string) => Promise<boolean>;
     logout: () => void;
 }
+

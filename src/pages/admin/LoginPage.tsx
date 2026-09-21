@@ -37,10 +37,7 @@ export function LoginPage() {
 
         setIsLoading(true);
 
-        // Simulate network delay
-        await new Promise((r) => setTimeout(r, 800));
-
-        const success = login(username, password);
+        const success = await login(username, password);
         if (success) {
             navigate(from, { replace: true });
         } else {

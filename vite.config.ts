@@ -15,6 +15,13 @@ export default defineConfig({
     host: true,
     open: true,
     port: 3001,
+    proxy: {
+      '/api': {
+        target: 'https://api.tunjai.in.th',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
   build: {
     target: 'es2020',

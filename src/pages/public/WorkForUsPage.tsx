@@ -15,6 +15,7 @@ import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
+import { careerService } from '@/services/careerService';
 
 interface JobPosition {
     id: string;
@@ -174,9 +175,26 @@ export function WorkForUsPage() {
         }
 
         setIsSubmitting(true);
-        // Simulate network submission
-        await new Promise((r) => setTimeout(r, 1000));
-        setIsSubmitting(false);
+        try {
+            const res = await careerService.applyJob({
+                fullName: fullName.trim(),
+                email: email.trim(),
+                phone: phone.trim(),
+                positionId: appliedPosition,
+                positionTitle: JOBS.find((j) => j.id === appliedPosition)?.titleTh || appliedPosition,
+                expectedSalary: expectedSalary.trim(),
+                resumeUrl: resumeUrl.trim(),
+                coverLetter: coverLetter.trim(),
+            });
+
+            if (!res.success) {
+                console.warn('API returned non-success response:', res.error);
+            }
+        } catch (err) {
+            console.warn('Network error while sending application to backend:', err);
+        } finally {
+            setIsSubmitting(false);
+        }
 
         toast.success(
             lang === 'th'

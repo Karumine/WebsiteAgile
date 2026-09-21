@@ -179,7 +179,7 @@ export function Navbar() {
                         }}
                         className="flex items-center gap-2 group transition-transform duration-200 hover:scale-[1.02]"
                     >
-                        <AgileAssetsLogo variant="full" textClassName={scrolled ? 'text-foreground' : 'text-white'} />
+                        <AgileAssetsLogo variant="full" showTagline={false} textClassName={scrolled ? 'text-foreground' : 'text-white'} />
                     </a>
 
                     {/* Desktop Navigation Links */}

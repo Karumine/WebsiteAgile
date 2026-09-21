@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import type { AuthState, User } from '@/types';
+import { authService } from '@/services/authService';
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
@@ -56,7 +57,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Initialize synchronously — auth is available on first render
     const [user, setUser] = useState<User | null>(() => loadUserFromStorage());
 
-    const login = (username: string, password: string): boolean => {
+    const login = async (username: string, password: string): Promise<boolean> => {
+        try {
+            // 1. Attempt API login with Backend
+            const apiRes = await authService.login(username, password);
+            if (apiRes.success && apiRes.user) {
+                setUser(apiRes.user);
+                const authData: StoredAuth = {
+                    user: apiRes.user,
+                    expiresAt: Date.now() + SESSION_DURATION_MS,
+                };
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(authData));
+                return true;
+            }
+        } catch (err) {
+            console.warn('API login failed, checking fallback credentials:', err);
+        }
+
+        // 2. Fallback to local admin credentials (e.g. while backend DB is returning 500)
         if (
             username === ADMIN_CREDENTIALS.username &&
             password === ADMIN_CREDENTIALS.password
@@ -70,10 +88,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(authData));
             return true;
         }
+
         return false;
     };
 
     const logout = () => {
+        authService.logout();
         setUser(null);
         localStorage.removeItem(STORAGE_KEY);
     };

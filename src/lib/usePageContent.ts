@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import type { PageCustomContent } from '@/types';
+import { pageContentService } from '@/services/pageContentService';
 
 export function usePageContent<T extends Partial<PageCustomContent>>(pageId: string, defaultContent: T) {
     const { settings, updateSettings } = useSiteSettings();
@@ -51,6 +52,11 @@ export function usePageContent<T extends Partial<PageCustomContent>>(pageId: str
                 [pageId]: updatedPage,
             },
         });
+
+        // Sync with Backend API asynchronously
+        pageContentService.updatePageContent(pageId, updatedPage).catch((err) => {
+            console.warn(`Could not sync page [${pageId}] to backend API:`, err);
+        });
     };
 
     const resetPageContent = () => {
@@ -58,6 +64,11 @@ export function usePageContent<T extends Partial<PageCustomContent>>(pageId: str
         delete existingPages[pageId];
         updateSettings({
             pageContents: existingPages,
+        });
+
+        // Delete on Backend API
+        pageContentService.deletePageContent(pageId).catch((err) => {
+            console.warn(`Could not delete page [${pageId}] on backend API:`, err);
         });
     };
 

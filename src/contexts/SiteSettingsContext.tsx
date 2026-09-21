@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react';
 import type { SiteSettings, ThemeSettings } from '@/types';
 import defaultSettingsData from '@/data/defaultSettings.json';
+import { themeService } from '@/services/themeService';
 
 const STORAGE_KEY = 'agile_assets_settings';
 const SAVE_DEBOUNCE_MS = 500;
@@ -98,6 +99,24 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
         applyThemeToDom(settings.themeSettings);
     }, [settings.themeSettings]);
 
+    // Initial fetch from backend API with fallback
+    useEffect(() => {
+        let isMounted = true;
+        themeService.getTheme().then((res) => {
+            if (isMounted && res.success && res.data) {
+                setSettings((prev) => ({
+                    ...prev,
+                    themeSettings: res.data,
+                }));
+            }
+        }).catch((err) => {
+            console.warn('Backend theme fetch unavailable, using local theme:', err);
+        });
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
     // Debounced localStorage write
     useEffect(() => {
         if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
@@ -115,6 +134,12 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
             ...newSettings,
             lastUpdated: new Date().toISOString(),
         }));
+
+        if (newSettings.themeSettings) {
+            themeService.updateTheme(newSettings.themeSettings).catch((err) => {
+                console.warn('Could not sync theme to backend API:', err);
+            });
+        }
     };
 
     const resetSettings = () => {
