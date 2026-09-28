@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { DollarSign, ArrowRight } from 'lucide-react';
+import { DollarSign, ArrowRight, Sparkles } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { usePageContent } from '@/lib/usePageContent';
@@ -9,14 +9,33 @@ import { AgileAssetsLogo } from '@/components/ui/AgileAssetsLogo';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
 export function HeroBanner() {
-    const { t } = useLanguage();
+    const { t, lang } = useLanguage();
     const { settings } = useSiteSettings();
     const { content } = usePageContent('home', DEFAULT_PAGE_CONTENTS['home']);
     const navigate = useNavigate();
 
-    const headline = content.heroTitleEn || content.heroTitleTh || settings.banner?.headline || 'Growth – Good Capital';
-    const subheadline = content.heroSubtitleTh || settings.banner?.subheadline || t('hero.titleTh');
-    const ctaText = content.ctaTextTh || settings.banner?.ctaText || t('hero.ctaFinancing');
+    const isEn = lang === 'en';
+
+    // Badge label
+    const badge = isEn
+        ? (content.heroBadgeEn || content.heroBadgeTh)
+        : (content.heroBadgeTh || content.heroBadgeEn);
+
+    // Main Headline
+    const headline = isEn
+        ? (content.heroTitleEn || content.heroTitleTh || settings.banner?.headline || 'Growth – Good Capital')
+        : (content.heroTitleTh || content.heroTitleEn || settings.banner?.headline || 'Growth – Good Capital');
+
+    // Subheadline
+    const subheadline = isEn
+        ? (content.heroSubtitleEn || content.heroSubtitleTh || settings.banner?.subheadline || 'Sustainable Financing for Industrial Enterprises')
+        : (content.heroSubtitleTh || content.heroSubtitleEn || settings.banner?.subheadline || t('hero.titleTh'));
+
+    // CTA Button
+    const ctaText = isEn
+        ? (content.ctaTextEn || content.ctaTextTh || settings.banner?.ctaText || 'Financing with Us')
+        : (content.ctaTextTh || content.ctaTextEn || settings.banner?.ctaText || t('hero.ctaFinancing'));
+
     const ctaLink = content.ctaLink || settings.banner?.ctaLink || '/leasing-application';
     const activeHeroImg = content.heroImage || heroBg;
 
@@ -26,11 +45,12 @@ export function HeroBanner() {
             <div className="absolute inset-0 z-0">
                 <img
                     src={activeHeroImg}
-                    alt="Agile Assets Growth Tree"
+                    alt=""
                     className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                     loading="eager"
                     fetchPriority="high"
                     decoding="async"
+                    referrerPolicy="no-referrer"
                 />
                 {/* Dynamic Vignette & Ambient Light Overlays */}
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
@@ -51,6 +71,14 @@ export function HeroBanner() {
                 <div className="animate-fade-in mb-6">
                     <AgileAssetsLogo variant="hero" />
                 </div>
+
+                {/* Badge Label (if provided in CMS) */}
+                {badge && (
+                    <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-xl border border-sky-400/40 bg-slate-950/70 text-xs sm:text-sm font-bold text-sky-300 mb-6 shadow-lg shadow-sky-500/10 animate-fade-in">
+                        <Sparkles className="w-3.5 h-3.5 text-sky-400" />
+                        <span>{badge}</span>
+                    </div>
+                )}
 
                 {/* Main Headline: Growth – Good Capital */}
                 <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-4 text-white drop-shadow-2xl font-sans">
@@ -74,7 +102,7 @@ export function HeroBanner() {
                                 window.scrollTo({ top: 0, behavior: 'smooth' });
                             }
                         }}
-                        className="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-400 via-sky-500 to-blue-600 text-white font-bold text-sm sm:text-base shadow-xl shadow-sky-500/35 hover:shadow-sky-400/60 hover:scale-105 active:scale-[0.98] transition-all duration-200 glow-cyan group"
+                        className="inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-400 via-sky-500 to-blue-600 text-white font-bold text-sm sm:text-base shadow-xl shadow-sky-500/35 hover:shadow-sky-400/60 hover:scale-105 active:scale-[0.98] transition-all duration-200 glow-cyan btn-dynamic-theme group"
                     >
                         <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
                             <DollarSign className="w-4 h-4 text-white" />

@@ -2,54 +2,43 @@ import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Sparkles, DollarSign, Calculator } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 
 export function KeyFinancingServicesSection() {
     const { lang } = useLanguage();
     const navigate = useNavigate();
+    const { content } = usePageContent('home', DEFAULT_PAGE_CONTENTS['home']);
 
-    const machines = [
-        {
-            id: 'blow-moulding',
-            title: 'Blow Moulding Machine',
-            subTitle: lang === 'th' ? 'สินเชื่อสำหรับเครื่องเป่าขวดพลาสติก' : 'Financing for PET bottle blowing machines',
-            image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2021/11/Blowing-Machine-Agile-Assets-1024x683.jpg',
+    const isEn = lang === 'en';
+
+    const sectionBadge = isEn
+        ? (content.machineryBadgeEn || content.machineryBadgeTh || 'KEY FINANCING SERVICES')
+        : (content.machineryBadgeTh || content.machineryBadgeEn || 'KEY FINANCING SERVICES');
+
+    const sectionTitle = isEn
+        ? (content.machineryTitleEn || content.machineryTitleTh || 'Industrial Equipment Hire Purchase Solutions')
+        : (content.machineryTitleTh || content.machineryTitleEn || 'บริการสินเชื่อเช่าซื้อเครื่องจักรอุตสาหกรรม');
+
+    const rawMachines = (content.machineryItems && content.machineryItems.length > 0)
+        ? content.machineryItems
+        : (DEFAULT_PAGE_CONTENTS['home']?.machineryItems || []);
+
+    const machines = rawMachines.map((item, idx) => {
+        const title = isEn ? (item.titleEn || item.title) : (item.title || item.titleEn || '');
+        const subTitle = isEn ? (item.subTitleEn || item.subTitle || item.descEn || '') : (item.subTitle || item.subTitleEn || item.description || '');
+        const href = item.link || '/';
+        const image = item.image || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=900&q=80';
+        return {
+            id: item.id || `mac-${idx}`,
+            title,
+            subTitle,
+            image,
             fallbackImage: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=900&q=80',
-            href: '/drinking-water-production',
-        },
-        {
-            id: 'injection-machine',
-            title: 'Injection Machine',
-            subTitle: lang === 'th' ? 'สินเชื่อสำหรับเครื่องฉีดพลาสติกฝาขวดน้ำ' : 'Financing for plastic cap injection molding',
-            image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2021/11/Injection-Machine-Agile-Assets-1024x683.jpg',
-            fallbackImage: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=900&q=80',
-            href: '/injection-molding-machine',
-        },
-        {
-            id: 'chiller',
-            title: 'Chiller',
-            subTitle: lang === 'th' ? 'สินเชื่อสำหรับชิลเลอร์หรือเครื่องทำความเย็น' : 'Financing for industrial water chillers & HVAC',
-            image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2021/11/Chiller-Agile-Assets-1024x683.jpg',
-            fallbackImage: 'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=900&q=80',
-            href: '/chiller',
-        },
-        {
-            id: 'generator-set',
-            title: 'Generator Set',
-            subTitle: lang === 'th' ? 'สินเชื่อสำหรับเครื่องกำเนิดไฟฟ้าอุตสาหกรรม' : 'Financing for industrial diesel & gas generators',
-            image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2021/11/Generator-Agile-Assets-1024x683.jpg',
-            fallbackImage: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=900&q=80',
-            href: '/generator-set',
-        },
-        {
-            id: 'solar-rooftop',
-            title: 'Solar Rooftop System',
-            subTitle: lang === 'th' ? 'สินเชื่อสำหรับระบบโซลาร์เซลล์โรงงาน' : 'Financing for commercial solar rooftop systems',
-            image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2021/11/Solar-Rooftop-Agile-Assets-1-1024x683.jpg',
-            fallbackImage: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=900&q=80',
-            href: '/solar-power-generation',
-        },
-    ];
+            href,
+        };
+    });
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
@@ -106,10 +95,10 @@ export function KeyFinancingServicesSection() {
                     <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-500/10 border border-sky-400/20 text-xs font-bold text-sky-500 mb-3">
                             <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-                            <span>KEY FINANCING SERVICES</span>
+                            <span>{sectionBadge}</span>
                         </div>
                         <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight font-sans">
-                            {lang === 'th' ? 'บริการสินเชื่อเช่าซื้อเครื่องจักรอุตสาหกรรม' : 'Industrial Equipment Hire Purchase Solutions'}
+                            {sectionTitle}
                         </h2>
                     </div>
                 </ScrollReveal>
@@ -165,6 +154,7 @@ export function KeyFinancingServicesSection() {
                                             alt={item.title}
                                             className="max-h-full max-w-full object-contain group-hover:scale-105 transition-transform duration-500"
                                             loading="lazy"
+                                            referrerPolicy="no-referrer"
                                             onError={(e) => {
                                                 const target = e.target as HTMLImageElement;
                                                 target.onerror = null;

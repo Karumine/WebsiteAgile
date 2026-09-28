@@ -1,75 +1,88 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ChevronLeft, ChevronRight, Droplets, Wheat, Factory, Flame, Sun, Sparkles } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Droplets, Wheat, Factory, Flame, Sun, Sparkles, Box } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 
 export function ServicesRangeSection() {
     const { lang } = useLanguage();
     const navigate = useNavigate();
+    const { content } = usePageContent('home', DEFAULT_PAGE_CONTENTS['home']);
 
-    const solutions = [
-        {
-            id: 'drinking-water',
-            title: lang === 'th' ? 'โรงงานผลิตน้ำดื่ม' : 'Drinking Water Production',
-            subTitle: lang === 'th' ? 'Drinking Water Production Line' : 'Turnkey Bottling Line',
-            desc: lang === 'th'
-                ? 'สินเชื่อเช่าซื้อเครื่องจักรโรงงานน้ำดื่ม: เครื่องกรอง RO, เครื่องเป่าขวด PET, เครื่องบรรจุอัตโนมัติ และสายแพ็คเกจจิ้ง'
-                : 'Turnkey financing for RO filtration, PET bottle blow molding, automated bottling lines, and robotic packaging.',
-            image: 'https://images.unsplash.com/photo-1584727638096-042c45049ebe?w=900&q=80',
-            href: '/drinking-water-production',
-            icon: Droplets,
-            tag: lang === 'th' ? 'ระบบกรองและบรรจุขวด' : 'RO & Packaging',
-        },
-        {
-            id: 'livestock-farm',
-            title: lang === 'th' ? 'ฟาร์มปศุสัตว์' : 'Livestock Smart Farm',
-            subTitle: lang === 'th' ? 'Livestock Agro-Industrial Systems' : 'Agro-Industrial Cooling',
-            desc: lang === 'th'
-                ? 'สินเชื่อระบบโรงเรือน Evaporative (Evap), ไซโลอาหาร, สายพานลำเลียงอัตโนมัติ และระบบควบคุมอุณหภูมิอัจฉริยะ'
-                : 'Specialized financing for closed Evaporative cooling barns, automated feeding silos, and climate control automation.',
-            image: 'https://images.unsplash.com/photo-1516467508483-a7212febe31a?w=900&q=80',
-            href: '/livestock-farm',
-            icon: Wheat,
-            tag: lang === 'th' ? 'โรงเรือน Evap & ไซโล' : 'Evap & Silo Automation',
-        },
-        {
-            id: 'food-processing',
-            title: lang === 'th' ? 'อุตสาหกรรมแปรรูปอาหาร' : 'Food Processing Plant',
-            subTitle: lang === 'th' ? 'Food Processing & Packaging Lines' : 'HACCP & GMP Production',
-            desc: lang === 'th'
-                ? 'สินเชื่อเครื่องจักรแปรรูปอาหาร: เครื่องแช่เยือกแข็ง IQF, หม้อต้ม Retort, เครื่องบรรจุสุญญากาศ มาตรฐาน GMP/HACCP'
-                : 'Turnkey machinery financing for IQF spiral freezers, retort sterilizers, and automated vacuum packaging lines.',
-            image: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=900&q=80',
-            href: '/food-processing',
-            icon: Factory,
-            tag: lang === 'th' ? 'เครื่องจักรแปรรูปอาหาร' : 'IQF & Retort Systems',
-        },
-        {
-            id: 'biogas-production',
-            title: lang === 'th' ? 'ระบบผลิตก๊าซชีวภาพ' : 'Biogas Power Plant',
-            subTitle: lang === 'th' ? 'Biogas & Waste-to-Energy' : 'Waste-to-Energy Solutions',
-            desc: lang === 'th'
-                ? 'สินเชื่อระบบบำบัดน้ำเสีย บ่อหมักก๊าซชีวภาพ CSTR/Lagoon และเครื่องกำเนิดไฟฟ้าจากก๊าซชีวภาพ ลดต้นทุนค่าไฟ'
-                : 'Turnkey funding for anaerobic digesters, covered lagoons, biological scrubbers, and biogas CHP generators.',
-            image: 'https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?w=900&q=80',
-            href: '/biogas-production',
-            icon: Flame,
-            tag: lang === 'th' ? 'พลังงานทดแทน ESG' : 'Renewable Energy ESG',
-        },
-        {
-            id: 'solar-power',
-            title: lang === 'th' ? 'ผลิตไฟฟ้าพลังงานแสงอาทิตย์' : 'Solar Power Generation',
-            subTitle: lang === 'th' ? 'Commercial & Industrial Solar' : 'C&I Solar Rooftop & Farm',
-            desc: lang === 'th'
-                ? 'สินเชื่อ Solar Rooftop โรงงาน, Solar Farm และ Solar Floating พร้อมอินเวอร์เตอร์และระบบกักเก็บพลังงาน BESS'
-                : 'Turnkey commercial solar rooftop installations, high-efficiency inverters, and battery energy storage (BESS).',
-            image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=900&q=80',
-            href: '/solar-power-generation',
-            icon: Sun,
-            tag: lang === 'th' ? 'Solar Rooftop & Farm' : 'Solar Rooftop & Farm',
-        },
-    ];
+    const isEn = lang === 'en';
+
+    const sectionBadge = isEn
+        ? (content.solutionsBadgeEn || content.solutionsBadgeTh || 'OUR FINANCING SERVICES')
+        : (content.solutionsBadgeTh || content.solutionsBadgeEn || 'OUR FINANCING SERVICES');
+
+    const sectionTitle = isEn
+        ? (content.solutionsTitleEn || content.solutionsTitleTh || 'Our Industry Financing Solutions')
+        : (content.solutionsTitleTh || content.solutionsTitleEn || 'โซลูชั่นทางการเงินของเราในอุตสาหกรรม');
+
+    const sectionSubtitle = isEn
+        ? (content.solutionsSubtitleEn || content.solutionsSubtitleTh || 'Tailored machinery leasing and capital financing structures covering 5 essential industrial sectors.')
+        : (content.solutionsSubtitleTh || content.solutionsSubtitleEn || 'โซลูชันสินเชื่อเช่าซื้อเครื่องจักรและอุปกรณ์ที่ปรับแต่งตามโครงสร้างธุรกิจ 5 กลุ่มอุตสาหกรรมหลัก');
+
+    const iconMap: Record<string, typeof Droplets> = {
+        'drinking-water': Droplets,
+        'sol-1': Droplets,
+        'livestock-farm': Wheat,
+        'sol-2': Wheat,
+        'food-processing': Factory,
+        'sol-3': Factory,
+        'biogas-production': Flame,
+        'sol-4': Flame,
+        'solar-power': Sun,
+        'sol-5': Sun,
+    };
+    const availableIcons: Record<string, typeof Droplets> = {
+        droplets: Droplets,
+        water: Droplets,
+        wheat: Wheat,
+        farm: Wheat,
+        factory: Factory,
+        food: Factory,
+        industry: Factory,
+        flame: Flame,
+        fire: Flame,
+        biogas: Flame,
+        sun: Sun,
+        solar: Sun,
+        box: Box,
+        package: Box,
+        sparkles: Sparkles,
+    };
+    const defaultIcons = [Droplets, Wheat, Factory, Flame, Sun, Box];
+
+    const rawSolutions = (content.solutionsItems && content.solutionsItems.length > 0)
+        ? content.solutionsItems
+        : (DEFAULT_PAGE_CONTENTS['home']?.solutionsItems || []);
+
+    const solutions = rawSolutions.map((item, idx) => {
+        const title = isEn ? (item.titleEn || item.title) : (item.title || item.titleEn || '');
+        const subTitle = isEn ? (item.subTitleEn || item.subTitle || item.titleEn || '') : (item.subTitle || item.subTitleEn || item.title || '');
+        const desc = isEn ? (item.descEn || item.description) : (item.description || item.descEn || '');
+        const tag = item.badge || '';
+        const href = item.link || '/';
+        const Icon = (item.icon && availableIcons[item.icon.toLowerCase()]) 
+            || iconMap[item.id] 
+            || defaultIcons[idx % defaultIcons.length];
+        const btnText = isEn ? (item.btnTextEn || item.btnText || 'Read More') : (item.btnText || item.btnTextEn || 'อ่านเพิ่มเติม');
+
+        return {
+            id: item.id || `sol-${idx}`,
+            title,
+            subTitle,
+            desc,
+            image: item.image || 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=900&q=80',
+            href,
+            icon: Icon,
+            tag,
+            btnText,
+        };
+    });
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
@@ -127,15 +140,13 @@ export function ServicesRangeSection() {
                         <div className="text-left max-w-2xl">
                             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-500/10 border border-sky-400/20 text-xs font-bold text-sky-500 mb-3">
                                 <Sparkles className="w-3.5 h-3.5 text-sky-400" />
-                                <span>OUR FINANCING SERVICES</span>
+                                <span>{sectionBadge}</span>
                             </div>
                             <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight font-sans">
-                                {lang === 'th' ? 'โซลูชั่นทางการเงินของเราในอุตสาหกรรม' : 'Our Industry Financing Solutions'}
+                                {sectionTitle}
                             </h2>
                             <p className="text-xs sm:text-sm text-muted-foreground mt-3 leading-relaxed">
-                                {lang === 'th'
-                                    ? 'โซลูชันสินเชื่อเช่าซื้อเครื่องจักรและอุปกรณ์ที่ปรับแต่งตามโครงสร้างธุรกิจ 5 กลุ่มอุตสาหกรรมหลัก'
-                                    : 'Tailored machinery leasing and capital financing structures covering 5 essential industrial sectors.'}
+                                {sectionSubtitle}
                             </p>
                         </div>
 
@@ -188,6 +199,7 @@ export function ServicesRangeSection() {
                                             alt={item.title}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                             loading="lazy"
+                                            referrerPolicy="no-referrer"
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
 
@@ -219,12 +231,16 @@ export function ServicesRangeSection() {
                                         {/* Action Button */}
                                         <button
                                             onClick={() => {
-                                                navigate(item.href);
-                                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                if (item.href?.startsWith('http')) {
+                                                    window.open(item.href, '_blank');
+                                                } else {
+                                                    navigate(item.href);
+                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                }
                                             }}
                                             className="inline-flex items-center justify-center gap-2 w-full py-3 px-5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs sm:text-sm shadow-md shadow-sky-500/25 hover:shadow-sky-400/40 hover:scale-[1.02] active:scale-[0.98] transition-all"
                                         >
-                                            <span>{lang === 'th' ? 'อ่านเพิ่มเติม' : 'Read More'}</span>
+                                            <span>{item.btnText}</span>
                                             <ArrowRight className="w-4 h-4" />
                                         </button>
                                     </div>

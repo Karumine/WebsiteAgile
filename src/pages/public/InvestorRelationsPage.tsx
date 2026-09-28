@@ -264,17 +264,17 @@ export function InvestorRelationsPage() {
 
                             {/* Main Titles */}
                             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-4 text-white drop-shadow-2xl font-sans">
-                                {content.heroTitleEn || content.heroTitleTh || 'Agile Assets'}
+                                {lang === 'th' ? (content.heroTitleTh || content.heroTitleEn || 'นักลงทุนสัมพันธ์') : (content.heroTitleEn || content.heroTitleTh || 'Investor Relations')}
                             </h1>
                             <p className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-sky-200 tracking-wide mb-8 drop-shadow-lg font-sans">
-                                {content.heroSubtitleTh || content.heroSubtitleEn || (lang === 'th' ? 'นักลงทุนสัมพันธ์' : 'Investor Relations')}
+                                {lang === 'th' ? (content.heroSubtitleTh || content.heroSubtitleEn || 'ข้อมูลทางการเงินและโอกาสเติบโตร่วมกับเรา') : (content.heroSubtitleEn || content.heroSubtitleTh || 'Investor Relations')}
                             </p>
 
                             {/* CTA Button */}
                             <div className="flex justify-center">
                                 <button
                                     onClick={scrollToForm}
-                                    className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-sky-500/30 hover:shadow-sky-500/50 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
+                                    className="btn-dynamic-theme inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-sky-500/30 hover:shadow-sky-500/50 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
                                 >
                                     <span>{(lang === 'th' ? (content.ctaTextTh || content.ctaTextEn) : (content.ctaTextEn || content.ctaTextTh)) || (lang === 'th' ? 'ติดต่อฝ่ายนักลงทุนสัมพันธ์' : 'Contact Investor Relations')}</span>
                                     <ArrowRight className="w-4 h-4" />

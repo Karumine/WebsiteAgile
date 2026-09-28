@@ -142,7 +142,13 @@
 
 @layer utilities {
   .gradient-primary {
-    background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #0c4a6e 100%);
+    background: linear-gradient(135deg, var(--grad-primary-1, #0284c7) 0%, var(--grad-primary-2, #0369a1) 100%);
+  }
+
+  .btn-dynamic-theme {
+    background: linear-gradient(135deg, var(--grad-primary-1, #0284c7) 0%, var(--grad-primary-2, #0369a1) 100%) !important;
+    color: var(--btn-primary-fg, #ffffff) !important;
+    border-radius: var(--btn-radius, 1rem) !important;
   }
 
   .gradient-hero {

@@ -142,17 +142,17 @@ export function SolarPowerPage() {
 
                             {/* Main Titles */}
                             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-4 text-white drop-shadow-2xl font-sans">
-                                {content.heroTitleEn || 'Solar Power Generation'}
+                                {lang === 'th' ? (content.heroTitleTh || content.heroTitleEn || 'พลังงานแสงอาทิตย์') : (content.heroTitleEn || content.heroTitleTh || 'Solar Power Generation')}
                             </h1>
                             <p className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-sky-200 tracking-wide mb-8 drop-shadow-lg font-sans">
-                                {lang === 'th' ? (content.heroSubtitleTh || content.heroTitleTh || 'พลังงานแสงอาทิตย์') : (content.heroSubtitleEn || 'Commercial & Industrial Solar Rooftop Financing')}
+                                {lang === 'th' ? (content.heroSubtitleTh || 'พลังงานแสงอาทิตย์') : (content.heroSubtitleEn || 'Commercial & Industrial Solar Rooftop Financing')}
                             </p>
 
                             {/* CTA Button */}
                             <div className="flex justify-center">
                                 <button
                                     onClick={scrollToForm}
-                                    className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-sky-500/30 hover:shadow-sky-500/50 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
+                                    className="btn-dynamic-theme inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-sky-500/30 hover:shadow-sky-500/50 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
                                 >
                                     <DollarSign className="w-5 h-5" />
                                     <span>{lang === 'th' ? (content.ctaTextTh || 'ขอสินเชื่อกับเรา') : (content.ctaTextEn || 'Financing with Us')}</span>

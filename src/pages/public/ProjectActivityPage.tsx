@@ -311,15 +311,15 @@ export function ProjectActivityPage() {
 
                         <ScrollReveal animation="fade-up" delay={100}>
                             <p className="text-xl sm:text-3xl font-semibold text-sky-200/90 mb-3 font-sans tracking-wide drop-shadow-md">
-                                Agile Assets
+                                {lang === 'th' ? (content.heroBadgeTh || content.heroBadgeEn || 'Agile Assets') : (content.heroBadgeEn || content.heroBadgeTh || 'Agile Assets')}
                             </p>
                             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight drop-shadow-2xl font-sans mb-4 bg-gradient-to-r from-white via-sky-100 to-sky-300 bg-clip-text text-transparent">
-                                {content.heroTitleEn || content.heroTitleTh || 'Project & Activity'}
+                                {lang === 'th' ? (content.heroTitleTh || content.heroTitleEn || 'ผลงานและกิจกรรม') : (content.heroTitleEn || content.heroTitleTh || 'Project & Activity')}
                             </h1>
                             <p className="text-sm sm:text-lg text-slate-300 max-w-2xl mx-auto font-light leading-relaxed drop-shadow-md">
-                                {content.heroSubtitleTh || content.heroSubtitleEn || (lang === 'th'
-                                    ? 'ผลงานส่งมอบเครื่องจักร ความร่วมมือทางธุรกิจ และกิจกรรมเพื่อสังคมที่สะท้อนความเชี่ยวชาญกว่า 16 ปี'
-                                    : 'Demonstrating our 16+ years of engineering heritage, equipment financing trust, and nationwide project commissionings.')}
+                                {lang === 'th'
+                                    ? (content.heroSubtitleTh || content.heroSubtitleEn || 'ผลงานส่งมอบเครื่องจักร ความร่วมมือทางธุรกิจ และกิจกรรมเพื่อสังคมที่สะท้อนความเชี่ยวชาญกว่า 16 ปี')
+                                    : (content.heroSubtitleEn || content.heroSubtitleTh || 'Demonstrating our 16+ years of engineering heritage, equipment financing trust, and nationwide project commissionings.')}
                             </p>
                         </ScrollReveal>
                     </div>

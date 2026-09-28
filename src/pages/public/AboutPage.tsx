@@ -153,7 +153,7 @@ export function AboutPage() {
                     {/* Background Graphic */}
                     <div className="absolute inset-0 z-0">
                         <img
-                            src={heroBg}
+                            src={content.heroImage || heroBg}
                             alt="Agile Assets About Us"
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
@@ -177,21 +177,21 @@ export function AboutPage() {
                                     {lang === 'th' ? 'หน้าหลัก' : 'Home'}
                                 </Link>
                                 <span className="opacity-50">/</span>
-                                <span className="text-white font-bold">{lang === 'th' ? 'เกี่ยวกับเรา' : 'About Us'}</span>
+                                <span className="text-white font-bold">{lang === 'th' ? (content.heroBadgeTh || 'เกี่ยวกับเรา') : (content.heroBadgeEn || 'About Us')}</span>
                             </div>
                         </ScrollReveal>
 
                         <ScrollReveal animation="fade-up" delay={100}>
                             <p className="text-xl sm:text-3xl font-semibold text-slate-100 mb-2 font-sans tracking-wide drop-shadow-md">
-                                Agile Assets
+                                {lang === 'th' ? (content.heroBadgeTh || content.heroBadgeEn || 'Agile Assets') : (content.heroBadgeEn || content.heroBadgeTh || 'Agile Assets')}
                             </p>
                             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-white mb-4 font-sans drop-shadow-2xl">
-                                {content.heroTitleEn || 'ABOUT US'}
+                                {lang === 'th' ? (content.heroTitleTh || content.heroTitleEn || 'ABOUT US') : (content.heroTitleEn || content.heroTitleTh || 'ABOUT US')}
                             </h1>
                             <p className="text-sm sm:text-lg text-sky-200/90 max-w-2xl mx-auto font-light leading-relaxed drop-shadow-md">
                                 {lang === 'th'
-                                    ? (content.heroSubtitleTh || content.heroTitleTh || 'สะพานเชื่อมโอกาสทางการเงิน สู่การเติบโตอย่างมั่นคงและยั่งยืนของภาคธุรกิจไทย')
-                                    : (content.heroSubtitleEn || 'Bridging financial possibilities to drive tangible and resilient industrial growth across Thailand.')}
+                                    ? (content.heroSubtitleTh || content.heroSubtitleEn || 'สะพานเชื่อมโอกาสทางการเงิน สู่การเติบโตอย่างมั่นคงและยั่งยืนของภาคธุรกิจไทย')
+                                    : (content.heroSubtitleEn || content.heroSubtitleTh || 'Bridging financial possibilities to drive tangible and resilient industrial growth across Thailand.')}
                             </p>
                         </ScrollReveal>
                     </div>

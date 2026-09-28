@@ -55,9 +55,9 @@ export function CustomerEligibilitySection() {
         };
     }, []);
 
-    const factoriesTarget = parseInt(settings.impactStats?.factoriesServed || '40', 10) || 40;
-    const contractsTarget = parseInt(settings.impactStats?.totalContractsCount || '50', 10) || 50;
-    const valueTarget = parseInt(settings.impactStats?.totalCreditValueMB || '400', 10) || 400;
+    const factoriesTarget = parseInt((settings.impactStats?.factoriesServed || '40').replace(/[^0-9]/g, ''), 10) || 40;
+    const contractsTarget = parseInt((settings.impactStats?.totalContractsCount || '50').replace(/[^0-9]/g, ''), 10) || 50;
+    const valueTarget = parseInt((settings.impactStats?.totalCreditValueMB || '400').replace(/[^0-9]/g, ''), 10) || 400;
 
     const factoryCount = useCounter(factoriesTarget, 1600, isVisible);
     const contractsCount = useCounter(contractsTarget, 1800, isVisible);

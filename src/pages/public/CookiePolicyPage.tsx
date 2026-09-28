@@ -94,12 +94,12 @@ export function CookiePolicyPage() {
                                 {content.heroBadgeTh || content.heroBadgeEn || 'Cookies Policy'}
                             </p>
                             <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight mb-4">
-                                {lang === 'th' ? (content.heroTitleTh || 'นโยบายคุกกี้') : (content.heroTitleEn || 'Cookies Policy')}
+                                {lang === 'th' ? (content.heroTitleTh || content.heroTitleEn || 'นโยบายคุกกี้') : (content.heroTitleEn || content.heroTitleTh || 'Cookies Policy')}
                             </h1>
                             <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                                 {lang === 'th'
-                                    ? (content.heroSubtitleTh || 'การคุ้มครองความเป็นส่วนตัวและความโปร่งใสในการเก็บรวบรวมข้อมูลผ่านเว็บไซต์ agileassets.co.th')
-                                    : (content.heroSubtitleEn || 'Privacy protection and transparency regarding data collection on agileassets.co.th')}
+                                    ? (content.heroSubtitleTh || content.heroSubtitleEn || 'การคุ้มครองความเป็นส่วนตัวและความโปร่งใสในการเก็บรวบรวมข้อมูลผ่านเว็บไซต์ agileassets.co.th')
+                                    : (content.heroSubtitleEn || content.heroSubtitleTh || 'Privacy protection and transparency regarding data collection on agileassets.co.th')}
                             </p>
                         </ScrollReveal>
                     </div>

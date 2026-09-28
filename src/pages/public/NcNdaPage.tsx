@@ -231,16 +231,16 @@ export function NcNdaPage() {
                             {/* Title */}
                             <h1 className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-foreground tracking-tight mb-4 font-sans">
                                 {lang === 'th'
-                                    ? (content.heroTitleTh || 'สัญญาการรักษาความลับของลูกค้า')
-                                    : (content.heroTitleEn || 'Customer Non-Disclosure Agreement')}
+                                    ? (content.heroTitleTh || content.heroTitleEn || 'สัญญาการรักษาความลับของลูกค้า')
+                                    : (content.heroTitleEn || content.heroTitleTh || 'Customer Non-Disclosure Agreement')}
                             </h1>
                             <p className="text-base sm:text-lg text-sky-400 font-semibold mb-2">
                                 (Non-Circumvention and Non-Disclosure Agreement)
                             </p>
                             <p className="text-sm text-muted-foreground max-w-2xl mx-auto leading-relaxed">
                                 {lang === 'th'
-                                    ? (content.heroSubtitleTh || 'ข้อตกลงและเงื่อนไขการคุ้มครองข้อมูลความลับทางการค้าและการไม่ก้าวข้ามหรือหลีกเลี่ยงผู้ให้ข้อมูล บริษัท อาร์จิสท์ แอสเซ็ทส์ จำกัด')
-                                    : (content.heroSubtitleEn || 'Confidentiality terms and non-circumvention covenants of Agile Assets Co., Ltd.')}
+                                    ? (content.heroSubtitleTh || content.heroSubtitleEn || 'ข้อตกลงและเงื่อนไขการคุ้มครองข้อมูลความลับทางการค้าและการไม่ก้าวข้ามหรือหลีกเลี่ยงผู้ให้ข้อมูล บริษัท อาร์จิสท์ แอสเซ็ทส์ จำกัด')
+                                    : (content.heroSubtitleEn || content.heroSubtitleTh || 'Confidentiality terms and non-circumvention covenants of Agile Assets Co., Ltd.')}
                             </p>
 
                             {/* Action Bar */}

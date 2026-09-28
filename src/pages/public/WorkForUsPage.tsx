@@ -369,22 +369,22 @@ export function WorkForUsPage() {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold uppercase tracking-wider mb-6 animate-fade-in shadow-sm">
                             <Briefcase className="w-3.5 h-3.5" />
-                            <span>{lang === 'th' ? content.heroBadgeTh : content.heroBadgeEn}</span>
+                            <span>{(lang === 'th' ? (content.heroBadgeTh || content.heroBadgeEn) : (content.heroBadgeEn || content.heroBadgeTh)) || 'CAREERS & OPPORTUNITIES'}</span>
                         </div>
 
                         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-foreground tracking-tight max-w-4xl mx-auto leading-tight sm:leading-tight">
-                            {lang === 'th' ? content.heroTitleTh : content.heroTitleEn}
+                            {lang === 'th' ? (content.heroTitleTh || content.heroTitleEn || 'ร่วมงานกับ Agile Assets') : (content.heroTitleEn || content.heroTitleTh || 'Work with Agile Assets')}
                         </h1>
 
                         <p className="mt-6 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-                            {lang === 'th' ? content.heroSubtitleTh : content.heroSubtitleEn}
+                            {lang === 'th' ? (content.heroSubtitleTh || content.heroSubtitleEn || 'ร่วมขับเคลื่อนอนาคตอุตสาหกรรมไทยและพลังงานสะอาดไปพร้อมกับเรา') : (content.heroSubtitleEn || content.heroSubtitleTh || 'Join us to empower Thai manufacturing with clean tech and dynamic capital.')}
                         </p>
 
                         {/* Action Buttons */}
                         <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-4">
                             <a
                                 href="#open-positions"
-                                className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-400/25 hover:shadow-blue-400/45 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+                                className="btn-dynamic-theme w-full sm:w-auto px-8 py-3.5 rounded-xl bg-gradient-to-br from-blue-400 to-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-400/25 hover:shadow-blue-400/45 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
                             >
                                 <span>{lang === 'th' ? 'ดูตำแหน่งงานว่าง' : 'Explore Open Positions'}</span>
                                 <ArrowRight className="w-4 h-4" />

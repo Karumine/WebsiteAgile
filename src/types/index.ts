@@ -91,11 +91,18 @@ export interface PageSectionItem {
     id: string;
     title: string;
     titleEn?: string;
+    subTitle?: string;
+    subTitleEn?: string;
     description: string;
     descEn?: string;
     badge?: string;
+    icon?: string;
     image?: string;
     link?: string;
+    quote?: string;
+    quoteEn?: string;
+    btnText?: string;
+    btnTextEn?: string;
 }
 
 export interface PageCustomContent {
@@ -103,6 +110,10 @@ export interface PageCustomContent {
     pageName: string;
     titleTh: string;
     titleEn?: string;
+    sectionTitleTh?: string;
+    sectionTitleEn?: string;
+    sectionSubtitleTh?: string;
+    sectionSubtitleEn?: string;
     metaTitle?: string;
     metaDescription?: string;
     heroBadgeTh?: string;
@@ -118,6 +129,35 @@ export interface PageCustomContent {
     contentTh?: string;
     contentEn?: string;
     items?: PageSectionItem[];
+
+    // Section 3: Industry Solutions (ServicesRangeSection)
+    solutionsBadgeTh?: string;
+    solutionsBadgeEn?: string;
+    solutionsTitleTh?: string;
+    solutionsTitleEn?: string;
+    solutionsSubtitleTh?: string;
+    solutionsSubtitleEn?: string;
+    solutionsItems?: PageSectionItem[];
+
+    // Section 4: Key Machinery Services (KeyFinancingServicesSection)
+    machineryBadgeTh?: string;
+    machineryBadgeEn?: string;
+    machineryTitleTh?: string;
+    machineryTitleEn?: string;
+    machinerySubtitleTh?: string;
+    machinerySubtitleEn?: string;
+    machineryItems?: PageSectionItem[];
+
+    // Section 5: What We Do (WhatWeDoSection)
+    whatWeDoBadgeTh?: string;
+    whatWeDoBadgeEn?: string;
+    whatWeDoTitleTh?: string;
+    whatWeDoTitleEn?: string;
+    whatWeDoSubtitleTh?: string;
+    whatWeDoSubtitleEn?: string;
+    whatWeDoImage?: string;
+    whatWeDoItems?: PageSectionItem[];
+
     lastUpdated?: string;
 }
 

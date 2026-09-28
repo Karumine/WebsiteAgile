@@ -296,17 +296,17 @@ export function SustainabilityPage() {
 
                             {/* Main Titles */}
                             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 text-white drop-shadow-2xl font-sans">
-                                {lang === 'th' ? (content.heroTitleTh || 'กลยุทธ์และการพัฒนาความยั่งยืน') : (content.heroTitleEn || 'Sustainability Strategy & ESG')}
+                                {lang === 'th' ? (content.heroTitleTh || content.heroTitleEn || 'กลยุทธ์และการพัฒนาความยั่งยืน') : (content.heroTitleEn || content.heroTitleTh || 'Sustainability Strategy & ESG')}
                             </h1>
                             <p className="text-xl sm:text-2xl lg:text-3xl font-semibold text-sky-200 tracking-wide mb-8 drop-shadow-lg font-sans">
-                                {lang === 'th' ? (content.heroSubtitleTh || 'ความมุ่งมั่นและความตั้งใจของเรา') : (content.heroSubtitleEn || 'Our Dedication to Sustainable Enterprise & Green Energy')}
+                                {lang === 'th' ? (content.heroSubtitleTh || content.heroSubtitleEn || 'ความมุ่งมั่นและความตั้งใจของเรา') : (content.heroSubtitleEn || content.heroSubtitleTh || 'Our Dedication to Sustainable Enterprise & Green Energy')}
                             </p>
 
                             {/* CTA Buttons */}
                             <div className="flex flex-wrap items-center justify-center gap-4">
                                 <button
                                     onClick={scrollToProjects}
-                                    className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-sky-500/30 hover:shadow-sky-500/50 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
+                                    className="btn-dynamic-theme inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-sky-500/30 hover:shadow-sky-500/50 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
                                 >
                                     <span>{lang === 'th' ? 'ดูโครงการความยั่งยืน' : 'Explore Sustainability Projects'}</span>
                                     <ArrowRight className="w-4 h-4" />

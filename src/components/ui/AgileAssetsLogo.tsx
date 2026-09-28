@@ -12,7 +12,6 @@ export const AgileAssetsLogo: React.FC<AgileAssetsLogoProps> = ({
     className = '',
     variant = 'full',
     textClassName = '',
-    showTagline = true,
 }) => {
     if (variant === 'icon') {
         return (
@@ -59,11 +58,6 @@ export const AgileAssetsLogo: React.FC<AgileAssetsLogoProps> = ({
                 <span className={`text-base sm:text-lg font-bold tracking-tight font-sans leading-tight ${textClassName || 'text-foreground'}`}>
                     Agile Assets
                 </span>
-                {showTagline && (
-                    <span className="text-[9px] sm:text-[10px] tracking-wider uppercase font-extrabold text-sky-500 dark:text-sky-400 leading-none mt-0.5">
-                        GROWTH • GOOD CAPITAL
-                    </span>
-                )}
             </div>
         </div>
     );

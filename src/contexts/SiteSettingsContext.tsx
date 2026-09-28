@@ -1,10 +1,10 @@
-import { createContext, useContext, useState, useEffect, useRef, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import type { SiteSettings, ThemeSettings } from '@/types';
 import defaultSettingsData from '@/data/defaultSettings.json';
 import { themeService } from '@/services/themeService';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 
 const STORAGE_KEY = 'agile_assets_settings';
-const SAVE_DEBOUNCE_MS = 500;
 
 export const DEFAULT_THEME_SETTINGS: ThemeSettings = {
     primaryColor: '#0284c7',
@@ -73,6 +73,34 @@ function loadSettings(): SiteSettings {
             // Ensure themeSettings and pageContents are defined
             parsed.themeSettings = parsed.themeSettings || DEFAULT_THEME_SETTINGS;
             parsed.pageContents = parsed.pageContents || {};
+
+            // Auto-backfill default data if sections/items are missing, empty, or dummy in saved localStorage
+            const homeDefault = DEFAULT_PAGE_CONTENTS['home'];
+            if (homeDefault) {
+                if (!parsed.pageContents['home']) {
+                    parsed.pageContents['home'] = { ...homeDefault };
+                } else {
+                    const home = parsed.pageContents['home'];
+                    const isSolutionsDummy = !home.solutionsItems || home.solutionsItems.length === 0 ||
+                        (home.solutionsItems.length === 1 && (home.solutionsItems[0].title === 'กลุ่มอุตสาหกรรมใหม่' || home.solutionsItems[0].title.includes('กลุ่มอุตสาหกรรมใหม่')));
+                    if (isSolutionsDummy) {
+                        home.solutionsItems = homeDefault.solutionsItems || [];
+                    }
+
+                    const isMachineryDummy = !home.machineryItems || home.machineryItems.length === 0 ||
+                        (home.machineryItems.length === 1 && (home.machineryItems[0].title === 'เครื่องจักรอุตสาหกรรมใหม่' || home.machineryItems[0].title.includes('เครื่องจักรอุตสาหกรรมใหม่')));
+                    if (isMachineryDummy) {
+                        home.machineryItems = homeDefault.machineryItems || [];
+                    }
+
+                    if (!home.items || home.items.length === 0) {
+                        home.items = homeDefault.items || [];
+                    }
+                }
+                // Persist the clean defaults to localStorage
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+            }
+
             parsed._version = DATA_VERSION;
             applyThemeToDom(parsed.themeSettings);
             return parsed;
@@ -92,7 +120,6 @@ function loadSettings(): SiteSettings {
 
 export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     const [settings, setSettings] = useState<SiteSettings>(loadSettings);
-    const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
 
     // Apply theme changes dynamically whenever themeSettings updates
     useEffect(() => {
@@ -117,23 +144,69 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
         };
     }, []);
 
-    // Debounced localStorage write
+    // Cross-tab real-time sync with BroadcastChannel and storage events
     useEffect(() => {
-        if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
-        saveTimerRef.current = setTimeout(() => {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
-        }, SAVE_DEBOUNCE_MS);
-        return () => {
-            if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+        let channel: BroadcastChannel | null = null;
+        try {
+            channel = new BroadcastChannel('agile_assets_settings_sync');
+            channel.onmessage = (event) => {
+                if (event.data && typeof event.data === 'object') {
+                    setSettings(event.data);
+                    if (event.data.themeSettings) {
+                        applyThemeToDom(event.data.themeSettings);
+                    }
+                }
+            };
+        } catch {
+            // BroadcastChannel not supported in older browsers
+        }
+
+        const handleStorage = (e: StorageEvent) => {
+            if (e.key === STORAGE_KEY && e.newValue) {
+                try {
+                    const parsed = JSON.parse(e.newValue);
+                    setSettings(parsed);
+                    if (parsed.themeSettings) {
+                        applyThemeToDom(parsed.themeSettings);
+                    }
+                } catch (err) {
+                    console.error('Error syncing settings from storage event:', err);
+                }
+            }
         };
-    }, [settings]);
+
+        window.addEventListener('storage', handleStorage);
+        return () => {
+            window.removeEventListener('storage', handleStorage);
+            channel?.close();
+        };
+    }, []);
 
     const updateSettings = (newSettings: Partial<SiteSettings>) => {
-        setSettings((prev) => ({
-            ...prev,
-            ...newSettings,
-            lastUpdated: new Date().toISOString(),
-        }));
+        setSettings((prev) => {
+            const updated = {
+                ...prev,
+                ...newSettings,
+                lastUpdated: new Date().toISOString(),
+            };
+
+            // Immediate synchronous write to localStorage for zero-lag persistence
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+                // Broadcast to other tabs & windows immediately
+                try {
+                    const ch = new BroadcastChannel('agile_assets_settings_sync');
+                    ch.postMessage(updated);
+                    ch.close();
+                } catch {
+                    // Fallback storage event
+                }
+            } catch (err) {
+                console.error('Failed to write settings to localStorage:', err);
+            }
+
+            return updated;
+        });
 
         if (newSettings.themeSettings) {
             themeService.updateTheme(newSettings.themeSettings).catch((err) => {
@@ -143,9 +216,20 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     };
 
     const resetSettings = () => {
-        const defaults = defaultSettingsData as SiteSettings;
+        const defaults = {
+            ...(defaultSettingsData as unknown as SiteSettings),
+            themeSettings: DEFAULT_THEME_SETTINGS,
+            pageContents: {},
+            _version: DATA_VERSION
+        };
         setSettings(defaults);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
+            const ch = new BroadcastChannel('agile_assets_settings_sync');
+            ch.postMessage(defaults);
+            ch.close();
+        } catch {}
+        applyThemeToDom(defaults.themeSettings);
     };
 
     return (

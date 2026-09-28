@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Download, BookOpen, TrendingUp, CheckCircle2, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import storyOriginImg from '@/assets/story_origin_engineers.png';
 import storyMachineryImg from '@/assets/story_machinery_finance.png';
@@ -13,9 +15,27 @@ export function OurStorySection() {
     const { theme } = useTheme();
     const isDark = theme === 'dark';
     const navigate = useNavigate();
+    const { content } = usePageContent('home', DEFAULT_PAGE_CONTENTS['home']);
 
     const [activeModal, setActiveModal] = useState<'newsletter' | null>(null);
     const [downloadSuccess, setDownloadSuccess] = useState(false);
+
+    const isEn = lang === 'en';
+
+    // Section Badge
+    const sectionBadge = isEn
+        ? (content.heroBadgeEn || content.heroBadgeTh || t('story.badge'))
+        : (content.heroBadgeTh || content.heroBadgeEn || t('story.badge'));
+
+    // Section Title
+    const sectionTitle = isEn
+        ? (content.sectionTitleEn || content.sectionTitleTh || t('story.title'))
+        : (content.sectionTitleTh || content.sectionTitleEn || t('story.title'));
+
+    // Section Subtitle
+    const sectionSubtitle = isEn
+        ? (content.sectionSubtitleEn || content.sectionSubtitleTh || t('story.subtitle'))
+        : (content.sectionSubtitleTh || content.sectionSubtitleEn || t('story.subtitle'));
 
     const handleDownloadNewsletter = (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,41 +46,50 @@ export function OurStorySection() {
         }, 2200);
     };
 
-    const storyCards = [
-        {
-            id: 'origin',
-            image: storyOriginImg,
-            tag: t('story.card1.tag'),
-            title: t('story.card1.title'),
-            quote: t('story.card1.quote'),
-            desc: t('story.card1.desc'),
-            btnText: t('story.card1.btn'),
-            icon: BookOpen,
-            action: () => navigate('/about-us'),
-        },
-        {
-            id: 'machinery',
-            image: storyMachineryImg,
-            tag: t('story.card2.tag'),
-            title: t('story.card2.title'),
-            quote: t('story.card2.quote'),
-            desc: t('story.card2.desc'),
-            btnText: t('story.card2.btn'),
-            icon: Download,
-            action: () => setActiveModal('newsletter'),
-        },
-        {
-            id: 'growth',
-            image: storyGrowthImg,
-            tag: t('story.card3.tag'),
-            title: t('story.card3.title'),
-            quote: t('story.card3.quote'),
-            desc: t('story.card3.desc'),
-            btnText: t('story.card3.btn'),
-            icon: TrendingUp,
-            action: () => navigate('/investor-relations'),
-        },
+    const defaultIcons = [BookOpen, Download, TrendingUp];
+    const defaultActions = [
+        () => navigate('/about-us'),
+        () => setActiveModal('newsletter'),
+        () => navigate('/investor-relations'),
     ];
+
+    const rawItems = (content.items && content.items.length > 0)
+        ? content.items
+        : (DEFAULT_PAGE_CONTENTS['home']?.items || []);
+
+    const storyCards = rawItems.map((item, idx) => {
+        const title = isEn ? (item.titleEn || item.title) : (item.title || item.titleEn || '');
+        const quote = isEn ? (item.quoteEn || item.quote) : (item.quote || item.quoteEn || '');
+        const desc = isEn ? (item.descEn || item.description) : (item.description || item.descEn || '');
+        const badge = item.badge || '';
+        const btnText = isEn ? (item.btnTextEn || item.btnText) : (item.btnText || item.btnTextEn || '');
+        const image = item.image || (idx === 0 ? storyOriginImg : idx === 1 ? storyMachineryImg : storyGrowthImg);
+        const Icon = defaultIcons[idx % defaultIcons.length];
+
+        const handleAction = () => {
+            if (item.link === '#newsletter' || item.id === 'story-2') {
+                setActiveModal('newsletter');
+            } else if (item.link?.startsWith('http')) {
+                window.open(item.link, '_blank');
+            } else if (item.link) {
+                navigate(item.link);
+            } else if (defaultActions[idx]) {
+                defaultActions[idx]();
+            }
+        };
+
+        return {
+            id: item.id || `story-${idx}`,
+            image,
+            tag: badge,
+            title,
+            quote,
+            desc,
+            btnText: btnText || (isEn ? 'Learn More' : 'ดูรายละเอียด'),
+            icon: Icon,
+            action: handleAction,
+        };
+    });
 
     return (
         <section id="our-story" className="relative pt-12 sm:pt-16 pb-20 lg:pb-24 overflow-hidden bg-background">
@@ -114,18 +143,18 @@ export function OurStorySection() {
                         {/* Brand Badge */}
                         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3 shadow-sm border transition-all duration-300">
                             <span className="text-xs font-black tracking-widest text-sky-600 dark:text-sky-400 uppercase font-sans">
-                                {t('story.badge')}
+                                {sectionBadge}
                             </span>
                         </div>
 
                         {/* Section Title */}
                         <h2 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 font-sans text-foreground">
-                            {t('story.title')}
+                            {sectionTitle}
                         </h2>
 
                         {/* Section Subtitle */}
                         <p className="text-sm sm:text-base text-muted-foreground leading-relaxed max-w-2xl mx-auto">
-                            {t('story.subtitle')}
+                            {sectionSubtitle}
                         </p>
                     </div>
                 </ScrollReveal>
@@ -173,11 +202,13 @@ export function OurStorySection() {
                                     </h3>
 
                                     {/* Card Subtitle / Quote Accent */}
-                                    <div className="mb-4 pl-3.5 border-l-2 border-sky-400">
-                                        <p className="text-xs sm:text-sm font-bold text-foreground/90 leading-snug font-sans">
-                                            {card.quote}
-                                        </p>
-                                    </div>
+                                    {card.quote && (
+                                        <div className="mb-4 pl-3.5 border-l-2 border-sky-400">
+                                            <p className="text-xs sm:text-sm font-bold text-foreground/90 leading-snug font-sans">
+                                                {card.quote}
+                                            </p>
+                                        </div>
+                                    )}
 
                                     {/* Card Body Description */}
                                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed font-normal mb-6">

@@ -130,10 +130,10 @@ export function CalculatorPage() {
                     <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto">
                         <ScrollReveal animation="fade-up">
                             <p className="text-xl sm:text-3xl font-semibold text-slate-100 mb-2 font-sans tracking-wide drop-shadow-md">
-                                {content.heroTitleEn || 'Financing Calculator'}
+                                {lang === 'th' ? (content.heroBadgeTh || content.heroBadgeEn || 'Agile Assets') : (content.heroBadgeEn || content.heroBadgeTh || 'Agile Assets')}
                             </p>
                             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight drop-shadow-2xl font-sans mb-4">
-                                {content.heroTitleTh || 'โปรแกรมคำนวณสินเชื่อ'}
+                                {lang === 'th' ? (content.heroTitleTh || content.heroTitleEn || 'โปรแกรมคำนวณสินเชื่อ') : (content.heroTitleEn || content.heroTitleTh || 'Financing Calculator')}
                             </h1>
                             {(content.heroSubtitleTh || content.heroSubtitleEn) && (
                                 <p className="text-sm sm:text-lg text-slate-300 max-w-2xl mx-auto font-light leading-relaxed drop-shadow-md">
