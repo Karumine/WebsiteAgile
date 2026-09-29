@@ -212,7 +212,7 @@ export function Navbar() {
                                 window.scrollTo({ top: 0, behavior: 'smooth' });
                             }
                         }}
-                        className="flex items-center gap-2 group transition-transform duration-200 hover:scale-[1.02]"
+                        className="flex items-center gap-2 group transition-transform duration-200"
                     >
                         <AgileAssetsLogo variant="full" showTagline={false} textClassName={scrolled ? 'text-foreground' : 'text-white'} />
                     </a>
@@ -234,7 +234,7 @@ export function Navbar() {
                                 className={cn(
                                     'inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 cursor-default relative',
                                     (isEquipmentActive || activeDropdown === 'equipment')
-                                        ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10 font-bold'
+                                        ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10'
                                         : scrolled
                                         ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
                                         : 'text-slate-100 hover:text-white hover:bg-white/15'
@@ -269,7 +269,7 @@ export function Navbar() {
                                                         className={cn(
                                                             'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs font-semibold transition-all duration-150',
                                                             isCategorySelected
-                                                                ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30 font-bold shadow-sm'
+                                                                ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30 shadow-sm'
                                                                 : isCategoryCurrentRoute
                                                                 ? 'text-sky-400 bg-sky-500/10 border border-sky-500/20'
                                                                 : 'text-foreground hover:bg-sky-500/10 hover:text-sky-400 border border-transparent'
@@ -310,7 +310,7 @@ export function Navbar() {
                                                         className={cn(
                                                             "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium transition-all group",
                                                             isSubActive
-                                                                ? "bg-sky-500/20 text-sky-400 font-bold border-l-2 border-sky-400 pl-3.5 shadow-sm"
+                                                                ? "bg-sky-500/20 text-sky-400 font-semibold border-l-2 border-sky-400 pl-3.5 shadow-sm"
                                                                 : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
                                                         )}
                                                     >
@@ -338,7 +338,7 @@ export function Navbar() {
                             className={cn(
                                 'px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 relative',
                                 isInvestorActive
-                                    ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10 font-bold'
+                                    ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10'
                                     : scrolled
                                     ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
                                     : 'text-slate-100 hover:text-white hover:bg-white/15'
@@ -365,7 +365,7 @@ export function Navbar() {
                                 className={cn(
                                     'inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 cursor-default relative',
                                     (isPressActive || activeDropdown === 'press')
-                                        ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10 font-bold'
+                                        ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10'
                                         : scrolled
                                         ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
                                         : 'text-slate-100 hover:text-white hover:bg-white/15'
@@ -390,7 +390,7 @@ export function Navbar() {
                                                     className={cn(
                                                         "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium transition-all",
                                                         isSubActive
-                                                            ? "bg-sky-500/20 text-sky-400 font-bold border-l-2 border-sky-400 pl-3.5"
+                                                            ? "bg-sky-500/20 text-sky-400 font-semibold border-l-2 border-sky-400 pl-3.5"
                                                             : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
                                                     )}
                                                 >
@@ -415,7 +415,7 @@ export function Navbar() {
                                 className={cn(
                                     'inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 relative',
                                     (isAboutActive || activeDropdown === 'about')
-                                        ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10 font-bold'
+                                        ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10'
                                         : scrolled
                                         ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
                                         : 'text-slate-100 hover:text-white hover:bg-white/15'
@@ -440,7 +440,7 @@ export function Navbar() {
                                                     className={cn(
                                                         "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium transition-all",
                                                         isSubActive
-                                                            ? "bg-sky-500/20 text-sky-400 font-bold border-l-2 border-sky-400 pl-3.5"
+                                                            ? "bg-sky-500/20 text-sky-400 font-semibold border-l-2 border-sky-400 pl-3.5"
                                                             : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
                                                     )}
                                                 >
@@ -460,7 +460,7 @@ export function Navbar() {
                             className={cn(
                                 'px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 relative',
                                 isAssetActive
-                                    ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10 font-bold'
+                                    ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10'
                                     : scrolled
                                     ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
                                     : 'text-slate-100 hover:text-white hover:bg-white/15'
@@ -591,7 +591,7 @@ export function Navbar() {
                             className={cn(
                                 "w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors",
                                 isEquipmentActive
-                                    ? "text-sky-400 bg-sky-500/15 font-bold"
+                                    ? "text-sky-400 bg-sky-500/15 font-semibold"
                                     : "text-foreground hover:bg-sky-500/10"
                             )}
                         >
@@ -609,7 +609,7 @@ export function Navbar() {
                                     <div key={cat.id} className="border-l-2 border-sky-500/30 pl-3 py-1 space-y-1">
                                         <button
                                             onClick={() => setMobileOpenSubMenu(mobileOpenSubMenu === cat.id ? null : cat.id)}
-                                            className="w-full flex items-center justify-between py-1 text-xs font-bold text-sky-400"
+                                            className="w-full flex items-center justify-between py-1 text-xs font-semibold text-sky-400"
                                         >
                                             <div className="flex items-center gap-2">
                                                 <cat.icon className="w-3.5 h-3.5" />
@@ -628,7 +628,7 @@ export function Navbar() {
                                                             className={cn(
                                                                 "w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors text-left",
                                                                 isSubActive
-                                                                    ? "bg-sky-500/20 text-sky-400 font-bold"
+                                                                    ? "bg-sky-500/20 text-sky-400 font-semibold"
                                                                     : "text-muted-foreground hover:text-sky-400 hover:bg-white/5"
                                                             )}
                                                         >
@@ -651,7 +651,7 @@ export function Navbar() {
                         className={cn(
                             'w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-colors',
                             isInvestorActive
-                                ? 'text-sky-400 bg-sky-500/15 font-bold'
+                                ? 'text-sky-400 bg-sky-500/15 font-semibold'
                                 : 'text-foreground hover:bg-sky-500/10'
                         )}
                     >
@@ -665,7 +665,7 @@ export function Navbar() {
                             className={cn(
                                 "w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors",
                                 isPressActive
-                                    ? "text-sky-400 bg-sky-500/15 font-bold"
+                                    ? "text-sky-400 bg-sky-500/15 font-semibold"
                                     : "text-foreground hover:bg-sky-500/10"
                             )}
                         >
@@ -683,7 +683,7 @@ export function Navbar() {
                                             className={cn(
                                                 "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left",
                                                 isSubActive
-                                                    ? "bg-sky-500/20 text-sky-400 font-bold"
+                                                    ? "bg-sky-500/20 text-sky-400 font-semibold"
                                                     : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
                                             )}
                                         >
@@ -703,7 +703,7 @@ export function Navbar() {
                             className={cn(
                                 "w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors",
                                 isAboutActive
-                                    ? "text-sky-400 bg-sky-500/15 font-bold"
+                                    ? "text-sky-400 bg-sky-500/15 font-semibold"
                                     : "text-foreground hover:bg-sky-500/10"
                             )}
                         >
@@ -721,7 +721,7 @@ export function Navbar() {
                                             className={cn(
                                                 "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left",
                                                 isSubActive
-                                                    ? "bg-sky-500/20 text-sky-400 font-bold"
+                                                    ? "bg-sky-500/20 text-sky-400 font-semibold"
                                                     : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
                                             )}
                                         >
@@ -740,8 +740,8 @@ export function Navbar() {
                         className={cn(
                             'w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-colors',
                             isAssetActive
-                                ? 'text-sky-400 bg-sky-500/15 font-bold'
-                                : 'text-foreground hover:bg-sky-500/10'
+                                ? "text-sky-400 bg-sky-500/15 font-semibold"
+                                : "text-foreground hover:bg-sky-500/10"
                         )}
                     >
                         {t('nav.assetForSale')}

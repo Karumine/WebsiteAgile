@@ -4,10 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import {
     LayoutDashboard,
-    BarChart3,
-    Image,
     Newspaper,
-    Settings,
     LogOut,
     Menu,
     X,
@@ -33,13 +30,10 @@ export function AdminLayout() {
         { to: '/management-portal/dashboard', icon: LayoutDashboard, labelEn: 'Dashboard', labelTh: 'แผงควบคุม' },
         { to: '/management-portal/pages', icon: FileEdit, labelEn: 'Page Contents', labelTh: 'จัดการเนื้อหาทุกหน้า' },
         { to: '/management-portal/appearance', icon: Palette, labelEn: 'Button & Theme', labelTh: 'สีปุ่ม & ธีมของเว็บ' },
-        { to: '/management-portal/banner', icon: Image, labelEn: 'Hero Banner', labelTh: 'แบนเนอร์หลัก' },
         { to: '/management-portal/news', icon: Newspaper, labelEn: 'News & Articles', labelTh: 'ข่าวสารและบทความ' },
         { to: '/management-portal/assets', icon: ShoppingBag, labelEn: 'Assets for Sale', labelTh: 'เครื่องจักรมือสอง' },
-        { to: '/management-portal/rates', icon: BarChart3, labelEn: 'Interest Rates', labelTh: 'อัตราดอกเบี้ย' },
         { to: '/management-portal/faq', icon: HelpCircle, labelEn: 'FAQ & Help', labelTh: 'คำถามที่พบบ่อย (FAQ)' },
         { to: '/management-portal/company', icon: Building2, labelEn: 'Company & Stats', labelTh: 'ข้อมูลบริษัท & สถิติ' },
-        { to: '/management-portal/custom', icon: Settings, labelEn: 'Custom Fields', labelTh: 'ข้อมูลโปรโมชัน' },
     ];
 
     const handleLogout = () => {
@@ -71,7 +65,7 @@ export function AdminLayout() {
                             href="/"
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 hover:text-sky-300 border border-sky-500/25 text-xs font-semibold transition-all hover:scale-105 active:scale-95 group shadow-sm"
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 hover:text-sky-300 border border-sky-500/25 text-xs font-semibold transition-colors group shadow-sm"
                             title={lang === 'th' ? 'เปิดหน้าเว็บจริงในแท็บใหม่' : 'Open live website in new tab'}
                         >
                             <ExternalLink className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -95,10 +89,10 @@ export function AdminLayout() {
                             onClick={() => setSidebarOpen(false)}
                             className={({ isActive }) =>
                                 cn(
-                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all',
+                                    'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold transition-colors',
                                     isActive
-                                        ? 'bg-primary/10 text-primary font-bold'
-                                        : 'text-muted-foreground hover:text-foreground hover:bg-white/5'
+                                        ? 'bg-primary/15 text-primary'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-white/5 font-medium'
                                 )
                             }
                         >

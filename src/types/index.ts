@@ -161,6 +161,15 @@ export interface PageCustomContent {
     lastUpdated?: string;
 }
 
+export interface CustomPageItem {
+    id: string;
+    groupId: string;
+    nameTh: string;
+    nameEn: string;
+    path: string;
+    createdAt?: string;
+}
+
 export interface SiteSettings {
     banner: BannerSettings;
     interestRates: InterestRate[];
@@ -172,6 +181,7 @@ export interface SiteSettings {
     faqs: FaqItem[];
     themeSettings?: ThemeSettings;
     pageContents?: Record<string, PageCustomContent>;
+    customPages?: CustomPageItem[];
     lastUpdated: string;
 }
 

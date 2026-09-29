@@ -1,22 +1,87 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import type { PageCustomContent, PageSectionItem } from '@/types';
+import type { PageCustomContent, PageSectionItem, CustomPageItem } from '@/types';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { 
     FileEdit, Save, RotateCcw, ExternalLink, Plus, Trash2, 
     Search, Layers, Sparkles, CheckCircle, Image as ImageIcon,
     Globe, Dices, ArrowUp, ArrowDown, Copy, Droplets, Wheat,
-    Factory, Flame, Sun, Box, ArrowRight
+    Factory, Flame, Sun, Box, ArrowRight,
+    Home, Wrench, TrendingUp, Newspaper, Users, ShoppingBag,
+    ChevronDown, ChevronRight, X, FolderPlus
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { cn } from '@/lib/utils';
+
+export interface NavGroupConfig {
+    id: string;
+    labelTh: string;
+    labelEn: string;
+    icon: React.ComponentType<{ className?: string }>;
+    descriptionTh: string;
+    badgeColor: string;
+}
+
+export const NAV_GROUPS: NavGroupConfig[] = [
+    {
+        id: 'home',
+        labelTh: 'หน้าแรก',
+        labelEn: 'Home',
+        icon: Home,
+        descriptionTh: 'หน้าแรกและภาพรวมเว็บไซต์',
+        badgeColor: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
+    },
+    {
+        id: 'leasing',
+        labelTh: 'สินเชื่อเครื่องจักรและอุปกรณ์',
+        labelEn: 'Equipment Financing',
+        icon: Wrench,
+        descriptionTh: 'กลุ่มสินเชื่ออุตสาหกรรมและเครื่องจักรเฉพาะทาง',
+        badgeColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+    },
+    {
+        id: 'investor',
+        labelTh: 'นักลงทุนสัมพันธ์',
+        labelEn: 'Investor Relations',
+        icon: TrendingUp,
+        descriptionTh: 'ข้อมูลนักลงทุน ธรรมาภิบาล และความยั่งยืน ESG',
+        badgeColor: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
+    },
+    {
+        id: 'news',
+        labelTh: 'ศูนย์ข่าวสาร',
+        labelEn: 'News & Knowledge',
+        icon: Newspaper,
+        descriptionTh: 'ข่าวสาร บทความ โครงการ และจดหมายข่าว',
+        badgeColor: 'text-purple-400 bg-purple-500/10 border-purple-500/20',
+    },
+    {
+        id: 'about',
+        labelTh: 'เกี่ยวกับเรา',
+        labelEn: 'About Us',
+        icon: Users,
+        descriptionTh: 'ข้อมูลองค์กร ร่วมงาน คำถามที่พบบ่อย และติดต่อเรา',
+        badgeColor: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
+    },
+    {
+        id: 'assets-sale',
+        labelTh: 'ทรัพย์เพื่อการขาย',
+        labelEn: 'Assets for Sale',
+        icon: ShoppingBag,
+        descriptionTh: 'เครื่องจักรมือสองและทรัพย์รอการขาย',
+        badgeColor: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
+    },
+];
 
 interface PageDefinition {
     id: string;
+    groupId: string;
     category: string;
     nameTh: string;
     nameEn: string;
     path: string;
+    isCustom?: boolean;
     defaultHeroTitleTh: string;
     defaultHeroTitleEn: string;
     defaultHeroSubtitleTh: string;
@@ -30,21 +95,32 @@ interface PageDefinition {
     defaultItems?: PageSectionItem[];
 }
 
-const getPageDef = (id: string, category: string, fallbackNameTh: string, nameEn: string, path: string): PageDefinition => {
+const getPageDef = (
+    id: string,
+    groupId: string,
+    fallbackNameTh: string,
+    nameEn: string,
+    path: string,
+    isCustom?: boolean
+): PageDefinition => {
     const master = DEFAULT_PAGE_CONTENTS[id];
+    const group = NAV_GROUPS.find((g) => g.id === groupId);
+    const groupName = group ? group.labelTh : 'ทั่วไป';
     return {
         id,
-        category,
+        groupId,
+        category: groupName,
         nameTh: master?.pageName || fallbackNameTh,
         nameEn,
         path,
-        defaultHeroTitleTh: master?.heroTitleTh || '',
-        defaultHeroTitleEn: master?.heroTitleEn || '',
+        isCustom: !!isCustom,
+        defaultHeroTitleTh: master?.heroTitleTh || fallbackNameTh,
+        defaultHeroTitleEn: master?.heroTitleEn || nameEn,
         defaultHeroSubtitleTh: master?.heroSubtitleTh || '',
         defaultHeroSubtitleEn: master?.heroSubtitleEn || '',
-        defaultBadgeTh: master?.heroBadgeTh || '',
-        defaultBadgeEn: master?.heroBadgeEn || '',
-        defaultImage: master?.heroImage || '',
+        defaultBadgeTh: master?.heroBadgeTh || group?.labelTh || '',
+        defaultBadgeEn: master?.heroBadgeEn || group?.labelEn || '',
+        defaultImage: master?.heroImage || '/assets/Hero-Banner-Website-3-scaled.png',
         defaultCtaTextTh: master?.ctaTextTh || 'ขอสินเชื่อกับเรา',
         defaultCtaTextEn: master?.ctaTextEn || 'Financing with Us',
         defaultCtaLink: master?.ctaLink || '/leasing-application',
@@ -52,33 +128,43 @@ const getPageDef = (id: string, category: string, fallbackNameTh: string, nameEn
     };
 };
 
-const PAGES_LIST: PageDefinition[] = [
-    // 1. หน้าหลักและทั่วไป
-    getPageDef('home', 'หน้าหลัก', 'หน้าแรก (Home Page)', 'Home Page', '/'),
-    getPageDef('about', 'หน้าหลัก', 'เกี่ยวกับเรา (About Us)', 'About Us', '/about'),
-    getPageDef('work-for-us', 'หน้าหลัก', 'ร่วมงานกับเรา (Work for Us)', 'Work For Us', '/work-for-us'),
+const BASE_PAGES_LIST: PageDefinition[] = [
+    // 1. หน้าแรก (Home)
+    getPageDef('home', 'home', 'หน้าแรก (Home Page)', 'Home Page', '/'),
 
-    // 2. โซลูชันสินเชื่ออุตสาหกรรม
-    getPageDef('drinking-water', 'สินเชื่ออุตสาหกรรม', 'โรงงานผลิตน้ำดื่ม (Drinking Water)', 'Drinking Water Production', '/drinking-water-production'),
-    getPageDef('livestock-farm', 'สินเชื่ออุตสาหกรรม', 'ฟาร์มปศุสัตว์ (Livestock Farm)', 'Livestock Farm Equipment', '/livestock-farm'),
-    getPageDef('food-processing', 'สินเชื่ออุตสาหกรรม', 'โรงงานแปรรูปอาหาร (Food Processing)', 'Food Processing Plant', '/food-processing'),
-    getPageDef('biogas-production', 'สินเชื่ออุตสาหกรรม', 'โรงไฟฟ้าก๊าซชีวภาพ (Biogas Production)', 'Biogas Power Generation', '/biogas-production'),
-    getPageDef('solar-power', 'สินเชื่ออุตสาหกรรม', 'พลังงานแสงอาทิตย์ (Solar Rooftop)', 'Solar Power Generation', '/solar-power-generation'),
-    getPageDef('chiller', 'สินเชื่ออุตสาหกรรม', 'เครื่องทำความเย็น (Industrial Chiller)', 'Industrial Chiller', '/chiller'),
-    getPageDef('injection-molding', 'สินเชื่ออุตสาหกรรม', 'เครื่องฉีดพลาสติก (Injection Molding)', 'Injection Molding Machine', '/injection-molding-machine'),
-    getPageDef('generator-set', 'สินเชื่ออุตสาหกรรม', 'เครื่องกำเนิดไฟฟ้า (Generator Set)', 'Industrial Generator Set', '/generator-set'),
+    // 2. สินเชื่อเครื่องจักรและอุปกรณ์ (Equipment Financing)
+    getPageDef('drinking-water', 'leasing', 'โรงงานผลิตน้ำดื่ม (Drinking Water)', 'Drinking Water Production', '/drinking-water-production'),
+    getPageDef('livestock-farm', 'leasing', 'ฟาร์มปศุสัตว์ (Livestock Farm)', 'Livestock Farm Equipment', '/livestock-farm'),
+    getPageDef('food-processing', 'leasing', 'โรงงานแปรรูปอาหาร (Food Processing)', 'Food Processing Plant', '/food-processing'),
+    getPageDef('biogas-production', 'leasing', 'โรงไฟฟ้าก๊าซชีวภาพ (Biogas Production)', 'Biogas Power Generation', '/biogas-production'),
+    getPageDef('solar-power', 'leasing', 'พลังงานแสงอาทิตย์ (Solar Rooftop)', 'Solar Power Generation', '/solar-power-generation'),
+    getPageDef('chiller', 'leasing', 'เครื่องทำความเย็น (Industrial Chiller)', 'Industrial Chiller', '/chiller'),
+    getPageDef('injection-molding', 'leasing', 'เครื่องฉีดพลาสติก (Injection Molding)', 'Injection Molding Machine', '/injection-molding-machine'),
+    getPageDef('generator-set', 'leasing', 'เครื่องกำเนิดไฟฟ้า (Generator Set)', 'Industrial Generator Set', '/generator-set'),
+    getPageDef('leasing-application', 'leasing', 'ยื่นขอสินเชื่อออนไลน์ (Online Application)', 'Financing Application', '/leasing-application'),
+    getPageDef('calculator', 'leasing', 'คำนวณสินเชื่อ (Financing Calculator)', 'Loan Calculator', '/calculator'),
+    getPageDef('interest-rate', 'leasing', 'แปลงอัตราดอกเบี้ย (Interest Rate Conversion)', 'Interest Rate Converter', '/interest-rate-conversion'),
 
-    // 3. องค์กรและบริการ
-    getPageDef('sustainability', 'องค์กรและบริการ', 'ความยั่งยืน & ESG (Sustainability)', 'Sustainability & ESG', '/sustainability'),
-    getPageDef('investor-relations', 'องค์กรและบริการ', 'นักลงทุนสัมพันธ์ (Investor Relations)', 'Investor Relations', '/investor-relations'),
-    getPageDef('projects', 'องค์กรและบริการ', 'โครงการ & กิจกรรม (Projects & Activity)', 'Projects & Activity', '/project'),
-    getPageDef('contact', 'องค์กรและบริการ', 'ติดต่อเรา (Contact Us)', 'Contact Us', '/contact'),
+    // 3. นักลงทุนสัมพันธ์ (Investor Relations)
+    getPageDef('investor-relations', 'investor', 'นักลงทุนสัมพันธ์ (Investor Relations)', 'Investor Relations', '/investor-relations'),
+    getPageDef('sustainability', 'investor', 'ความยั่งยืน & ESG (Sustainability)', 'Sustainability & ESG', '/sustainability'),
 
-    // 4. เครื่องมือและข้อตกลง
-    getPageDef('calculator', 'เครื่องมือและข้อตกลง', 'คำนวณสินเชื่อ (Financing Calculator)', 'Loan Calculator', '/calculator'),
-    getPageDef('interest-rate', 'เครื่องมือและข้อตกลง', 'แปลงอัตราดอกเบี้ย (Interest Rate Conversion)', 'Interest Rate Converter', '/interest-rate-conversion'),
-    getPageDef('nc-nda', 'เครื่องมือและข้อตกลง', 'สัญญา NC-NDA (Non-Disclosure Agreement)', 'NC-NDA Agreement', '/nc-nda'),
-    getPageDef('cookie-policy', 'เครื่องมือและข้อตกลง', 'นโยบายคุกกี้ (Cookie & Privacy Policy)', 'Cookie Policy', '/cookie-policy'),
+    // 4. ศูนย์ข่าวสาร (News & Knowledge)
+    getPageDef('projects', 'news', 'โครงการ & กิจกรรม (Projects & Activity)', 'Projects & Activity', '/project'),
+    getPageDef('news', 'news', 'ข่าวสารและอัปเดต (News & Articles)', 'News & Updates', '/news-update'),
+    getPageDef('knowledge', 'news', 'คลังความรู้ & บทความ (Knowledge)', 'Knowledge & Articles', '/knowledge'),
+    getPageDef('newsletter', 'news', 'จดหมายข่าว (Newsletter)', 'Newsletter', '/newsletter'),
+
+    // 5. เกี่ยวกับเรา (About Us)
+    getPageDef('about', 'about', 'เกี่ยวกับเรา (About Us)', 'About Us', '/about'),
+    getPageDef('work-for-us', 'about', 'ร่วมงานกับเรา (Work for Us)', 'Work For Us', '/work-for-us'),
+    getPageDef('faq', 'about', 'คำถามที่พบบ่อย (FAQ)', 'FAQ & Help', '/faq'),
+    getPageDef('contact', 'about', 'ติดต่อเรา (Contact Us)', 'Contact Us', '/contact'),
+    getPageDef('nc-nda', 'about', 'สัญญา NC-NDA (Non-Disclosure Agreement)', 'NC-NDA Agreement', '/nc-nda'),
+    getPageDef('cookie-policy', 'about', 'นโยบายคุกกี้ (Cookie & Privacy Policy)', 'Cookie Policy', '/cookie-policy'),
+
+    // 6. ทรัพย์เพื่อการขาย (Assets for Sale)
+    getPageDef('used-machine', 'assets-sale', 'เครื่องจักรมือสองและทรัพย์รอการขาย (Assets for Sale)', 'Assets for Sale', '/used-machine'),
 ];
 
 // Helper to render solution icon
@@ -370,11 +456,37 @@ export function PageContentEditor() {
 
     const [selectedPageId, setSelectedPageId] = useState<string>('home');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState<string>('all');
+    const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>('all');
+    const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+        home: true,
+        leasing: true,
+        investor: true,
+        news: true,
+        about: true,
+        'assets-sale': true,
+    });
+
+    // Add New Page Modal State
+    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [newPageGroupId, setNewPageGroupId] = useState('home');
+    const [newPageNameTh, setNewPageNameTh] = useState('');
+    const [newPageNameEn, setNewPageNameEn] = useState('');
+    const [newPagePath, setNewPagePath] = useState('');
+
+    const allPages = useMemo<PageDefinition[]>(() => {
+        const customList: PageDefinition[] = (settings.customPages || []).map((cp) => {
+            return getPageDef(cp.id, cp.groupId, cp.nameTh, cp.nameEn, cp.path, true);
+        });
+        return [...BASE_PAGES_LIST, ...customList];
+    }, [settings.customPages]);
 
     const activePageDef = useMemo(() => {
-        return PAGES_LIST.find((p) => p.id === selectedPageId) || PAGES_LIST[0];
-    }, [selectedPageId]);
+        return allPages.find((p) => p.id === selectedPageId) || allPages[0];
+    }, [allPages, selectedPageId]);
+
+    const activeNavGroup = useMemo(() => {
+        return NAV_GROUPS.find((g) => g.id === activePageDef.groupId) || NAV_GROUPS[0];
+    }, [activePageDef]);
 
     const getInitialContent = (pageId: string, def: PageDefinition): PageCustomContent => {
         const saved = settings.pageContents?.[pageId];
@@ -453,12 +565,12 @@ export function PageContentEditor() {
 
     // Current page content state (saved or fallback to master default)
     const [editContent, setEditContent] = useState<PageCustomContent>(() => {
-        const homeDef = PAGES_LIST.find((p) => p.id === 'home') || PAGES_LIST[0];
+        const homeDef = BASE_PAGES_LIST.find((p) => p.id === 'home') || BASE_PAGES_LIST[0];
         return getInitialContent('home', homeDef);
     });
 
     const [savedSnapshot, setSavedSnapshot] = useState<string>(() => {
-        const homeDef = PAGES_LIST.find((p) => p.id === 'home') || PAGES_LIST[0];
+        const homeDef = BASE_PAGES_LIST.find((p) => p.id === 'home') || BASE_PAGES_LIST[0];
         return JSON.stringify(getInitialContent('home', homeDef));
     });
 
@@ -498,10 +610,119 @@ export function PageContentEditor() {
     // When selectedPageId changes, reload form
     const handleSelectPage = (pageId: string) => {
         setSelectedPageId(pageId);
-        const def = PAGES_LIST.find((p) => p.id === pageId) || PAGES_LIST[0];
+        const def = allPages.find((p) => p.id === pageId) || allPages[0];
         const initial = getInitialContent(pageId, def);
         setEditContent(initial);
         setSavedSnapshot(JSON.stringify(initial));
+    };
+
+    const toggleGroup = (groupId: string) => {
+        setExpandedGroups((prev) => ({
+            ...prev,
+            [groupId]: !prev[groupId],
+        }));
+    };
+
+    const openAddModal = (presetGroupId?: string) => {
+        setNewPageGroupId(presetGroupId || (activePageDef.groupId || 'home'));
+        setNewPageNameTh('');
+        setNewPageNameEn('');
+        setNewPagePath('');
+        setIsAddModalOpen(true);
+    };
+
+    const handleCreatePage = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newPageNameTh.trim()) {
+            toast.error(lang === 'th' ? 'กรุณาระบุชื่อหน้าภาษาไทย' : 'Please enter Thai page name');
+            return;
+        }
+
+        let rawPath = newPagePath.trim();
+        if (!rawPath) {
+            rawPath = '/' + newPageNameTh.trim().toLowerCase().replace(/[^a-zA-Z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
+        }
+        if (!rawPath.startsWith('/')) {
+            rawPath = '/' + rawPath;
+        }
+
+        const generatedId = `page-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
+        const groupDef = NAV_GROUPS.find((g) => g.id === newPageGroupId) || NAV_GROUPS[0];
+
+        const newCustomItem: CustomPageItem = {
+            id: generatedId,
+            groupId: newPageGroupId,
+            nameTh: newPageNameTh.trim(),
+            nameEn: newPageNameEn.trim() || newPageNameTh.trim(),
+            path: rawPath,
+            createdAt: new Date().toISOString(),
+        };
+
+        const initialNewContent: PageCustomContent = {
+            id: generatedId,
+            pageName: newPageNameTh.trim(),
+            titleTh: newPageNameTh.trim(),
+            titleEn: newPageNameEn.trim() || newPageNameTh.trim(),
+            heroBadgeTh: groupDef.labelTh,
+            heroBadgeEn: groupDef.labelEn,
+            heroTitleTh: newPageNameTh.trim(),
+            heroTitleEn: newPageNameEn.trim() || newPageNameTh.trim(),
+            heroSubtitleTh: `รายละเอียดและข้อมูลบริการ ${newPageNameTh.trim()}`,
+            heroSubtitleEn: `Information and services for ${newPageNameEn.trim() || newPageNameTh.trim()}`,
+            heroImage: '/assets/Hero-Banner-Website-3-scaled.png',
+            ctaTextTh: 'ขอสินเชื่อกับเรา',
+            ctaTextEn: 'Financing with Us',
+            ctaLink: '/leasing-application',
+            metaTitle: `${newPageNameTh.trim()} | Agile Assets`,
+            metaDescription: `ข้อมูล ${newPageNameTh.trim()}`,
+            items: [],
+            lastUpdated: new Date().toISOString(),
+        };
+
+        const updatedCustomPages = [...(settings.customPages || []), newCustomItem];
+        const updatedPageContents = {
+            ...(settings.pageContents || {}),
+            [generatedId]: initialNewContent,
+        };
+
+        updateSettings({
+            customPages: updatedCustomPages,
+            pageContents: updatedPageContents,
+        });
+
+        // Expand target group
+        setExpandedGroups((prev) => ({ ...prev, [newPageGroupId]: true }));
+        setSelectedPageId(generatedId);
+        setEditContent(initialNewContent);
+        setSavedSnapshot(JSON.stringify(initialNewContent));
+        setIsAddModalOpen(false);
+
+        toast.success(
+            lang === 'th'
+                ? `สร้างหน้าใหม่ "${newCustomItem.nameTh}" ในหัวข้อ "${groupDef.labelTh}" เรียบร้อยแล้ว!`
+                : `Created new page "${newCustomItem.nameEn}" successfully!`
+        );
+    };
+
+    const handleDeleteCustomPage = (pageId: string, pageName: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!window.confirm(lang === 'th' ? `คุณต้องการลบหน้า "${pageName}" ใช่หรือไม่?` : `Delete page "${pageName}"?`)) {
+            return;
+        }
+        const updatedCustom = (settings.customPages || []).filter((p) => p.id !== pageId);
+        const updatedContents = { ...(settings.pageContents || {}) };
+        delete updatedContents[pageId];
+
+        updateSettings({
+            customPages: updatedCustom,
+            pageContents: updatedContents,
+        });
+
+        if (selectedPageId === pageId) {
+            setSelectedPageId('home');
+        }
+
+        toast.success(lang === 'th' ? `ลบหน้า "${pageName}" เรียบร้อยแล้ว` : `Deleted page "${pageName}"`);
     };
 
     // Detect unsaved changes (dirty check)
@@ -833,17 +1054,29 @@ export function PageContentEditor() {
 
     // Filter pages list
     const filteredPages = useMemo(() => {
-        return PAGES_LIST.filter((p) => {
+        return allPages.filter((p) => {
             const matchesSearch =
                 p.nameTh.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 p.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 p.path.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesCategory = selectedCategory === 'all' || p.category === selectedCategory;
-            return matchesSearch && matchesCategory;
+            const matchesGroup = selectedGroupFilter === 'all' || p.groupId === selectedGroupFilter;
+            return matchesSearch && matchesGroup;
         });
-    }, [searchQuery, selectedCategory]);
+    }, [allPages, searchQuery, selectedGroupFilter]);
 
-    const categories = ['all', ...new Set(PAGES_LIST.map((p) => p.category))];
+    const groupedPages = useMemo(() => {
+        const map: Record<string, PageDefinition[]> = {};
+        NAV_GROUPS.forEach((g) => {
+            map[g.id] = [];
+        });
+        filteredPages.forEach((p) => {
+            if (!map[p.groupId]) {
+                map[p.groupId] = [];
+            }
+            map[p.groupId].push(p);
+        });
+        return map;
+    }, [filteredPages]);
 
     const isPageCustomized = !!settings.pageContents?.[selectedPageId];
 
@@ -861,17 +1094,25 @@ export function PageContentEditor() {
                     </h1>
                     <p className="text-sm text-muted-foreground mt-1">
                         {lang === 'th'
-                            ? 'เลือกหน้าที่ต้องการแก้ไข ปรับแต่งข้อความพาดหัว สโลแกน รายการเครื่องจักร ภาพประกอบ และ SEO ได้ครบจบในที่เดียว'
+                            ? 'เลือกหน้าที่ต้องการแก้ไข จัดแบ่งตาม 6 หัวข้อหลักของ Navbar และเพิ่มหน้าเพจใหม่ได้สะดวก'
                             : 'Select any page to customize headlines, descriptions, equipment cards, images, and SEO metadata.'}
                     </p>
                 </div>
 
                 <div className="flex items-center gap-3">
+                    <button
+                        type="button"
+                        onClick={() => openAddModal()}
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-xs font-semibold shadow-md shadow-sky-500/20 transition-colors"
+                    >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>{lang === 'th' ? '+ เพิ่มหน้าเพจใหม่' : '+ Add New Page'}</span>
+                    </button>
                     <a
                         href={activePageDef.path}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-semibold transition-all hover:scale-105 active:scale-95 shadow-sm"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-xs font-semibold transition-colors shadow-sm"
                     >
                         <ExternalLink className="w-3.5 h-3.5" />
                         <span>{lang === 'th' ? 'ดูหน้าเว็บจริง' : 'View Live Page'}</span>
@@ -884,14 +1125,26 @@ export function PageContentEditor() {
                 {/* Left: Page Navigator */}
                 <div className="lg:col-span-4 space-y-4">
                     <div className="glass rounded-2xl p-4 space-y-3">
-                        <div className="flex items-center justify-between">
-                            <span className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
-                                <Layers className="w-3.5 h-3.5 text-sky-400" />
-                                {lang === 'th' ? 'เลือกหน้าที่ต้องการแก้ไข' : 'Select Page'}
-                            </span>
-                            <span className="text-[11px] text-muted-foreground">
-                                {filteredPages.length} {lang === 'th' ? 'หน้า' : 'pages'}
-                            </span>
+                        <div className="flex items-center justify-between gap-2">
+                            <div>
+                                <span className="text-xs font-bold text-foreground uppercase tracking-wider flex items-center gap-1.5">
+                                    <Layers className="w-3.5 h-3.5 text-sky-400" />
+                                    {lang === 'th' ? 'เลือกหน้าที่ต้องการแก้ไข' : 'Select Page'}
+                                </span>
+                                <span className="text-[11px] text-muted-foreground">
+                                    {filteredPages.length} {lang === 'th' ? 'หน้าทั้งหมด' : 'pages total'}
+                                </span>
+                            </div>
+
+                            <button
+                                type="button"
+                                onClick={() => openAddModal()}
+                                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 border border-sky-500/30 text-[11px] font-semibold transition-colors"
+                                title={lang === 'th' ? 'สร้างหน้าเพจใหม่' : 'Add new page'}
+                            >
+                                <Plus className="w-3 h-3" />
+                                <span>{lang === 'th' ? 'เพิ่มหน้า' : 'Add Page'}</span>
+                            </button>
                         </div>
 
                         {/* Search input */}
@@ -902,62 +1155,191 @@ export function PageContentEditor() {
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 placeholder={lang === 'th' ? 'ค้นหาชื่อหน้า หรือ URL...' : 'Search page or url...'}
-                                className="w-full pl-8 pr-3 py-2 rounded-xl bg-navy-light border border-border text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+                                className="w-full pl-8 pr-7 py-2 rounded-xl bg-navy-light border border-border text-foreground text-xs focus:outline-none focus:ring-1 focus:ring-primary"
                             />
-                        </div>
-
-                        {/* Category filter pills */}
-                        <div className="flex flex-wrap gap-1 pt-1">
-                            {categories.map((cat) => (
+                            {searchQuery && (
                                 <button
-                                    key={cat}
                                     type="button"
-                                    onClick={() => setSelectedCategory(cat)}
-                                    className={`px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all ${
-                                        selectedCategory === cat
-                                            ? 'bg-primary text-white shadow-sm'
-                                            : 'bg-white/5 text-muted-foreground hover:text-foreground'
-                                    }`}
+                                    onClick={() => setSearchQuery('')}
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                                 >
-                                    {cat === 'all' ? (lang === 'th' ? 'ทั้งหมด' : 'All') : cat}
+                                    <X className="w-3.5 h-3.5" />
                                 </button>
-                            ))}
+                            )}
                         </div>
 
-                        {/* Page items list */}
-                        <div className="max-h-[580px] overflow-y-auto space-y-1.5 pr-1 pt-2">
-                            {filteredPages.map((page) => {
-                                const isSelected = page.id === selectedPageId;
-                                const hasCustom = !!settings.pageContents?.[page.id];
+                        {/* 6 Group Filter Tabs */}
+                        <div className="flex flex-wrap gap-1 pt-0.5">
+                            <button
+                                type="button"
+                                onClick={() => setSelectedGroupFilter('all')}
+                                className={cn(
+                                    'px-2 py-1 rounded-lg text-[10px] font-semibold transition-all',
+                                    selectedGroupFilter === 'all'
+                                        ? 'bg-primary text-white shadow-sm'
+                                        : 'bg-white/5 text-muted-foreground hover:text-foreground'
+                                )}
+                            >
+                                {lang === 'th' ? 'ทั้งหมด' : 'All'}
+                            </button>
+                            {NAV_GROUPS.map((g) => {
+                                const count = (groupedPages[g.id] || []).length;
                                 return (
                                     <button
-                                        key={page.id}
+                                        key={g.id}
                                         type="button"
-                                        onClick={() => handleSelectPage(page.id)}
-                                        className={`w-full text-left p-3 rounded-xl border transition-all flex items-center justify-between gap-2 group ${
-                                            isSelected
-                                                ? 'border-primary bg-primary/10 shadow-sm'
-                                                : 'border-border/60 hover:bg-white/5'
-                                        }`}
+                                        onClick={() => setSelectedGroupFilter(g.id)}
+                                        className={cn(
+                                            'px-2 py-1 rounded-lg text-[10px] font-semibold transition-all flex items-center gap-1',
+                                            selectedGroupFilter === g.id
+                                                ? 'bg-primary text-white shadow-sm'
+                                                : 'bg-white/5 text-muted-foreground hover:text-foreground'
+                                        )}
                                     >
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex items-center gap-1.5">
-                                                <p className={`text-xs font-bold truncate ${isSelected ? 'text-primary' : 'text-foreground'}`}>
-                                                    {lang === 'th' ? page.nameTh : page.nameEn}
-                                                </p>
-                                                {hasCustom && (
-                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" title="มีข้อมูลแก้ไขพิเศษ" />
-                                                )}
+                                        <span>{lang === 'th' ? g.labelTh : g.labelEn}</span>
+                                        <span className="opacity-70 text-[9px]">({count})</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+
+                        {/* Grouped Accordion List */}
+                        <div className="max-h-[620px] overflow-y-auto space-y-2 pr-1 pt-1">
+                            {NAV_GROUPS.filter(g => selectedGroupFilter === 'all' || selectedGroupFilter === g.id).map((group) => {
+                                const pagesInGroup = groupedPages[group.id] || [];
+                                const isExpanded = searchQuery.trim().length > 0 ? true : (expandedGroups[group.id] ?? true);
+                                const GroupIcon = group.icon;
+
+                                return (
+                                    <div
+                                        key={group.id}
+                                        className="rounded-xl border border-border/70 bg-card/40 backdrop-blur-sm overflow-hidden transition-all duration-200"
+                                    >
+                                        {/* Group Header */}
+                                        <div
+                                            className="flex items-center justify-between p-2.5 bg-white/[0.02] hover:bg-white/[0.06] cursor-pointer transition-colors select-none"
+                                            onClick={() => toggleGroup(group.id)}
+                                        >
+                                            <div className="flex items-center gap-2 min-w-0">
+                                                <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border", group.badgeColor)}>
+                                                    <GroupIcon className="w-3.5 h-3.5" />
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <span className="text-xs font-bold text-foreground block truncate">
+                                                        {lang === 'th' ? group.labelTh : group.labelEn}
+                                                    </span>
+                                                </div>
                                             </div>
-                                            <p className="text-[10px] font-mono text-muted-foreground truncate mt-0.5">
-                                                {page.path}
-                                            </p>
+
+                                            <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-muted-foreground font-mono">
+                                                    {pagesInGroup.length}
+                                                </span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openAddModal(group.id)}
+                                                    title={lang === 'th' ? `เพิ่มหน้าในหัวข้อ ${group.labelTh}` : `Add page to ${group.labelEn}`}
+                                                    className="p-1 rounded-md text-muted-foreground hover:text-sky-400 hover:bg-sky-500/10 transition-colors"
+                                                >
+                                                    <Plus className="w-3.5 h-3.5" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => toggleGroup(group.id)}
+                                                    className="p-1 text-muted-foreground hover:text-foreground"
+                                                >
+                                                    {isExpanded ? (
+                                                        <ChevronDown className="w-3.5 h-3.5" />
+                                                    ) : (
+                                                        <ChevronRight className="w-3.5 h-3.5" />
+                                                    )}
+                                                </button>
+                                            </div>
                                         </div>
 
-                                        <span className="text-[9px] px-1.5 py-0.5 rounded-md bg-white/5 text-muted-foreground shrink-0">
-                                            {page.category}
-                                        </span>
-                                    </button>
+                                        {/* Group Pages List */}
+                                        {isExpanded && (
+                                            <div className="p-1.5 pt-0.5 space-y-1 border-t border-border/40">
+                                                {pagesInGroup.length === 0 ? (
+                                                    <div className="p-3 text-center text-xs text-muted-foreground/70 italic">
+                                                        {searchQuery
+                                                            ? (lang === 'th' ? 'ไม่พบหน้าที่ค้นหาในกลุ่มนี้' : 'No matching pages')
+                                                            : (lang === 'th' ? 'ยังไม่มีหน้าในหัวข้อนี้' : 'No pages yet')}
+                                                    </div>
+                                                ) : (
+                                                    pagesInGroup.map((page) => {
+                                                        const isSelected = page.id === selectedPageId;
+                                                        const hasCustom = !!settings.pageContents?.[page.id];
+
+                                                        return (
+                                                            <div
+                                                                key={page.id}
+                                                                onClick={() => handleSelectPage(page.id)}
+                                                                className={cn(
+                                                                    'w-full text-left p-2.5 rounded-lg border transition-all flex items-center justify-between gap-2 group cursor-pointer',
+                                                                    isSelected
+                                                                        ? 'border-primary bg-primary/15 shadow-sm shadow-primary/10'
+                                                                        : 'border-transparent hover:border-border/60 hover:bg-white/5'
+                                                                )}
+                                                            >
+                                                                <div className="min-w-0 flex-1">
+                                                                    <div className="flex items-center gap-1.5">
+                                                                        <p className={cn(
+                                                                            'text-xs font-semibold truncate',
+                                                                            isSelected ? 'text-primary' : 'text-foreground'
+                                                                        )}>
+                                                                            {lang === 'th' ? page.nameTh : page.nameEn}
+                                                                        </p>
+                                                                        {page.isCustom && (
+                                                                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-mono">
+                                                                                New
+                                                                            </span>
+                                                                        )}
+                                                                        {hasCustom && !page.isCustom && (
+                                                                            <span
+                                                                                className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"
+                                                                                title="มีข้อมูลปรับแต่งพิเศษ"
+                                                                            />
+                                                                        )}
+                                                                    </div>
+                                                                    <p className="text-[10px] font-mono text-muted-foreground truncate mt-0.5">
+                                                                        {page.path}
+                                                                    </p>
+                                                                </div>
+
+                                                                <div className="flex items-center gap-1 shrink-0">
+                                                                    {page.isCustom && (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={(e) => handleDeleteCustomPage(page.id, page.nameTh, e)}
+                                                                            title={lang === 'th' ? 'ลบหน้านี้' : 'Delete page'}
+                                                                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-rose-500/20 text-muted-foreground hover:text-rose-400 transition-all"
+                                                                        >
+                                                                            <Trash2 className="w-3 h-3" />
+                                                                        </button>
+                                                                    )}
+                                                                    <ChevronRight className={cn(
+                                                                        "w-3.5 h-3.5 transition-transform",
+                                                                        isSelected ? "text-primary translate-x-0.5" : "text-muted-foreground/40 group-hover:text-muted-foreground"
+                                                                    )} />
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })
+                                                )}
+
+                                                {/* Bottom Quick Add in this group */}
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openAddModal(group.id)}
+                                                    className="w-full py-1.5 px-2 rounded-lg border border-dashed border-border/60 hover:border-sky-500/50 hover:bg-sky-500/5 text-muted-foreground hover:text-sky-400 text-[11px] font-medium flex items-center justify-center gap-1 transition-all mt-1"
+                                                >
+                                                    <Plus className="w-3 h-3" />
+                                                    <span>{lang === 'th' ? `+ เพิ่มหน้าในหัวข้อนี้` : `+ Add page in this group`}</span>
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
                                 );
                             })}
                         </div>
@@ -969,22 +1351,32 @@ export function PageContentEditor() {
                     {/* Page Active Banner */}
                     <div className="glass rounded-2xl p-5 flex items-center justify-between gap-4 border-l-4 border-l-primary">
                         <div className="min-w-0">
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-wrap">
                                 <h2 className="text-base font-bold text-foreground truncate">
                                     {lang === 'th' ? activePageDef.nameTh : activePageDef.nameEn}
                                 </h2>
-                                {isPageCustomized ? (
+                                <span className={cn(
+                                    "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border",
+                                    activeNavGroup.badgeColor
+                                )}>
+                                    <span>{lang === 'th' ? `หัวข้อหลัก: ${activeNavGroup.labelTh}` : `Nav: ${activeNavGroup.labelEn}`}</span>
+                                </span>
+                                {activePageDef.isCustom ? (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[10px] font-semibold">
+                                        <span>{lang === 'th' ? 'หน้าสร้างใหม่ (Custom)' : 'User Created'}</span>
+                                    </span>
+                                ) : isPageCustomized ? (
                                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-semibold">
                                         <CheckCircle className="w-3 h-3" />
-                                        <span>กำหนดเอง (Customized)</span>
+                                        <span>{lang === 'th' ? 'กำหนดเอง (Customized)' : 'Customized'}</span>
                                     </span>
                                 ) : (
                                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-[10px] font-semibold">
-                                        <span>ค่าเริ่มต้น (Default)</span>
+                                        <span>{lang === 'th' ? 'ค่าเริ่มต้น (Default)' : 'Default'}</span>
                                     </span>
                                 )}
                             </div>
-                            <p className="text-xs font-mono text-muted-foreground mt-0.5">
+                            <p className="text-xs font-mono text-muted-foreground mt-1">
                                 URL Path: <a href={activePageDef.path} target="_blank" rel="noreferrer" className="text-primary hover:underline">{activePageDef.path}</a>
                             </p>
                         </div>
@@ -994,7 +1386,7 @@ export function PageContentEditor() {
                             target="_blank"
                             rel="noreferrer"
                             className="shrink-0 p-2 rounded-xl bg-navy-light hover:bg-white/10 text-muted-foreground hover:text-foreground transition-all"
-                            title="เปิดดูหน้าจริง"
+                            title={lang === 'th' ? 'เปิดดูหน้าจริง' : 'View live page'}
                         >
                             <ExternalLink className="w-4 h-4" />
                         </a>
@@ -2179,6 +2571,143 @@ export function PageContentEditor() {
                     </button>
                 </div>
             </div>
+
+            {/* Modal: เพิ่มหน้าเพจใหม่ */}
+            {isAddModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
+                    <div className="glass rounded-3xl border border-sky-500/30 bg-card/95 p-6 w-full max-w-lg shadow-2xl space-y-5 animate-scale-up">
+                        <div className="flex items-start justify-between gap-3 border-b border-border pb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400">
+                                    <FolderPlus className="w-5 h-5" />
+                                </div>
+                                <div>
+                                    <h3 className="text-base font-bold text-foreground">
+                                        {lang === 'th' ? 'เพิ่มหน้าเพจใหม่' : 'Add New Page'}
+                                    </h3>
+                                    <p className="text-xs text-muted-foreground">
+                                        {lang === 'th'
+                                            ? 'กำหนดชื่อ URL และจัดเข้า 1 ใน 6 หัวข้อหลักของ Navbar'
+                                            : 'Configure page details and assign to 1 of 6 main navbar categories'}
+                                    </p>
+                                </div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setIsAddModalOpen(false)}
+                                className="p-1.5 rounded-xl hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors"
+                            >
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleCreatePage} className="space-y-4">
+                            {/* Field: เลือกหัวข้อหลัก */}
+                            <div>
+                                <label className="block text-xs font-bold text-foreground mb-1.5 flex items-center gap-1">
+                                    <span>{lang === 'th' ? 'เลือกหัวข้อหลักใน Navbar *' : 'Assign to Main Nav Group *'}</span>
+                                </label>
+                                <select
+                                    value={newPageGroupId}
+                                    onChange={(e) => setNewPageGroupId(e.target.value)}
+                                    className="w-full px-3.5 py-2.5 rounded-xl bg-navy-light border border-border text-foreground text-xs focus:ring-2 focus:ring-primary focus:outline-none"
+                                >
+                                    {NAV_GROUPS.map((g) => (
+                                        <option key={g.id} value={g.id}>
+                                            {lang === 'th' ? g.labelTh : g.labelEn} ({g.descriptionTh})
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            {/* Field: ชื่อหน้าภาษาไทย */}
+                            <div>
+                                <label className="block text-xs font-bold text-foreground mb-1.5">
+                                    {lang === 'th' ? 'ชื่อหน้า (ภาษาไทย) *' : 'Page Name (Thai) *'}
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={newPageNameTh}
+                                    onChange={(e) => {
+                                        setNewPageNameTh(e.target.value);
+                                        if (!newPagePath) {
+                                            const slug = e.target.value.toLowerCase().replace(/[^a-zA-Z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
+                                            if (slug) {
+                                                setNewPagePath(`/${slug}`);
+                                            }
+                                        }
+                                    }}
+                                    placeholder={lang === 'th' ? 'เช่น สินเชื่อโซลาร์ลอยน้ำ หรือ ข้อมูลโปรโมชัน' : 'e.g. Solar Floating or Promotion'}
+                                    className="w-full px-3.5 py-2.5 rounded-xl bg-navy-light border border-border text-foreground text-xs focus:ring-2 focus:ring-primary focus:outline-none"
+                                />
+                            </div>
+
+                            {/* Field: ชื่อหน้าภาษาอังกฤษ */}
+                            <div>
+                                <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                                    {lang === 'th' ? 'ชื่อหน้า (English / ภาษาอังกฤษ)' : 'Page Name (English)'}
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newPageNameEn}
+                                    onChange={(e) => {
+                                        setNewPageNameEn(e.target.value);
+                                        if (!newPagePath && e.target.value) {
+                                            const slug = e.target.value.toLowerCase().replace(/[^a-zA-Z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
+                                            setNewPagePath(`/${slug}`);
+                                        }
+                                    }}
+                                    placeholder="e.g. Floating Solar Farm"
+                                    className="w-full px-3.5 py-2.5 rounded-xl bg-navy-light border border-border text-foreground text-xs focus:ring-2 focus:ring-primary focus:outline-none"
+                                />
+                            </div>
+
+                            {/* Field: URL Path */}
+                            <div>
+                                <label className="block text-xs font-bold text-foreground mb-1.5 flex items-center justify-between">
+                                    <span>{lang === 'th' ? 'URL Path (เส้นทางหน้าเว็บ) *' : 'URL Path *'}</span>
+                                    <span className="text-[10px] text-muted-foreground font-normal">
+                                        {lang === 'th' ? 'ต้องขึ้นต้นด้วย /' : 'must start with /'}
+                                    </span>
+                                </label>
+                                <input
+                                    type="text"
+                                    required
+                                    value={newPagePath}
+                                    onChange={(e) => {
+                                        let val = e.target.value;
+                                        if (val && !val.startsWith('/')) {
+                                            val = '/' + val;
+                                        }
+                                        setNewPagePath(val);
+                                    }}
+                                    placeholder="/floating-solar"
+                                    className="w-full px-3.5 py-2.5 rounded-xl bg-navy-light border border-border text-foreground text-xs font-mono focus:ring-2 focus:ring-primary focus:outline-none"
+                                />
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsAddModalOpen(false)}
+                                    className="px-4 py-2.5 rounded-xl border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
+                                >
+                                    {lang === 'th' ? 'ยกเลิก' : 'Cancel'}
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white text-xs font-bold shadow-lg shadow-sky-500/25 transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    <span>{lang === 'th' ? 'บันทึกและสร้างหน้า' : 'Create Page'}</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
