@@ -145,7 +145,7 @@ export function ContactSection() {
                                 <button
                                     type="submit"
                                     disabled={isVerifying}
-                                    className="inline-flex items-center justify-center gap-2 px-10 py-3.5 rounded-xl bg-sky-400 hover:bg-sky-300 text-slate-950 font-extrabold text-xs sm:text-sm shadow-xl shadow-sky-400/25 hover:scale-105 active:scale-95 disabled:opacity-50 transition-all min-w-[200px]"
+                                    className="inline-flex items-center justify-center gap-2 px-10 py-3.5 rounded-xl font-extrabold text-xs sm:text-sm shadow-xl hover:scale-105 active:scale-95 disabled:opacity-50 transition-all min-w-[200px] btn-dynamic-theme"
                                 >
                                     {isVerifying ? (
                                         <>

@@ -127,8 +127,21 @@ export function AssetForSalePage() {
                     <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto">
                         <ScrollReveal animation="fade-down">
                             {/* Category Badge */}
-                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-xl border border-sky-400/40 bg-slate-950/80 text-xs sm:text-sm font-bold text-sky-300 mb-6 shadow-lg shadow-sky-500/10">
-                                <div className="w-5 h-5 rounded-full flex items-center justify-center bg-sky-400/20 text-sky-300">
+                            <div
+                                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-xl border bg-slate-950/80 text-xs sm:text-sm font-bold mb-6 shadow-lg"
+                                style={{
+                                    borderColor: 'rgba(var(--accent-rgb, 56 189 248), 0.4)',
+                                    color: 'var(--theme-sky-300, #7dd3fc)',
+                                    boxShadow: '0 10px 25px -5px rgba(var(--primary-rgb, 2 132 199), 0.1)',
+                                }}
+                            >
+                                <div
+                                    className="w-5 h-5 rounded-full flex items-center justify-center"
+                                    style={{
+                                        backgroundColor: 'rgba(var(--accent-rgb, 56 189 248), 0.2)',
+                                        color: 'var(--theme-sky-300, #7dd3fc)',
+                                    }}
+                                >
                                     <Tag className="w-3.5 h-3.5" />
                                 </div>
                                 <span>Certified Pre-Owned Machinery & Equipment</span>

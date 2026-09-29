@@ -4,6 +4,8 @@ import defaultSettingsData from '@/data/defaultSettings.json';
 import { themeService } from '@/services/themeService';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 
+import { generateThemePalette } from '@/utils/themeColors';
+
 const STORAGE_KEY = 'agile_assets_settings';
 
 export const DEFAULT_THEME_SETTINGS: ThemeSettings = {
@@ -20,12 +22,43 @@ export function applyThemeToDom(theme?: ThemeSettings) {
     if (typeof document === 'undefined') return;
     const activeTheme = theme || DEFAULT_THEME_SETTINGS;
     const root = document.documentElement;
+    const palette = generateThemePalette(activeTheme);
 
+    // Root brand variables
     root.style.setProperty('--primary', activeTheme.primaryColor);
     root.style.setProperty('--grad-primary-1', activeTheme.gradientStart);
     root.style.setProperty('--grad-primary-2', activeTheme.gradientEnd);
     root.style.setProperty('--ring', activeTheme.accentColor);
+    root.style.setProperty('--accent', activeTheme.accentColor);
 
+    // Dynamic brand shades (overrides sky-* and blue-* color system across site)
+    root.style.setProperty('--theme-sky-50', palette.sky50);
+    root.style.setProperty('--theme-sky-100', palette.sky100);
+    root.style.setProperty('--theme-sky-200', palette.sky200);
+    root.style.setProperty('--theme-sky-300', palette.sky300);
+    root.style.setProperty('--theme-sky-400', palette.sky400);
+    root.style.setProperty('--theme-sky-500', palette.sky500);
+    root.style.setProperty('--theme-sky-600', palette.sky600);
+    root.style.setProperty('--theme-sky-700', palette.sky700);
+    root.style.setProperty('--theme-sky-800', palette.sky800);
+    root.style.setProperty('--theme-sky-900', palette.sky900);
+    root.style.setProperty('--theme-sky-950', palette.sky950);
+    root.style.setProperty('--theme-blue-600', palette.blue600);
+
+    // RGB components
+    root.style.setProperty('--primary-rgb', palette.primaryRgb);
+    root.style.setProperty('--accent-rgb', palette.accentRgb);
+
+    // Ambient aura, glowing borders, and card effects
+    root.style.setProperty('--glow-color', `rgba(${palette.accentRgb}, 0.35)`);
+    root.style.setProperty('--glow-color-lg', `rgba(${palette.accentRgb}, 0.5)`);
+    root.style.setProperty('--ambient-glow-1', `rgba(${palette.accentRgb}, 0.2)`);
+    root.style.setProperty('--ambient-glow-2', `rgba(${palette.accentRgb}, 0.05)`);
+    root.style.setProperty('--ambient-glow-blue', `rgba(${palette.primaryRgb}, 0.18)`);
+    root.style.setProperty('--glass-card-hover-border', `rgba(${palette.accentRgb}, 0.35)`);
+    root.style.setProperty('--glass-card-hover-shadow', `rgba(${palette.accentRgb}, 0.18)`);
+
+    // Radius
     const radiusMap: Record<string, string> = {
         'rounded-md': '0.375rem',
         'rounded-xl': '0.75rem',
@@ -36,7 +69,19 @@ export function applyThemeToDom(theme?: ThemeSettings) {
     root.style.setProperty('--radius', radius);
     root.style.setProperty('--btn-radius', radius);
     root.style.setProperty('--btn-primary-bg', activeTheme.primaryColor);
-    root.style.setProperty('--btn-primary-fg', activeTheme.buttonTextColor);
+    root.style.setProperty('--btn-primary-fg', activeTheme.buttonTextColor || '#ffffff');
+
+    // Dynamic button style preset
+    if (activeTheme.buttonStyle === 'solid') {
+        root.style.setProperty('--btn-primary-bg-style', activeTheme.primaryColor);
+        root.style.setProperty('--btn-primary-shadow', `0 10px 25px -5px rgba(${palette.primaryRgb}, 0.35)`);
+    } else if (activeTheme.buttonStyle === 'glow') {
+        root.style.setProperty('--btn-primary-bg-style', `linear-gradient(135deg, ${activeTheme.gradientStart} 0%, ${activeTheme.gradientEnd} 100%)`);
+        root.style.setProperty('--btn-primary-shadow', `0 0 25px 2px rgba(${palette.accentRgb}, 0.6)`);
+    } else {
+        root.style.setProperty('--btn-primary-bg-style', `linear-gradient(135deg, ${activeTheme.gradientStart} 0%, ${activeTheme.gradientEnd} 100%)`);
+        root.style.setProperty('--btn-primary-shadow', `0 10px 25px -5px rgba(${palette.primaryRgb}, 0.4)`);
+    }
 }
 
 interface SiteSettingsContextType {
@@ -73,6 +118,8 @@ function loadSettings(): SiteSettings {
             // Ensure themeSettings and pageContents are defined
             parsed.themeSettings = parsed.themeSettings || DEFAULT_THEME_SETTINGS;
             parsed.pageContents = parsed.pageContents || {};
+            parsed.impactStats = parsed.impactStats || (defaultSettingsData as unknown as SiteSettings).impactStats;
+            parsed.companyInfo = parsed.companyInfo || (defaultSettingsData as unknown as SiteSettings).companyInfo;
 
             // Auto-backfill default data if sections/items are missing, empty, or dummy in saved localStorage
             const homeDefault = DEFAULT_PAGE_CONTENTS['home'];
@@ -97,6 +144,17 @@ function loadSettings(): SiteSettings {
                         home.items = homeDefault.items || [];
                     }
                 }
+                // Fix industrial equipment hero badges if they were set to Industry Solutions
+                if (parsed.pageContents) {
+                    const industrialIds = ['chiller', 'injection-molding', 'generator-set'];
+                    industrialIds.forEach(id => {
+                        if (parsed.pageContents![id] && parsed.pageContents![id].heroBadgeTh === 'Financing Service • Industry Solutions') {
+                            parsed.pageContents![id].heroBadgeTh = 'Financing Service • Industrial Equipment';
+                            parsed.pageContents![id].heroBadgeEn = 'Financing Service • Industrial Equipment';
+                        }
+                    });
+                }
+
                 // Persist the clean defaults to localStorage
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
             }

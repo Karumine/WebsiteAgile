@@ -40,7 +40,7 @@ export interface ImpactStats {
     factoriesServed: string;
     totalCreditValueMB: string;
     totalContractsCount: string;
-    customerSatisfactionPct: string;
+    customerSatisfactionPct?: string;
 }
 
 export interface UsedMachineryItem {

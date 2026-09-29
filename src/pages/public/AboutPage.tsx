@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import {
     ShieldCheck,
     Clock,
@@ -170,17 +170,6 @@ export function AboutPage() {
                     <div className="absolute bottom-1/3 left-10 w-96 h-96 bg-blue-600/15 rounded-full blur-[120px] pointer-events-none animate-float" />
 
                     <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto">
-                        <ScrollReveal animation="fade-down">
-                            {/* Breadcrumb Badge */}
-                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-sky-400/30 text-xs font-semibold text-sky-400 mb-5 shadow-lg">
-                                <Link to="/" className="hover:text-white transition-colors">
-                                    {lang === 'th' ? 'หน้าหลัก' : 'Home'}
-                                </Link>
-                                <span className="opacity-50">/</span>
-                                <span className="text-white font-bold">{lang === 'th' ? (content.heroBadgeTh || 'เกี่ยวกับเรา') : (content.heroBadgeEn || 'About Us')}</span>
-                            </div>
-                        </ScrollReveal>
-
                         <ScrollReveal animation="fade-up" delay={100}>
                             <p className="text-xl sm:text-3xl font-semibold text-slate-100 mb-2 font-sans tracking-wide drop-shadow-md">
                                 {lang === 'th' ? (content.heroBadgeTh || content.heroBadgeEn || 'Agile Assets') : (content.heroBadgeEn || content.heroBadgeTh || 'Agile Assets')}

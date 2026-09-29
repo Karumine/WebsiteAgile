@@ -56,8 +56,19 @@ const ABOUT_MENU = [
 const EQUIPMENT_PATHS = new Set([
     '/drinking-water-production', '/livestock-farm', '/food-processing',
     '/biogas-production', '/solar-power-generation', '/solar-power-generation-en',
-    '/en/solar-power-generation-en', '/chiller', '/injection-molding-machine', '/generator-set',
+    '/en/solar-power-generation-en', '/chiller', '/chiller-2', '/en/chiller-2',
+    '/injection-molding-machine', '/injection-molding-machine-en', '/en/injection-molding-machine-en',
+    '/generator-set', '/generator-set-2', '/en/generator-set-2',
 ]);
+
+const isPathMatching = (path: string, itemHref: string) => {
+    if (path === itemHref) return true;
+    if (itemHref === '/generator-set' && (path === '/generator-set-2' || path === '/en/generator-set-2')) return true;
+    if (itemHref === '/chiller' && (path === '/chiller-2' || path === '/en/chiller-2')) return true;
+    if (itemHref === '/injection-molding-machine' && (path === '/injection-molding-machine-en' || path === '/en/injection-molding-machine-en')) return true;
+    if (itemHref === '/solar-power-generation' && (path === '/solar-power-generation-en' || path === '/en/solar-power-generation-en')) return true;
+    return false;
+};
 
 const INVESTOR_PATHS = new Set(['/investor-relations', '/en/investor-relations']);
 
@@ -79,6 +90,7 @@ const ASSET_PATHS = new Set([
     '/used-machine', '/used-machine-2', '/asset-for-sale',
     '/assets-for-sale', '/asset-for-sale-en', '/en/asset-for-sale-en',
 ]);
+
 export function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
@@ -90,6 +102,29 @@ export function Navbar() {
     const navigate = useNavigate();
     const location = useLocation();
     const rafRef = useRef<number>(0);
+
+    // Automatically sync activeSubMenu with current route when page changes or menu opens
+    useEffect(() => {
+        for (const cat of EQUIPMENT_CATEGORIES) {
+            if (cat.items.some(item => isPathMatching(location.pathname, item.href))) {
+                setActiveSubMenu(cat.id);
+                break;
+            }
+        }
+    }, [location.pathname, activeDropdown]);
+
+    // Automatically expand current route category in mobile drawer
+    useEffect(() => {
+        if (isOpen) {
+            for (const cat of EQUIPMENT_CATEGORIES) {
+                if (cat.items.some(item => isPathMatching(location.pathname, item.href))) {
+                    setMobileOpenMenu('equipment');
+                    setMobileOpenSubMenu(cat.id);
+                    break;
+                }
+            }
+        }
+    }, [isOpen, location.pathname]);
 
     // Throttled scroll handler using requestAnimationFrame
     useEffect(() => {
@@ -222,25 +257,38 @@ export function Navbar() {
                                                     {t('nav.equipmentFinancing')}
                                                 </p>
                                             </div>
-                                            {EQUIPMENT_CATEGORIES.map((cat) => (
-                                                <button
-                                                    key={cat.id}
-                                                    onMouseEnter={() => setActiveSubMenu(cat.id)}
-                                                    onClick={() => setActiveSubMenu(cat.id)}
-                                                    className={cn(
-                                                        'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs font-semibold transition-all duration-150',
-                                                        activeSubMenu === cat.id
-                                                             ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
-                                                             : 'text-foreground hover:bg-sky-500/10 hover:text-sky-400 border border-transparent'
-                                                    )}
-                                                >
-                                                    <div className="flex items-center gap-2.5">
-                                                        <cat.icon className="w-4 h-4 text-sky-400" />
-                                                        <span>{t(cat.titleKey)}</span>
-                                                    </div>
-                                                    <ChevronRight className="w-3.5 h-3.5 opacity-70" />
-                                                </button>
-                                            ))}
+                                            {EQUIPMENT_CATEGORIES.map((cat) => {
+                                                const isCategorySelected = activeSubMenu === cat.id;
+                                                const isCategoryCurrentRoute = cat.items.some(it => isPathMatching(location.pathname, it.href));
+
+                                                return (
+                                                    <button
+                                                        key={cat.id}
+                                                        onMouseEnter={() => setActiveSubMenu(cat.id)}
+                                                        onClick={() => setActiveSubMenu(cat.id)}
+                                                        className={cn(
+                                                            'w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left text-xs font-semibold transition-all duration-150',
+                                                            isCategorySelected
+                                                                ? 'bg-sky-500/20 text-sky-400 border border-sky-500/30 font-bold shadow-sm'
+                                                                : isCategoryCurrentRoute
+                                                                ? 'text-sky-400 bg-sky-500/10 border border-sky-500/20'
+                                                                : 'text-foreground hover:bg-sky-500/10 hover:text-sky-400 border border-transparent'
+                                                        )}
+                                                    >
+                                                        <div className="flex items-center gap-2.5">
+                                                            <cat.icon className={cn(
+                                                                "w-4 h-4 transition-colors",
+                                                                isCategorySelected || isCategoryCurrentRoute ? "text-sky-400" : "text-muted-foreground"
+                                                            )} />
+                                                            <span>{t(cat.titleKey)}</span>
+                                                        </div>
+                                                        <ChevronRight className={cn(
+                                                            "w-3.5 h-3.5 transition-transform",
+                                                            isCategorySelected ? "opacity-100 translate-x-0.5 text-sky-400" : "opacity-70"
+                                                        )} />
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
 
                                         {/* Vertical Divider */}
@@ -254,7 +302,7 @@ export function Navbar() {
                                                 </p>
                                             </div>
                                             {currentSubItems.map((item) => {
-                                                const isSubActive = location.pathname === item.href;
+                                                const isSubActive = isPathMatching(location.pathname, item.href);
                                                 return (
                                                     <button
                                                         key={item.id}
@@ -262,14 +310,14 @@ export function Navbar() {
                                                         className={cn(
                                                             "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium transition-all group",
                                                             isSubActive
-                                                                ? "bg-sky-500/20 text-sky-400 font-bold border-l-2 border-sky-400 pl-3.5"
+                                                                ? "bg-sky-500/20 text-sky-400 font-bold border-l-2 border-sky-400 pl-3.5 shadow-sm"
                                                                 : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
                                                         )}
                                                     >
                                                         <div className={cn(
                                                             "w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors",
                                                             isSubActive
-                                                                ? "bg-sky-500 text-white"
+                                                                ? "bg-sky-500 text-white shadow-sm shadow-sky-500/30"
                                                                 : "bg-sky-500/10 text-sky-400 group-hover:bg-sky-500 group-hover:text-white"
                                                         )}>
                                                             <item.icon className="w-3.5 h-3.5" />
@@ -298,7 +346,7 @@ export function Navbar() {
                         >
                             {t('nav.investorRelations')}
                             {isInvestorActive && (
-                                <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
+                                <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_var(--ring)]" />
                             )}
                         </button>
 
@@ -326,7 +374,7 @@ export function Navbar() {
                                 {t('nav.pressCenter')}
                                 <ChevronDown className={cn("w-3.5 h-3.5 opacity-70 transition-transform duration-200", activeDropdown === 'press' && "rotate-180")} />
                                 {isPressActive && (
-                                    <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
+                                    <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_var(--ring)]" />
                                 )}
                             </button>
 
@@ -376,7 +424,7 @@ export function Navbar() {
                                 {t('nav.about')}
                                 <ChevronDown className={cn("w-3.5 h-3.5 opacity-70 transition-transform duration-200", activeDropdown === 'about' && "rotate-180")} />
                                 {isAboutActive && (
-                                    <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
+                                    <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_var(--ring)]" />
                                 )}
                             </button>
 
@@ -420,7 +468,7 @@ export function Navbar() {
                         >
                             {t('nav.assetForSale')}
                             {isAssetActive && (
-                                <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_rgba(56,189,248,0.8)]" />
+                                <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_var(--ring)]" />
                             )}
                         </button>
                     </nav>
@@ -572,7 +620,7 @@ export function Navbar() {
                                         {(mobileOpenSubMenu === cat.id || !mobileOpenSubMenu) && (
                                             <div className="space-y-1 pt-1">
                                                 {cat.items.map((item) => {
-                                                    const isSubActive = location.pathname === item.href;
+                                                    const isSubActive = isPathMatching(location.pathname, item.href);
                                                     return (
                                                         <button
                                                             key={item.id}

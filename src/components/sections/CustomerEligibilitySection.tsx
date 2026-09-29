@@ -5,26 +5,43 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 
-function useCounter(end: number, duration: number = 2000, trigger: boolean = false) {
-    const [count, setCount] = useState(0);
+function useAnimatedStat(raw: string | undefined, fallback: string, duration: number = 1800, trigger: boolean = false): string {
+    const rawVal = (raw && raw.trim().length > 0) ? raw.trim() : fallback;
+    const match = rawVal.match(/^([^\d]*)(\d[\d,.]*)(.*)$/);
+
+    const prefix = match ? match[1] : '';
+    const numStr = match ? match[2].replace(/,/g, '') : '';
+    const suffix = match ? match[3] : '';
+    const targetNum = numStr ? parseFloat(numStr) : null;
+
+    const [currentNum, setCurrentNum] = useState<number>(0);
 
     useEffect(() => {
-        if (!trigger) return;
+        if (!trigger || targetNum === null || isNaN(targetNum)) return;
         let start = 0;
-        const increment = end / (duration / 16);
+        const totalSteps = duration / 16;
+        const increment = targetNum / totalSteps;
         const timer = setInterval(() => {
             start += increment;
-            if (start >= end) {
-                setCount(end);
+            if (start >= targetNum) {
+                setCurrentNum(targetNum);
                 clearInterval(timer);
             } else {
-                setCount(Math.floor(start));
+                setCurrentNum(Math.floor(start));
             }
         }, 16);
         return () => clearInterval(timer);
-    }, [end, duration, trigger]);
+    }, [targetNum, duration, trigger]);
 
-    return count;
+    if (targetNum === null || isNaN(targetNum)) {
+        return rawVal;
+    }
+
+    if (!trigger) {
+        return `${prefix}0${suffix}`;
+    }
+
+    return `${prefix}${currentNum.toLocaleString()}${suffix}`;
 }
 
 export function CustomerEligibilitySection() {
@@ -55,13 +72,9 @@ export function CustomerEligibilitySection() {
         };
     }, []);
 
-    const factoriesTarget = parseInt((settings.impactStats?.factoriesServed || '40').replace(/[^0-9]/g, ''), 10) || 40;
-    const contractsTarget = parseInt((settings.impactStats?.totalContractsCount || '50').replace(/[^0-9]/g, ''), 10) || 50;
-    const valueTarget = parseInt((settings.impactStats?.totalCreditValueMB || '400').replace(/[^0-9]/g, ''), 10) || 400;
-
-    const factoryCount = useCounter(factoriesTarget, 1600, isVisible);
-    const contractsCount = useCounter(contractsTarget, 1800, isVisible);
-    const valueCount = useCounter(valueTarget, 2000, isVisible);
+    const factoryCount = useAnimatedStat(settings.impactStats?.factoriesServed, '40', 1600, isVisible);
+    const contractsCount = useAnimatedStat(settings.impactStats?.totalContractsCount, '50', 1800, isVisible);
+    const valueCount = useAnimatedStat(settings.impactStats?.totalCreditValueMB, '400', 2000, isVisible);
 
     const criterias = [
         {

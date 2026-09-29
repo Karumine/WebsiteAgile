@@ -275,7 +275,7 @@ export function LoanCalculatorSection() {
                             <div>
                                 <button
                                     onClick={handleApplyCalculation}
-                                    className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl bg-gradient-to-r from-sky-400 via-sky-500 to-blue-600 hover:from-sky-300 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-sky-500/30 hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 glow-cyan"
+                                    className="w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-2xl text-white font-bold text-sm shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200 glow-cyan btn-dynamic-theme"
                                 >
                                     <CheckCircle2 className="w-4.5 h-4.5" />
                                     <span>{t('calc.applyNow')}</span>

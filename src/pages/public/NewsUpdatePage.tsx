@@ -124,8 +124,15 @@ export function NewsUpdatePage() {
                     <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto">
                         <ScrollReveal animation="fade-down">
                             {/* Breadcrumb / Category Badge */}
-                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-sky-400/30 text-xs font-semibold text-sky-300 mb-5 shadow-lg shadow-sky-500/10">
-                                <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping" />
+                            <div
+                                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full backdrop-blur-xl bg-slate-950/80 border text-xs font-semibold mb-5 shadow-lg"
+                                style={{
+                                    borderColor: 'rgba(var(--accent-rgb, 56 189 248), 0.3)',
+                                    color: 'var(--theme-sky-300, #7dd3fc)',
+                                    boxShadow: '0 10px 25px -5px rgba(var(--primary-rgb, 2 132 199), 0.1)',
+                                }}
+                            >
+                                <span className="w-2 h-2 rounded-full animate-ping" style={{ backgroundColor: 'var(--theme-sky-400, #38bdf8)' }} />
                                 <span>News Update · Corporate Milestones & Media</span>
                             </div>
                         </ScrollReveal>

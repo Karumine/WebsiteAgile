@@ -129,10 +129,9 @@
         "operatingHours": "จันทร์ - ศุกร์: 08:30 - 17:30 น."
     },
     "impactStats": {
-        "factoriesServed": "40+",
-        "totalCreditValueMB": "400+",
-        "totalContractsCount": "50+",
-        "customerSatisfactionPct": "98%"
+        "factoriesServed": "40",
+        "totalContractsCount": "50",
+        "totalCreditValueMB": "400"
     },
     "usedMachinery": [
         {

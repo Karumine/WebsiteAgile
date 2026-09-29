@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { 
     TrendingUp, Award, ArrowRight, Send, Check, 
@@ -12,12 +12,72 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
+interface StatItem {
+    value: string;
+    unit: string;
+    labelTh: string;
+    labelEn: string;
+    subTh: string;
+    subEn: string;
+    icon: React.ComponentType<{ className?: string }>;
+}
+
+function StatMetricCard({ st, lang }: { st: StatItem; lang: string }) {
+    const IconComp = st.icon;
+    const targetNum = parseFloat(st.value.replace(/,/g, ''));
+    const [count, setCount] = useState(0);
+
+    useEffect(() => {
+        if (isNaN(targetNum)) return;
+        let start = 0;
+        const duration = 1800;
+        const totalSteps = duration / 16;
+        const increment = targetNum / totalSteps;
+        const timer = setInterval(() => {
+            start += increment;
+            if (start >= targetNum) {
+                setCount(targetNum);
+                clearInterval(timer);
+            } else {
+                setCount(Math.floor(start));
+            }
+        }, 16);
+        return () => clearInterval(timer);
+    }, [targetNum]);
+
+    const displayValue = isNaN(targetNum) ? st.value : count.toLocaleString();
+
+    return (
+        <div className="rounded-2xl p-6 sm:p-7 bg-card text-card-foreground border border-border shadow-2xl hover:border-sky-500/60 transition-all duration-300 hover:shadow-sky-500/10 text-center flex flex-col items-center justify-center group">
+            <div className="w-12 h-12 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-600 dark:text-sky-400 mb-3 group-hover:scale-110 transition-transform">
+                <IconComp className="w-6 h-6" />
+            </div>
+            <div className="flex items-baseline gap-1 mb-1">
+                <span className="text-4xl sm:text-5xl font-black text-sky-600 dark:text-sky-400 tracking-tight font-sans">
+                    {displayValue}
+                </span>
+                <span className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-sky-300">
+                    {st.unit}
+                </span>
+            </div>
+            <h3 className="text-base sm:text-lg font-bold text-foreground mb-1">
+                {lang === 'th' ? st.labelTh : st.labelEn}
+            </h3>
+            <p className="text-xs text-muted-foreground">
+                {lang === 'th' ? st.subTh : st.subEn}
+            </p>
+        </div>
+    );
+}
+
 export function InvestorRelationsPage() {
     const { lang } = useLanguage();
+    const { settings } = useSiteSettings();
     const { content } = usePageContent('investor-relations', DEFAULT_PAGE_CONTENTS['investor-relations']);
     const [submitting, setSubmitting] = useState(false);
     const [submitted, setSubmitted] = useState(false);
@@ -30,11 +90,31 @@ export function InvestorRelationsPage() {
         note: '',
     });
 
-    // Key Performance Metrics (Counters)
-    const keyStats = [
+    const parseStat = (raw: string | undefined, fallbackVal: string, defaultUnit: string) => {
+        const rawVal = (raw && raw.trim().length > 0) ? raw.trim() : fallbackVal;
+        const match = rawVal.match(/^([^\d]*)(\d[\d,.]*)(.*)$/);
+        if (!match) {
+            return { value: rawVal, unit: defaultUnit };
+        }
+        const val = match[2];
+        let unit = match[3]?.trim() || '';
+        if (!unit) {
+            unit = defaultUnit;
+        } else if (defaultUnit.includes('MB') && !unit.includes('MB')) {
+            unit = unit === '+' ? 'MB+' : `${unit} MB`;
+        }
+        return { value: val, unit };
+    };
+
+    const factoryStat = parseStat(settings.impactStats?.factoriesServed, '40', '+');
+    const contractsStat = parseStat(settings.impactStats?.totalContractsCount, '54', '+');
+    const valueStat = parseStat(settings.impactStats?.totalCreditValueMB, '399', 'MB+');
+
+    // Key Performance Metrics (Counters) - Dynamically connected to SiteSettings impactStats
+    const keyStats: StatItem[] = [
         {
-            value: '40',
-            unit: '+',
+            value: factoryStat.value,
+            unit: factoryStat.unit,
             labelTh: 'โรงงานที่ให้สินเชื่อ',
             labelEn: 'Client Factories Supported',
             subTh: 'กระจายตัวในหลากหลายอุตสาหกรรมทั่วประเทศ',
@@ -42,8 +122,8 @@ export function InvestorRelationsPage() {
             icon: Factory,
         },
         {
-            value: '54',
-            unit: '+',
+            value: contractsStat.value,
+            unit: contractsStat.unit,
             labelTh: 'สัญญาเช่าซื้อสะสม',
             labelEn: 'Hire Purchase Contracts',
             subTh: 'บริหารความเสี่ยงแบบ 100% Asset-Backed',
@@ -51,8 +131,8 @@ export function InvestorRelationsPage() {
             icon: FileCheck,
         },
         {
-            value: '399',
-            unit: 'MB+',
+            value: valueStat.value,
+            unit: valueStat.unit,
             labelTh: 'มูลค่าสินเชื่อที่บริหารรวม',
             labelEn: 'Total Portfolio Managed',
             subTh: 'เติบโตอย่างมั่นคงต่อเนื่องทุกไตรมาส',
@@ -255,8 +335,21 @@ export function InvestorRelationsPage() {
                     <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto">
                         <ScrollReveal animation="fade-up">
                             {/* Category Badge */}
-                            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-xl border border-sky-400/40 bg-slate-950/80 text-xs sm:text-sm font-bold text-sky-300 mb-6 shadow-lg shadow-sky-500/10">
-                                <div className="w-5 h-5 rounded-full flex items-center justify-center bg-sky-400/20 text-sky-300">
+                            <div
+                                className="inline-flex items-center gap-2 px-4 py-2 rounded-full backdrop-blur-xl border bg-slate-950/80 text-xs sm:text-sm font-bold mb-6 shadow-lg"
+                                style={{
+                                    borderColor: 'rgba(var(--accent-rgb, 56 189 248), 0.4)',
+                                    color: 'var(--theme-sky-300, #7dd3fc)',
+                                    boxShadow: '0 10px 25px -5px rgba(var(--primary-rgb, 2 132 199), 0.1)',
+                                }}
+                            >
+                                <div
+                                    className="w-5 h-5 rounded-full flex items-center justify-center"
+                                    style={{
+                                        backgroundColor: 'rgba(var(--accent-rgb, 56 189 248), 0.2)',
+                                        color: 'var(--theme-sky-300, #7dd3fc)',
+                                    }}
+                                >
                                     <TrendingUp className="w-3.5 h-3.5" />
                                 </div>
                                 <span>{(lang === 'th' ? (content.heroBadgeTh || content.heroBadgeEn) : (content.heroBadgeEn || content.heroBadgeTh)) || (lang === 'th' ? 'Investor Relations • นักลงทุนสัมพันธ์' : 'Investor Relations')}</span>
@@ -288,28 +381,7 @@ export function InvestorRelationsPage() {
                         <ScrollReveal animation="fade-up" delay={100}>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
                                 {keyStats.map((st, i) => (
-                                    <div 
-                                        key={i} 
-                                        className="rounded-2xl p-6 sm:p-7 bg-card text-card-foreground border border-border shadow-2xl hover:border-sky-500/60 transition-all duration-300 hover:shadow-sky-500/10 text-center flex flex-col items-center justify-center group"
-                                    >
-                                        <div className="w-12 h-12 rounded-xl bg-sky-500/15 border border-sky-500/30 flex items-center justify-center text-sky-600 dark:text-sky-400 mb-3 group-hover:scale-110 transition-transform">
-                                            <st.icon className="w-6 h-6" />
-                                        </div>
-                                        <div className="flex items-baseline gap-1 mb-1">
-                                            <span className="text-4xl sm:text-5xl font-black text-sky-600 dark:text-sky-400 tracking-tight font-sans">
-                                                {st.value}
-                                            </span>
-                                            <span className="text-xl sm:text-2xl font-bold text-blue-600 dark:text-sky-300">
-                                                {st.unit}
-                                            </span>
-                                        </div>
-                                        <h3 className="text-base sm:text-lg font-bold text-foreground mb-1">
-                                            {lang === 'th' ? st.labelTh : st.labelEn}
-                                        </h3>
-                                        <p className="text-xs text-muted-foreground">
-                                            {lang === 'th' ? st.subTh : st.subEn}
-                                        </p>
-                                    </div>
+                                    <StatMetricCard key={i} st={st} lang={lang} />
                                 ))}
                             </div>
                         </ScrollReveal>
@@ -417,14 +489,14 @@ export function InvestorRelationsPage() {
                                             <div className="space-y-2 text-xs text-muted-foreground">
                                                 <div className="flex items-center gap-2">
                                                     <Mail className="w-4 h-4 text-sky-500 flex-shrink-0" />
-                                                    <a href="mailto:marketing@agileassets.co.th" className="hover:text-sky-500 text-foreground font-medium underline underline-offset-2 transition-colors">
-                                                        marketing@agileassets.co.th
+                                                    <a href={`mailto:${settings.companyInfo?.email || 'marketing@agileassets.co.th'}`} className="hover:text-sky-500 text-foreground font-medium underline underline-offset-2 transition-colors">
+                                                        {settings.companyInfo?.email || 'marketing@agileassets.co.th'}
                                                     </a>
                                                 </div>
                                                 <div className="flex items-center gap-2">
                                                     <Phone className="w-4 h-4 text-sky-500 flex-shrink-0" />
-                                                    <a href="tel:0625902227" className="hover:text-sky-500 text-foreground font-bold transition-colors">
-                                                        062-590-2227
+                                                    <a href={`tel:${(settings.companyInfo?.phone || '062-590-2227').replace(/[^0-9+]/g, '')}`} className="hover:text-sky-500 text-foreground font-bold transition-colors">
+                                                        {settings.companyInfo?.phone || '062-590-2227'}
                                                     </a>
                                                 </div>
                                             </div>

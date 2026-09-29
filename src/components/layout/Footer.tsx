@@ -56,7 +56,7 @@ export function Footer() {
     ];
 
     return (
-        <footer className="border-t border-border/80 bg-slate-950 text-slate-300">
+        <footer className="border-t border-slate-200 dark:border-border/80 bg-slate-100/90 dark:bg-slate-950 text-slate-700 dark:text-slate-300 transition-colors duration-200">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10">
                     {/* Brand Column */}
@@ -76,12 +76,12 @@ export function Footer() {
                         >
                             <AgileAssetsLogo variant="full" />
                         </a>
-                        <p className="text-xs text-slate-400 leading-relaxed max-w-sm">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed max-w-sm">
                             {lang === 'th'
                                 ? 'Agile Assets ผู้ให้บริการสินเชื่อเช่าซื้อเครื่องจักร ยานพาหนะเชิงพาณิชย์ และโซลูชันเงินทุนเพื่อการเติบโตอย่างยั่งยืน มุ่งมั่นเคียงข้างธุรกิจไทยตั้งแต่ปี 2010'
                                 : 'Agile Assets — Premier equipment financing and bespoke capital solutions empowering enterprises with speed, transparency, and ESG-aligned growth since 2010.'}
                         </p>
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-400/20 text-sky-400 text-xs font-semibold">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-400/25 text-sky-600 dark:text-sky-400 text-xs font-semibold">
                             <ShieldCheck className="w-3.5 h-3.5" />
                             <span>Licensed Financial Institution</span>
                         </div>
@@ -89,7 +89,7 @@ export function Footer() {
 
                     {/* Quick Navigation Links */}
                     <div className="lg:col-span-2 space-y-4">
-                        <h3 className="text-xs font-bold text-white uppercase tracking-widest font-sans">
+                        <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-widest font-sans">
                             {t('footer.quickLinks')}
                         </h3>
                         <ul className="space-y-2 text-xs">
@@ -97,7 +97,7 @@ export function Footer() {
                                 <li key={item.href}>
                                     <button
                                         onClick={() => handleNavClick(item.href)}
-                                        className="text-slate-400 hover:text-sky-400 transition-colors text-left"
+                                        className="text-slate-600 dark:text-slate-400 hover:text-sky-500 dark:hover:text-sky-400 transition-colors text-left"
                                     >
                                         {t(item.labelKey)}
                                     </button>
@@ -108,7 +108,7 @@ export function Footer() {
 
                     {/* Financing Services */}
                     <div className="lg:col-span-3 space-y-4">
-                        <h3 className="text-xs font-bold text-white uppercase tracking-widest font-sans">
+                        <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-widest font-sans">
                             {t('footer.services')}
                         </h3>
                         <ul className="space-y-2 text-xs">
@@ -116,7 +116,7 @@ export function Footer() {
                                 <li key={idx}>
                                     <button
                                         onClick={() => handleNavClick(p.href)}
-                                        className="text-slate-400 hover:text-sky-400 transition-colors text-left"
+                                        className="text-slate-600 dark:text-slate-400 hover:text-sky-500 dark:hover:text-sky-400 transition-colors text-left"
                                     >
                                         {p.name}
                                     </button>
@@ -127,44 +127,44 @@ export function Footer() {
 
                     {/* Contact & Support */}
                     <div className="lg:col-span-3 space-y-4">
-                        <h3 className="text-xs font-bold text-white uppercase tracking-widest font-sans">
+                        <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-widest font-sans">
                             {t('footer.contact')}
                         </h3>
                         <ul className="space-y-3 text-xs">
-                            <li className="flex items-center gap-2.5 text-slate-300">
-                                <Phone className="w-4 h-4 text-sky-400 flex-shrink-0" />
-                                <a href={`tel:${companyInfo.phone}`} className="hover:text-sky-400 transition-colors">
+                            <li className="flex items-center gap-2.5 text-slate-700 dark:text-slate-300">
+                                <Phone className="w-4 h-4 text-sky-500 dark:text-sky-400 flex-shrink-0" />
+                                <a href={`tel:${companyInfo.phone}`} className="hover:text-sky-500 dark:hover:text-sky-400 transition-colors">
                                     {companyInfo.phone}
                                 </a>
                             </li>
-                            <li className="flex items-center gap-2.5 text-slate-300">
-                                <Mail className="w-4 h-4 text-sky-400 flex-shrink-0" />
-                                <a href={`mailto:${companyInfo.email}`} className="hover:text-sky-400 transition-colors">
+                            <li className="flex items-center gap-2.5 text-slate-700 dark:text-slate-300">
+                                <Mail className="w-4 h-4 text-sky-500 dark:text-sky-400 flex-shrink-0" />
+                                <a href={`mailto:${companyInfo.email}`} className="hover:text-sky-500 dark:hover:text-sky-400 transition-colors">
                                     {companyInfo.email}
                                 </a>
                             </li>
-                            <li className="flex items-start gap-2.5 text-slate-300">
-                                <MapPin className="w-4 h-4 text-sky-400 flex-shrink-0 mt-0.5" />
-                                <span className="leading-relaxed text-slate-400">{companyInfo.address}</span>
+                            <li className="flex items-start gap-2.5 text-slate-700 dark:text-slate-300">
+                                <MapPin className="w-4 h-4 text-sky-500 dark:text-sky-400 flex-shrink-0 mt-0.5" />
+                                <span className="leading-relaxed text-slate-600 dark:text-slate-400">{companyInfo.address}</span>
                             </li>
                         </ul>
                     </div>
                 </div>
 
-                <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
+                <div className="mt-12 pt-8 border-t border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-500">
                     <p>
                         © {new Date().getFullYear()} {companyInfo.name}. {t('footer.copyright')}
                     </p>
                     <div className="flex flex-wrap items-center gap-4 text-xs">
-                        <button onClick={() => handleNavClick('/nc-nda')} className="hover:text-sky-400 transition-colors">
+                        <button onClick={() => handleNavClick('/nc-nda')} className="hover:text-sky-500 dark:hover:text-sky-400 transition-colors">
                             {lang === 'th' ? 'สัญญาการรักษาความลับ (NC-NDA)' : 'NC-NDA Agreement'}
                         </button>
                         <span>•</span>
-                        <button onClick={() => handleNavClick('/cookie-policy')} className="hover:text-sky-400 transition-colors">
+                        <button onClick={() => handleNavClick('/cookie-policy')} className="hover:text-sky-500 dark:hover:text-sky-400 transition-colors">
                             {lang === 'th' ? 'นโยบายคุกกี้' : 'Cookie Policy'}
                         </button>
                         <span>•</span>
-                        <button onClick={() => handleNavClick('/privacy-policy')} className="hover:text-sky-400 transition-colors">
+                        <button onClick={() => handleNavClick('/privacy-policy')} className="hover:text-sky-500 dark:hover:text-sky-400 transition-colors">
                             {lang === 'th' ? 'นโยบายความเป็นส่วนตัว' : 'Privacy Policy'}
                         </button>
                     </div>

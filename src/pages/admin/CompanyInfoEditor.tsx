@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Save, Building2, BarChart3, Phone, Mail, MapPin } from 'lucide-react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -7,6 +7,7 @@ import type { CompanyInfo, ImpactStats } from '@/types';
 import toast from 'react-hot-toast';
 
 function CompanyContactLivePreview({ info, stats }: { info: CompanyInfo; stats: ImpactStats }) {
+    const { lang } = useLanguage();
     return (
         <div className="p-6 sm:p-8 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white rounded-2xl space-y-10 transition-colors selection:bg-sky-500 selection:text-white">
             {/* Section 1: Contact Page Preview */}
@@ -89,45 +90,42 @@ function CompanyContactLivePreview({ info, stats }: { info: CompanyInfo; stats: 
                 <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 flex items-center gap-1.5">
                         <BarChart3 className="w-3.5 h-3.5" />
-                        <span>การแสดงผลสถิติผลงานบนหน้าแรก (Home Page Impact Stats)</span>
+                        <span>การแสดงผลสถิติบนหน้าแรก (เกณฑ์การเป็นลูกค้าของอาไจล์ แอสเซ็ทส์)</span>
                     </span>
                     <span className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                        (ส่วนเกณฑ์ลูกค้า & ผลงาน)
+                        (อัปเดตสดตามฟอร์ม)
                     </span>
                 </div>
 
                 <div className="rounded-3xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white p-6 sm:p-8 shadow-lg border border-slate-200 dark:border-slate-800">
-                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-slate-800">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-200 dark:divide-slate-800">
+                        {/* 1. โรงงาน */}
                         <div className="text-center pt-2 sm:pt-0 sm:px-2">
-                            <div className="text-2xl sm:text-3xl font-extrabold text-sky-600 dark:text-sky-400 font-sans mb-1">
-                                {stats.factoriesServed || '40+'}
+                            <div className="text-3xl sm:text-4xl font-extrabold text-sky-600 dark:text-sky-400 font-sans mb-1">
+                                {stats.factoriesServed || '40'}
                             </div>
-                            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                โรงงานที่ดูแล
-                            </div>
-                        </div>
-                        <div className="text-center pt-3 sm:pt-0 sm:px-2">
-                            <div className="text-2xl sm:text-3xl font-extrabold text-sky-600 dark:text-sky-400 font-sans mb-1">
-                                {stats.totalContractsCount || '50+'}
-                            </div>
-                            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                จำนวนสัญญา
+                            <div className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+                                {lang === 'th' ? 'โรงงาน' : 'Industrial Plants'}
                             </div>
                         </div>
+
+                        {/* 2. สัญญาเช่าซื้อ */}
                         <div className="text-center pt-3 sm:pt-0 sm:px-2">
-                            <div className="text-2xl sm:text-3xl font-extrabold text-sky-600 dark:text-sky-400 font-sans mb-1">
-                                {stats.totalCreditValueMB ? `${stats.totalCreditValueMB} MB` : '400+ MB'}
+                            <div className="text-3xl sm:text-4xl font-extrabold text-sky-600 dark:text-sky-400 font-sans mb-1">
+                                {stats.totalContractsCount || '50'}
                             </div>
-                            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                มูลค่าสินเชื่อ
+                            <div className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+                                {lang === 'th' ? 'สัญญาเช่าซื้อ' : 'Active Leasing Contracts'}
                             </div>
                         </div>
+
+                        {/* 3. มูลค่าสินเชื่อที่บริหารรวม (MB) */}
                         <div className="text-center pt-3 sm:pt-0 sm:px-2">
-                            <div className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-sans mb-1">
-                                {stats.customerSatisfactionPct || '98%'}
+                            <div className="text-3xl sm:text-4xl font-extrabold text-sky-600 dark:text-sky-400 font-sans mb-1">
+                                {stats.totalCreditValueMB || '400'}
                             </div>
-                            <div className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                                ความพึงพอใจ
+                            <div className="text-xs sm:text-sm font-bold text-slate-700 dark:text-slate-300">
+                                {lang === 'th' ? 'มูลค่าสินเชื่อที่บริหารรวม (MB)' : 'Total Managed Value (MB)'}
                             </div>
                         </div>
                     </div>
@@ -153,11 +151,19 @@ export function CompanyInfoEditor() {
     });
 
     const [stats, setStats] = useState<ImpactStats>(settings.impactStats || {
-        factoriesServed: '40+',
-        totalCreditValueMB: '400+',
-        totalContractsCount: '50+',
-        customerSatisfactionPct: '98%',
+        factoriesServed: '40',
+        totalContractsCount: '50',
+        totalCreditValueMB: '400',
     });
+
+    useEffect(() => {
+        if (settings.companyInfo) {
+            setInfo(settings.companyInfo);
+        }
+        if (settings.impactStats) {
+            setStats(settings.impactStats);
+        }
+    }, [settings.companyInfo, settings.impactStats]);
 
     const updateInfoField = (field: keyof CompanyInfo, val: string) => {
         const updatedInfo = { ...info, [field]: val };
@@ -205,40 +211,45 @@ export function CompanyInfoEditor() {
                         </h2>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {/* 1. โรงงาน */}
                         <div>
-                            <label className="block text-xs font-semibold text-muted-foreground mb-1">จำนวนโรงงาน</label>
+                            <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                                {lang === 'th' ? 'โรงงาน' : 'Industrial Plants'}
+                            </label>
                             <input
                                 type="text"
                                 value={stats.factoriesServed || ''}
+                                placeholder="เช่น 40 หรือ 40+"
                                 onChange={(e) => updateStatsField('factoriesServed', e.target.value)}
                                 className="w-full px-3 py-1.5 rounded-xl bg-background border border-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
                             />
                         </div>
+
+                        {/* 2. สัญญาเช่าซื้อ */}
                         <div>
-                            <label className="block text-xs font-semibold text-muted-foreground mb-1">ยอดอนุมัติ (ล้านบาท)</label>
-                            <input
-                                type="text"
-                                value={stats.totalCreditValueMB || ''}
-                                onChange={(e) => updateStatsField('totalCreditValueMB', e.target.value)}
-                                className="w-full px-3 py-1.5 rounded-xl bg-background border border-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-xs font-semibold text-muted-foreground mb-1">จำนวนสัญญา</label>
+                            <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                                {lang === 'th' ? 'สัญญาเช่าซื้อ' : 'Active Leasing Contracts'}
+                            </label>
                             <input
                                 type="text"
                                 value={stats.totalContractsCount || ''}
+                                placeholder="เช่น 50 หรือ 50+"
                                 onChange={(e) => updateStatsField('totalContractsCount', e.target.value)}
                                 className="w-full px-3 py-1.5 rounded-xl bg-background border border-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
                             />
                         </div>
+
+                        {/* 3. มูลค่าสินเชื่อที่บริหารรวม (MB) */}
                         <div>
-                            <label className="block text-xs font-semibold text-muted-foreground mb-1">ความพึงพอใจ (%)</label>
+                            <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                                {lang === 'th' ? 'มูลค่าสินเชื่อที่บริหารรวม (MB)' : 'Total Managed Value (MB)'}
+                            </label>
                             <input
                                 type="text"
-                                value={stats.customerSatisfactionPct || ''}
-                                onChange={(e) => updateStatsField('customerSatisfactionPct', e.target.value)}
+                                value={stats.totalCreditValueMB || ''}
+                                placeholder="เช่น 400 หรือ 400+"
+                                onChange={(e) => updateStatsField('totalCreditValueMB', e.target.value)}
                                 className="w-full px-3 py-1.5 rounded-xl bg-background border border-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
                             />
                         </div>
