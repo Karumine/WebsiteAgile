@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { PageCustomContent, PageSectionItem, CustomPageItem } from '@/types';
@@ -21,6 +21,9 @@ export interface NavGroupConfig {
     icon: React.ComponentType<{ className?: string }>;
     descriptionTh: string;
     badgeColor: string;
+    parentId?: string;
+    parentLabelTh?: string;
+    parentLabelEn?: string;
 }
 
 export const NAV_GROUPS: NavGroupConfig[] = [
@@ -33,12 +36,26 @@ export const NAV_GROUPS: NavGroupConfig[] = [
         badgeColor: 'text-blue-400 bg-blue-500/10 border-blue-500/20',
     },
     {
-        id: 'leasing',
-        labelTh: 'สินเชื่อเครื่องจักรและอุปกรณ์',
-        labelEn: 'Equipment Financing',
-        icon: Wrench,
-        descriptionTh: 'กลุ่มสินเชื่ออุตสาหกรรมและเครื่องจักรเฉพาะทาง',
+        id: 'leasing-industry',
+        labelTh: 'Industry Solutions',
+        labelEn: 'Industry Solutions',
+        parentId: 'leasing',
+        parentLabelTh: 'สินเชื่อเครื่องจักรและอุปกรณ์',
+        parentLabelEn: 'Equipment Financing',
+        icon: Factory,
+        descriptionTh: 'โซลูชันโรงงานผลิตน้ำดื่ม ฟาร์ม อาหาร ไบโอแก๊ส และโซลาร์',
         badgeColor: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
+    },
+    {
+        id: 'leasing-equipment',
+        labelTh: 'Industrial Equipment',
+        labelEn: 'Industrial Equipment',
+        parentId: 'leasing',
+        parentLabelTh: 'สินเชื่อเครื่องจักรและอุปกรณ์',
+        parentLabelEn: 'Equipment Financing',
+        icon: Box,
+        descriptionTh: 'เครื่องทำความเย็น ชิลเลอร์ ฉีดพลาสติก เครื่องกำเนิดไฟฟ้า และเครื่องมือสินเชื่อ',
+        badgeColor: 'text-orange-400 bg-orange-500/10 border-orange-500/20',
     },
     {
         id: 'investor',
@@ -74,6 +91,124 @@ export const NAV_GROUPS: NavGroupConfig[] = [
     },
 ];
 
+// ── Custom Select Component ─────────────────────────────────────────────────
+interface SelectOption {
+    value: string;
+    label: string;
+    emoji?: string;
+    description?: string;
+    badgeColor?: string;
+    icon?: React.ComponentType<{ className?: string }>;
+}
+
+function CustomSelect({
+    value,
+    onChange,
+    options,
+    placeholder = 'เลือก...',
+    className = '',
+}: {
+    value: string;
+    onChange: (val: string) => void;
+    options: SelectOption[];
+    placeholder?: string;
+    className?: string;
+}) {
+    const [open, setOpen] = useState(false);
+    const ref = useRef<HTMLDivElement>(null);
+    const selected = options.find((o) => o.value === value);
+
+    useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) {
+                setOpen(false);
+            }
+        };
+        if (open) document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [open]);
+
+    return (
+        <div ref={ref} className={cn('relative', className)}>
+            {/* Trigger */}
+            <button
+                type="button"
+                onClick={() => setOpen((v) => !v)}
+                className={cn(
+                    'w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-xl',
+                    'bg-navy-light border border-border text-foreground text-xs',
+                    'hover:border-primary/50 hover:bg-white/5 transition-all duration-200',
+                    'focus:outline-none focus:ring-2 focus:ring-primary/50',
+                    open && 'border-primary/60 ring-2 ring-primary/30 bg-white/5'
+                )}
+            >
+                <span className="flex items-center gap-2 min-w-0">
+                    {selected?.emoji && <span className="text-sm">{selected.emoji}</span>}
+                    {selected?.icon && (() => { const Icon = selected.icon!; return <Icon className="w-3.5 h-3.5 shrink-0" />; })()}
+                    <span className="truncate font-medium">{selected ? selected.label : <span className="text-muted-foreground">{placeholder}</span>}</span>
+                </span>
+                <ChevronDown
+                    className={cn(
+                        'w-3.5 h-3.5 shrink-0 text-muted-foreground transition-transform duration-200',
+                        open && 'rotate-180 text-primary'
+                    )}
+                />
+            </button>
+
+            {/* Dropdown Panel */}
+            {open && (
+                <div
+                    className={cn(
+                        'absolute z-[200] mt-1.5 w-full min-w-[220px]',
+                        'glass rounded-2xl border border-border/80 shadow-2xl shadow-black/40',
+                        'overflow-hidden',
+                        'animate-in fade-in-0 zoom-in-95 slide-in-from-top-1 duration-150'
+                    )}
+                >
+                    <div className="p-1.5 max-h-72 overflow-y-auto custom-scrollbar">
+                        {options.map((opt) => {
+                            const isActive = opt.value === value;
+                            const Icon = opt.icon;
+                            return (
+                                <button
+                                    key={opt.value}
+                                    type="button"
+                                    onClick={() => { onChange(opt.value); setOpen(false); }}
+                                    className={cn(
+                                        'w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left transition-all duration-150',
+                                        'hover:bg-primary/10 hover:text-primary',
+                                        isActive
+                                            ? 'bg-primary/15 text-primary font-semibold'
+                                            : 'text-foreground'
+                                    )}
+                                >
+                                    {opt.emoji && <span className="text-base leading-none shrink-0">{opt.emoji}</span>}
+                                    {Icon && <Icon className={cn('w-4 h-4 shrink-0', isActive ? 'text-primary' : 'text-muted-foreground')} />}
+                                    {opt.badgeColor && (
+                                        <span className={cn('w-5 h-5 rounded-md flex items-center justify-center border shrink-0', opt.badgeColor)}>
+                                            {Icon && <Icon className="w-3 h-3" />}
+                                        </span>
+                                    )}
+                                    <span className="min-w-0">
+                                        <span className="block text-xs font-medium truncate">{opt.label}</span>
+                                        {opt.description && (
+                                            <span className="block text-[10px] text-muted-foreground mt-0.5 truncate">{opt.description}</span>
+                                        )}
+                                    </span>
+                                    {isActive && (
+                                        <span className="ml-auto shrink-0 w-1.5 h-1.5 rounded-full bg-primary" />
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 interface PageDefinition {
     id: string;
     groupId: string;
@@ -105,7 +240,7 @@ const getPageDef = (
 ): PageDefinition => {
     const master = DEFAULT_PAGE_CONTENTS[id];
     const group = NAV_GROUPS.find((g) => g.id === groupId);
-    const groupName = group ? group.labelTh : 'ทั่วไป';
+    const groupName = group ? (group.parentLabelTh ? `${group.parentLabelTh} > ${group.labelTh}` : group.labelTh) : 'ทั่วไป';
     return {
         id,
         groupId,
@@ -133,17 +268,20 @@ const BASE_PAGES_LIST: PageDefinition[] = [
     getPageDef('home', 'home', 'หน้าแรก (Home Page)', 'Home Page', '/'),
 
     // 2. สินเชื่อเครื่องจักรและอุปกรณ์ (Equipment Financing)
-    getPageDef('drinking-water', 'leasing', 'โรงงานผลิตน้ำดื่ม (Drinking Water)', 'Drinking Water Production', '/drinking-water-production'),
-    getPageDef('livestock-farm', 'leasing', 'ฟาร์มปศุสัตว์ (Livestock Farm)', 'Livestock Farm Equipment', '/livestock-farm'),
-    getPageDef('food-processing', 'leasing', 'โรงงานแปรรูปอาหาร (Food Processing)', 'Food Processing Plant', '/food-processing'),
-    getPageDef('biogas-production', 'leasing', 'โรงไฟฟ้าก๊าซชีวภาพ (Biogas Production)', 'Biogas Power Generation', '/biogas-production'),
-    getPageDef('solar-power', 'leasing', 'พลังงานแสงอาทิตย์ (Solar Rooftop)', 'Solar Power Generation', '/solar-power-generation'),
-    getPageDef('chiller', 'leasing', 'เครื่องทำความเย็น (Industrial Chiller)', 'Industrial Chiller', '/chiller'),
-    getPageDef('injection-molding', 'leasing', 'เครื่องฉีดพลาสติก (Injection Molding)', 'Injection Molding Machine', '/injection-molding-machine'),
-    getPageDef('generator-set', 'leasing', 'เครื่องกำเนิดไฟฟ้า (Generator Set)', 'Industrial Generator Set', '/generator-set'),
-    getPageDef('leasing-application', 'leasing', 'ยื่นขอสินเชื่อออนไลน์ (Online Application)', 'Financing Application', '/leasing-application'),
-    getPageDef('calculator', 'leasing', 'คำนวณสินเชื่อ (Financing Calculator)', 'Loan Calculator', '/calculator'),
-    getPageDef('interest-rate', 'leasing', 'แปลงอัตราดอกเบี้ย (Interest Rate Conversion)', 'Interest Rate Converter', '/interest-rate-conversion'),
+    // 2.1 โซลูชันตามอุตสาหกรรม (Industry Solutions - 5 หน้า)
+    getPageDef('drinking-water', 'leasing-industry', 'โรงงานผลิตน้ำดื่ม (Drinking Water)', 'Drinking Water Production', '/drinking-water-production'),
+    getPageDef('livestock-farm', 'leasing-industry', 'ฟาร์มปศุสัตว์ (Livestock Farm)', 'Livestock Farm Equipment', '/livestock-farm'),
+    getPageDef('food-processing', 'leasing-industry', 'โรงงานแปรรูปอาหาร (Food Processing)', 'Food Processing Plant', '/food-processing'),
+    getPageDef('biogas-production', 'leasing-industry', 'โรงไฟฟ้าก๊าซชีวภาพ (Biogas Production)', 'Biogas Power Generation', '/biogas-production'),
+    getPageDef('solar-power', 'leasing-industry', 'พลังงานแสงอาทิตย์ (Solar Rooftop)', 'Solar Power Generation', '/solar-power-generation'),
+
+    // 2.2 เครื่องจักรอุตสาหกรรมและเครื่องมือ (Industrial Equipment & Tools - 6 หน้า)
+    getPageDef('chiller', 'leasing-equipment', 'เครื่องทำความเย็น (Industrial Chiller)', 'Industrial Chiller', '/chiller'),
+    getPageDef('injection-molding', 'leasing-equipment', 'เครื่องฉีดพลาสติก (Injection Molding)', 'Injection Molding Machine', '/injection-molding-machine'),
+    getPageDef('generator-set', 'leasing-equipment', 'เครื่องกำเนิดไฟฟ้า (Generator Set)', 'Industrial Generator Set', '/generator-set'),
+    getPageDef('leasing-application', 'leasing-equipment', 'ยื่นขอสินเชื่อออนไลน์ (Online Application)', 'Financing Application', '/leasing-application'),
+    getPageDef('calculator', 'leasing-equipment', 'คำนวณสินเชื่อ (Financing Calculator)', 'Loan Calculator', '/calculator'),
+    getPageDef('interest-rate', 'leasing-equipment', 'แปลงอัตราดอกเบี้ย (Interest Rate Conversion)', 'Interest Rate Converter', '/interest-rate-conversion'),
 
     // 3. นักลงทุนสัมพันธ์ (Investor Relations)
     getPageDef('investor-relations', 'investor', 'นักลงทุนสัมพันธ์ (Investor Relations)', 'Investor Relations', '/investor-relations'),
@@ -459,7 +597,8 @@ export function PageContentEditor() {
     const [selectedGroupFilter, setSelectedGroupFilter] = useState<string>('all');
     const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
         home: true,
-        leasing: true,
+        'leasing-industry': true,
+        'leasing-equipment': true,
         investor: true,
         news: true,
         about: true,
@@ -475,7 +614,8 @@ export function PageContentEditor() {
 
     const allPages = useMemo<PageDefinition[]>(() => {
         const customList: PageDefinition[] = (settings.customPages || []).map((cp) => {
-            return getPageDef(cp.id, cp.groupId, cp.nameTh, cp.nameEn, cp.path, true);
+            const mappedGroupId = cp.groupId === 'leasing' ? 'leasing-industry' : cp.groupId;
+            return getPageDef(cp.id, mappedGroupId, cp.nameTh, cp.nameEn, cp.path, true);
         });
         return [...BASE_PAGES_LIST, ...customList];
     }, [settings.customPages]);
@@ -1059,7 +1199,12 @@ export function PageContentEditor() {
                 p.nameTh.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 p.nameEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 p.path.toLowerCase().includes(searchQuery.toLowerCase());
-            const matchesGroup = selectedGroupFilter === 'all' || p.groupId === selectedGroupFilter;
+            const matchesGroup =
+                selectedGroupFilter === 'all'
+                    ? true
+                    : selectedGroupFilter === 'leasing'
+                    ? (p.groupId === 'leasing-industry' || p.groupId === 'leasing-equipment' || p.groupId === 'leasing')
+                    : p.groupId === selectedGroupFilter;
             return matchesSearch && matchesGroup;
         });
     }, [allPages, searchQuery, selectedGroupFilter]);
@@ -1070,10 +1215,11 @@ export function PageContentEditor() {
             map[g.id] = [];
         });
         filteredPages.forEach((p) => {
-            if (!map[p.groupId]) {
-                map[p.groupId] = [];
+            const targetGroupId = p.groupId === 'leasing' ? 'leasing-industry' : p.groupId;
+            if (!map[targetGroupId]) {
+                map[targetGroupId] = [];
             }
-            map[p.groupId].push(p);
+            map[targetGroupId].push(p);
         });
         return map;
     }, [filteredPages]);
@@ -1081,7 +1227,7 @@ export function PageContentEditor() {
     const isPageCustomized = !!settings.pageContents?.[selectedPageId];
 
     return (
-        <div className="space-y-8 max-w-7xl pb-28">
+        <div className="space-y-8 w-full pb-28">
             {/* Top Header */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
@@ -1094,7 +1240,7 @@ export function PageContentEditor() {
                     </h1>
                     <p className="text-sm text-muted-foreground mt-1">
                         {lang === 'th'
-                            ? 'เลือกหน้าที่ต้องการแก้ไข จัดแบ่งตาม 6 หัวข้อหลักของ Navbar และเพิ่มหน้าเพจใหม่ได้สะดวก'
+                            ? 'เลือกหน้าที่ต้องการแก้ไข จัดแบ่งตามหมวดหมู่หลักของ Navbar (แบ่ง 2 หมวดหมู่ย่อยของสินเชื่อฯ) และเพิ่มหน้าเพจใหม่ได้สะดวก'
                             : 'Select any page to customize headlines, descriptions, equipment cards, images, and SEO metadata.'}
                     </p>
                 </div>
@@ -1168,7 +1314,7 @@ export function PageContentEditor() {
                             )}
                         </div>
 
-                        {/* 6 Group Filter Tabs */}
+                        {/* Group Filter Tabs */}
                         <div className="flex flex-wrap gap-1 pt-0.5">
                             <button
                                 type="button"
@@ -1182,6 +1328,26 @@ export function PageContentEditor() {
                             >
                                 {lang === 'th' ? 'ทั้งหมด' : 'All'}
                             </button>
+                            {/* Combined Financing Filter Pill */}
+                            {(() => {
+                                const count = (groupedPages['leasing-industry'] || []).length + (groupedPages['leasing-equipment'] || []).length;
+                                return (
+                                    <button
+                                        type="button"
+                                        onClick={() => setSelectedGroupFilter('leasing')}
+                                        className={cn(
+                                            'px-2 py-1 rounded-lg text-[10px] font-semibold transition-all flex items-center gap-1',
+                                            selectedGroupFilter === 'leasing'
+                                                ? 'bg-amber-500 text-white shadow-sm'
+                                                : 'bg-white/5 text-muted-foreground hover:text-foreground'
+                                        )}
+                                    >
+                                        <Wrench className="w-3 h-3" />
+                                        <span>{lang === 'th' ? 'สินเชื่อฯ ทั้งหมด' : 'Financing (All)'}</span>
+                                        <span className="opacity-70 text-[9px]">({count})</span>
+                                    </button>
+                                );
+                            })()}
                             {NAV_GROUPS.map((g) => {
                                 const count = (groupedPages[g.id] || []).length;
                                 return (
@@ -1205,140 +1371,169 @@ export function PageContentEditor() {
 
                         {/* Grouped Accordion List */}
                         <div className="max-h-[620px] overflow-y-auto space-y-2 pr-1 pt-1">
-                            {NAV_GROUPS.filter(g => selectedGroupFilter === 'all' || selectedGroupFilter === g.id).map((group) => {
+                            {NAV_GROUPS.filter(g => 
+                                selectedGroupFilter === 'all' 
+                                || selectedGroupFilter === g.id 
+                                || (selectedGroupFilter === 'leasing' && (g.id === 'leasing-industry' || g.id === 'leasing-equipment'))
+                            ).map((group) => {
                                 const pagesInGroup = groupedPages[group.id] || [];
                                 const isExpanded = searchQuery.trim().length > 0 ? true : (expandedGroups[group.id] ?? true);
                                 const GroupIcon = group.icon;
+                                const isFirstLeasing = group.id === 'leasing-industry' && (selectedGroupFilter === 'all' || selectedGroupFilter === 'leasing');
 
                                 return (
-                                    <div
-                                        key={group.id}
-                                        className="rounded-xl border border-border/70 bg-card/40 backdrop-blur-sm overflow-hidden transition-all duration-200"
-                                    >
-                                        {/* Group Header */}
-                                        <div
-                                            className="flex items-center justify-between p-2.5 bg-white/[0.02] hover:bg-white/[0.06] cursor-pointer transition-colors select-none"
-                                            onClick={() => toggleGroup(group.id)}
-                                        >
-                                            <div className="flex items-center gap-2 min-w-0">
-                                                <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border", group.badgeColor)}>
-                                                    <GroupIcon className="w-3.5 h-3.5" />
+                                    <div key={group.id} className="space-y-1.5">
+                                        {/* Visual Section Header for Equipment Financing */}
+                                        {isFirstLeasing && (
+                                            <div className="pt-2 pb-0.5 px-1 flex items-center justify-between">
+                                                <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-400">
+                                                    <Wrench className="w-3.5 h-3.5" />
+                                                    <span>{lang === 'th' ? 'สินเชื่อเครื่องจักรและอุปกรณ์' : 'Equipment Financing'}</span>
                                                 </div>
-                                                <div className="min-w-0">
-                                                    <span className="text-xs font-bold text-foreground block truncate">
-                                                        {lang === 'th' ? group.labelTh : group.labelEn}
-                                                    </span>
-                                                </div>
-                                            </div>
-
-                                            <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
-                                                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-muted-foreground font-mono">
-                                                    {pagesInGroup.length}
+                                                <span className="text-[10px] text-amber-400/80 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20 font-medium">
+                                                    {lang === 'th' ? 'แบ่งเป็น 2 หมวดหมู่ตาม Navbar' : '2 Sub-Categories'}
                                                 </span>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => openAddModal(group.id)}
-                                                    title={lang === 'th' ? `เพิ่มหน้าในหัวข้อ ${group.labelTh}` : `Add page to ${group.labelEn}`}
-                                                    className="p-1 rounded-md text-muted-foreground hover:text-sky-400 hover:bg-sky-500/10 transition-colors"
-                                                >
-                                                    <Plus className="w-3.5 h-3.5" />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => toggleGroup(group.id)}
-                                                    className="p-1 text-muted-foreground hover:text-foreground"
-                                                >
-                                                    {isExpanded ? (
-                                                        <ChevronDown className="w-3.5 h-3.5" />
-                                                    ) : (
-                                                        <ChevronRight className="w-3.5 h-3.5" />
-                                                    )}
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* Group Pages List */}
-                                        {isExpanded && (
-                                            <div className="p-1.5 pt-0.5 space-y-1 border-t border-border/40">
-                                                {pagesInGroup.length === 0 ? (
-                                                    <div className="p-3 text-center text-xs text-muted-foreground/70 italic">
-                                                        {searchQuery
-                                                            ? (lang === 'th' ? 'ไม่พบหน้าที่ค้นหาในกลุ่มนี้' : 'No matching pages')
-                                                            : (lang === 'th' ? 'ยังไม่มีหน้าในหัวข้อนี้' : 'No pages yet')}
-                                                    </div>
-                                                ) : (
-                                                    pagesInGroup.map((page) => {
-                                                        const isSelected = page.id === selectedPageId;
-                                                        const hasCustom = !!settings.pageContents?.[page.id];
-
-                                                        return (
-                                                            <div
-                                                                key={page.id}
-                                                                onClick={() => handleSelectPage(page.id)}
-                                                                className={cn(
-                                                                    'w-full text-left p-2.5 rounded-lg border transition-all flex items-center justify-between gap-2 group cursor-pointer',
-                                                                    isSelected
-                                                                        ? 'border-primary bg-primary/15 shadow-sm shadow-primary/10'
-                                                                        : 'border-transparent hover:border-border/60 hover:bg-white/5'
-                                                                )}
-                                                            >
-                                                                <div className="min-w-0 flex-1">
-                                                                    <div className="flex items-center gap-1.5">
-                                                                        <p className={cn(
-                                                                            'text-xs font-semibold truncate',
-                                                                            isSelected ? 'text-primary' : 'text-foreground'
-                                                                        )}>
-                                                                            {lang === 'th' ? page.nameTh : page.nameEn}
-                                                                        </p>
-                                                                        {page.isCustom && (
-                                                                            <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-mono">
-                                                                                New
-                                                                            </span>
-                                                                        )}
-                                                                        {hasCustom && !page.isCustom && (
-                                                                            <span
-                                                                                className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"
-                                                                                title="มีข้อมูลปรับแต่งพิเศษ"
-                                                                            />
-                                                                        )}
-                                                                    </div>
-                                                                    <p className="text-[10px] font-mono text-muted-foreground truncate mt-0.5">
-                                                                        {page.path}
-                                                                    </p>
-                                                                </div>
-
-                                                                <div className="flex items-center gap-1 shrink-0">
-                                                                    {page.isCustom && (
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={(e) => handleDeleteCustomPage(page.id, page.nameTh, e)}
-                                                                            title={lang === 'th' ? 'ลบหน้านี้' : 'Delete page'}
-                                                                            className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-rose-500/20 text-muted-foreground hover:text-rose-400 transition-all"
-                                                                        >
-                                                                            <Trash2 className="w-3 h-3" />
-                                                                        </button>
-                                                                    )}
-                                                                    <ChevronRight className={cn(
-                                                                        "w-3.5 h-3.5 transition-transform",
-                                                                        isSelected ? "text-primary translate-x-0.5" : "text-muted-foreground/40 group-hover:text-muted-foreground"
-                                                                    )} />
-                                                                </div>
-                                                            </div>
-                                                        );
-                                                    })
-                                                )}
-
-                                                {/* Bottom Quick Add in this group */}
-                                                <button
-                                                    type="button"
-                                                    onClick={() => openAddModal(group.id)}
-                                                    className="w-full py-1.5 px-2 rounded-lg border border-dashed border-border/60 hover:border-sky-500/50 hover:bg-sky-500/5 text-muted-foreground hover:text-sky-400 text-[11px] font-medium flex items-center justify-center gap-1 transition-all mt-1"
-                                                >
-                                                    <Plus className="w-3 h-3" />
-                                                    <span>{lang === 'th' ? `+ เพิ่มหน้าในหัวข้อนี้` : `+ Add page in this group`}</span>
-                                                </button>
                                             </div>
                                         )}
+
+                                        <div className="rounded-xl border border-border/70 bg-card/40 backdrop-blur-sm overflow-hidden transition-all duration-200">
+                                            {/* Group Header */}
+                                            <div
+                                                className="flex items-center justify-between p-2.5 bg-white/[0.02] hover:bg-white/[0.06] cursor-pointer transition-colors select-none"
+                                                onClick={() => toggleGroup(group.id)}
+                                            >
+                                                <div className="flex items-center gap-2 min-w-0">
+                                                    <div className={cn("w-6 h-6 rounded-lg flex items-center justify-center shrink-0 border", group.badgeColor)}>
+                                                        <GroupIcon className="w-3.5 h-3.5" />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <span className="text-xs font-bold text-foreground block truncate">
+                                                            {lang === 'th' ? group.labelTh : group.labelEn}
+                                                        </span>
+                                                        {group.parentId && (
+                                                            <span className="text-[9px] text-muted-foreground block truncate">
+                                                                {lang === 'th' ? group.parentLabelTh : group.parentLabelEn}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-1 shrink-0" onClick={(e) => e.stopPropagation()}>
+                                                    <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/10 text-muted-foreground font-mono">
+                                                        {pagesInGroup.length}
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => openAddModal(group.id)}
+                                                        title={lang === 'th' ? `เพิ่มหน้าในหัวข้อ ${group.labelTh}` : `Add page to ${group.labelEn}`}
+                                                        className="p-1 rounded-md text-muted-foreground hover:text-sky-400 hover:bg-sky-500/10 transition-colors"
+                                                    >
+                                                        <Plus className="w-3.5 h-3.5" />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => toggleGroup(group.id)}
+                                                        className="p-1 text-muted-foreground hover:text-foreground"
+                                                    >
+                                                        {isExpanded ? (
+                                                            <ChevronDown className="w-3.5 h-3.5" />
+                                                        ) : (
+                                                            <ChevronRight className="w-3.5 h-3.5" />
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            </div>
+
+                                            {/* Group Pages List */}
+                                            {isExpanded && (
+                                                <div className="p-1.5 pt-0.5 space-y-1 border-t border-border/40">
+                                                    {pagesInGroup.length === 0 ? (
+                                                        <div className="p-3 text-center text-xs text-muted-foreground/70 italic">
+                                                            {searchQuery
+                                                                ? (lang === 'th' ? 'ไม่พบหน้าที่ค้นหาในกลุ่มนี้' : 'No matching pages')
+                                                                : (lang === 'th' ? 'ยังไม่มีหน้าในหัวข้อนี้' : 'No pages yet')}
+                                                        </div>
+                                                    ) : (
+                                                        pagesInGroup.map((page, pIdx) => {
+                                                            const isSelected = page.id === selectedPageId;
+                                                            const hasCustom = !!settings.pageContents?.[page.id];
+
+                                                            return (
+                                                                <div key={page.id}>
+                                                                    {group.id === 'leasing-equipment' && pIdx === 3 && (
+                                                                        <div className="pt-2 pb-1 px-2 flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider border-t border-border/40 mt-1.5 mb-1">
+                                                                            <Wrench className="w-3 h-3 text-sky-400" />
+                                                                            <span>{lang === 'th' ? 'แบบฟอร์ม & เครื่องมือคำนวณสินเชื่อ' : 'Financing Tools & Applications'}</span>
+                                                                        </div>
+                                                                    )}
+                                                                    <div
+                                                                        onClick={() => handleSelectPage(page.id)}
+                                                                        className={cn(
+                                                                            'w-full text-left p-2.5 rounded-lg border transition-all flex items-center justify-between gap-2 group cursor-pointer',
+                                                                            isSelected
+                                                                                ? 'border-primary bg-primary/15 shadow-sm shadow-primary/10'
+                                                                                : 'border-transparent hover:border-border/60 hover:bg-white/5'
+                                                                        )}
+                                                                    >
+                                                                        <div className="min-w-0 flex-1">
+                                                                            <div className="flex items-center gap-1.5">
+                                                                                <p className={cn(
+                                                                                    'text-xs font-semibold truncate',
+                                                                                    isSelected ? 'text-primary' : 'text-foreground'
+                                                                                )}>
+                                                                                    {lang === 'th' ? page.nameTh : page.nameEn}
+                                                                                </p>
+                                                                                {page.isCustom && (
+                                                                                    <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 text-purple-300 font-mono">
+                                                                                        New
+                                                                                    </span>
+                                                                                )}
+                                                                                {hasCustom && !page.isCustom && (
+                                                                                    <span
+                                                                                        className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0"
+                                                                                        title="มีข้อมูลปรับแต่งพิเศษ"
+                                                                                    />
+                                                                                )}
+                                                                            </div>
+                                                                            <p className="text-[10px] font-mono text-muted-foreground truncate mt-0.5">
+                                                                                {page.path}
+                                                                            </p>
+                                                                        </div>
+
+                                                                        <div className="flex items-center gap-1 shrink-0">
+                                                                            {page.isCustom && (
+                                                                                <button
+                                                                                    type="button"
+                                                                                    onClick={(e) => handleDeleteCustomPage(page.id, page.nameTh, e)}
+                                                                                    title={lang === 'th' ? 'ลบหน้านี้' : 'Delete page'}
+                                                                                    className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-rose-500/20 text-muted-foreground hover:text-rose-400 transition-all"
+                                                                                >
+                                                                                    <Trash2 className="w-3 h-3" />
+                                                                                </button>
+                                                                            )}
+                                                                            <ChevronRight className={cn(
+                                                                                "w-3.5 h-3.5 transition-transform",
+                                                                                isSelected ? "text-primary translate-x-0.5" : "text-muted-foreground/40 group-hover:text-muted-foreground"
+                                                                            )} />
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            );
+                                                        })
+                                                    )}
+
+                                                    {/* Bottom Quick Add in this group */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => openAddModal(group.id)}
+                                                        className="w-full py-1.5 px-2 rounded-lg border border-dashed border-border/60 hover:border-sky-500/50 hover:bg-sky-500/5 text-muted-foreground hover:text-sky-400 text-[11px] font-medium flex items-center justify-center gap-1 transition-all mt-1"
+                                                    >
+                                                        <Plus className="w-3 h-3" />
+                                                        <span>{lang === 'th' ? `+ เพิ่มหน้าในหัวข้อนี้` : `+ Add page in this group`}</span>
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 );
                             })}
@@ -1359,7 +1554,11 @@ export function PageContentEditor() {
                                     "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold border",
                                     activeNavGroup.badgeColor
                                 )}>
-                                    <span>{lang === 'th' ? `หัวข้อหลัก: ${activeNavGroup.labelTh}` : `Nav: ${activeNavGroup.labelEn}`}</span>
+                                    <span>
+                                        {lang === 'th'
+                                            ? (activeNavGroup.parentLabelTh ? `หัวข้อหลัก: ${activeNavGroup.parentLabelTh} > ${activeNavGroup.labelTh}` : `หัวข้อหลัก: ${activeNavGroup.labelTh}`)
+                                            : (activeNavGroup.parentLabelEn ? `Nav: ${activeNavGroup.parentLabelEn} > ${activeNavGroup.labelEn}` : `Nav: ${activeNavGroup.labelEn}`)}
+                                    </span>
                                 </span>
                                 {activePageDef.isCustom ? (
                                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-purple-500/10 border border-purple-500/30 text-purple-400 text-[10px] font-semibold">
@@ -2093,19 +2292,19 @@ export function PageContentEditor() {
                                                             <label className="block text-[11px] font-medium text-muted-foreground mb-1">
                                                                 ไอคอนบนรูปภาพ (Icon)
                                                             </label>
-                                                            <select
+                                                            <CustomSelect
                                                                 value={item.icon || 'factory'}
-                                                                onChange={(e) => updateSolutionField(item.id, 'icon', e.target.value)}
-                                                                className="w-full px-3 py-1.5 rounded-lg bg-navy-light border border-border text-foreground text-xs focus:ring-1 focus:ring-primary"
-                                                            >
-                                                                <option value="factory">🏭 โรงงาน / อุตสาหกรรมแปรรูปอาหาร (Factory)</option>
-                                                                <option value="flame">🔥 ก๊าซชีวภาพ / พลังงานทดแทน (Biogas / Flame)</option>
-                                                                <option value="sun">☀️ โซลาร์เซลล์ / แสงอาทิตย์ (Solar / Sun)</option>
-                                                                <option value="droplets">💧 น้ำดื่ม / ของเหลว (Water / Droplets)</option>
-                                                                <option value="wheat">🌾 ฟาร์มปศุสัตว์ / เกษตร (Farm / Wheat)</option>
-                                                                <option value="box">📦 คลังสินค้า / บรรจุภัณฑ์ (Box / Logistics)</option>
-                                                                <option value="sparkles">✨ โซลูชันทั่วไป (Sparkles)</option>
-                                                            </select>
+                                                                onChange={(val) => updateSolutionField(item.id, 'icon', val)}
+                                                                options={[
+                                                                    { value: 'factory',  emoji: '🏭', label: 'โรงงาน / แปรรูปอาหาร',    description: 'Factory / Industrial' },
+                                                                    { value: 'flame',    emoji: '🔥', label: 'ก๊าซชีวภาพ / พลังงาน',    description: 'Biogas / Flame' },
+                                                                    { value: 'sun',      emoji: '☀️', label: 'โซลาร์เซลล์ / แสงอาทิตย์', description: 'Solar / Sun' },
+                                                                    { value: 'droplets', emoji: '💧', label: 'น้ำดื่ม / ของเหลว',         description: 'Water / Droplets' },
+                                                                    { value: 'wheat',    emoji: '🌾', label: 'ฟาร์มปศุสัตว์ / เกษตร',   description: 'Farm / Wheat' },
+                                                                    { value: 'box',      emoji: '📦', label: 'คลังสินค้า / บรรจุภัณฑ์', description: 'Box / Logistics' },
+                                                                    { value: 'sparkles', emoji: '✨', label: 'โซลูชันทั่วไป',           description: 'General / Sparkles' },
+                                                                ]}
+                                                            />
                                                         </div>
 
                                                         <div>
@@ -2587,8 +2786,8 @@ export function PageContentEditor() {
                                     </h3>
                                     <p className="text-xs text-muted-foreground">
                                         {lang === 'th'
-                                            ? 'กำหนดชื่อ URL และจัดเข้า 1 ใน 6 หัวข้อหลักของ Navbar'
-                                            : 'Configure page details and assign to 1 of 6 main navbar categories'}
+                                            ? 'กำหนดชื่อ URL และจัดเข้าหมวดหมู่หลักของ Navbar (เช่น Industry Solutions หรือ Industrial Equipment)'
+                                            : 'Configure page details and assign to Navbar categories'}
                                     </p>
                                 </div>
                             </div>
@@ -2607,17 +2806,19 @@ export function PageContentEditor() {
                                 <label className="block text-xs font-bold text-foreground mb-1.5 flex items-center gap-1">
                                     <span>{lang === 'th' ? 'เลือกหัวข้อหลักใน Navbar *' : 'Assign to Main Nav Group *'}</span>
                                 </label>
-                                <select
+                                <CustomSelect
                                     value={newPageGroupId}
-                                    onChange={(e) => setNewPageGroupId(e.target.value)}
-                                    className="w-full px-3.5 py-2.5 rounded-xl bg-navy-light border border-border text-foreground text-xs focus:ring-2 focus:ring-primary focus:outline-none"
-                                >
-                                    {NAV_GROUPS.map((g) => (
-                                        <option key={g.id} value={g.id}>
-                                            {lang === 'th' ? g.labelTh : g.labelEn} ({g.descriptionTh})
-                                        </option>
-                                    ))}
-                                </select>
+                                    onChange={setNewPageGroupId}
+                                    options={NAV_GROUPS.map((g) => ({
+                                        value: g.id,
+                                        label: lang === 'th'
+                                            ? (g.parentLabelTh ? `${g.parentLabelTh} → ${g.labelTh}` : g.labelTh)
+                                            : (g.parentLabelEn ? `${g.parentLabelEn} → ${g.labelEn}` : g.labelEn),
+                                        description: g.descriptionTh,
+                                        badgeColor: g.badgeColor,
+                                        icon: g.icon,
+                                    }))}
+                                />
                             </div>
 
                             {/* Field: ชื่อหน้าภาษาไทย */}
