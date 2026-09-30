@@ -5,7 +5,7 @@ import { authService } from '@/services/authService';
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
 const ADMIN_CREDENTIALS = {
-    username: 'dreamza007',
+    username: 'marketing',
     password: '123456789',
 };
 

@@ -32,7 +32,7 @@
 
 | รายการ | v1.0 (เดิม) | v2.0 (ใหม่ใน Addendum นี้) | ผลกระทบต่อ Backend |
 |---|---|---|---|
-| **Admin Credentials** | `admin` / `admin123` | `dreamza007` / `123456789` | อัปเดต Initial Seed Data ใน Database |
+| **Admin Credentials** | `admin` / `admin123` | `marketing` / `123456789` | อัปเดต Initial Seed Data ใน Database |
 | **Website Typography** | Prompt & Plus Jakarta Sans | **Noto Sans Thai** & Plus Jakarta Sans | อัปเดตรองรับการสร้าง PDF / Email Template ด้วย Noto Sans Thai |
 | **หน้าสมัครงาน (Careers)** | ไม่มี (ลิงก์ไปหน้า Contact) | **หน้าใหม่เต็มรูปแบบ (`/work-for-us`)** | เพิ่ม API รับใบสมัครงาน (`POST /careers/apply`) และตารางจัดเก็บ |
 | **การปรับแต่งสีปุ่ม & ธีม** | Hardcoded CSS | **Admin ปรับแต่งสีปุ่มและธีมได้อิสระ** | เพิ่ม API บันทึก Theme Settings (`/settings/theme`) |
@@ -46,7 +46,7 @@
 > มีการปรับเปลี่ยนค่าเริ่มต้นบัญชีผู้ดูแลระบบ (Administrator Account) สำหรับการเริ่มต้นใช้งานครั้งแรก
 
 ### 2.1 บัญชีผู้ดูแลระบบตั้งต้น (Initial Seed Account)
-* **Username**: `dreamza007`
+* **Username**: `marketing`
 * **Default Password**: `123456789` (บันทึกด้วย BCrypt / Argon2 Hashing ใน Production)
 * **Role**: `admin`
 * **Display Name**: `Super Administrator`
@@ -60,15 +60,15 @@
 IF EXISTS (SELECT 1 FROM Users WHERE Username = 'admin')
 BEGIN
     UPDATE Users 
-    SET Username = 'dreamza007',
+    SET Username = 'marketing',
         PasswordHash = '$2a$12$e8YkY/mY1Wk3g.XjO9z6seQ4Nf8oH1z6Q9z6seQ4Nf8oH1z6Q9z6s', -- BCrypt hash of 123456789
         UpdatedAt = GETUTCDATE()
     WHERE Username = 'admin';
 END
-ELSE IF NOT EXISTS (SELECT 1 FROM Users WHERE Username = 'dreamza007')
+ELSE IF NOT EXISTS (SELECT 1 FROM Users WHERE Username = 'marketing')
 BEGIN
     INSERT INTO Users (Id, Username, PasswordHash, Role, FullName, Email, IsActive, CreatedAt)
-    VALUES (NEWID(), 'dreamza007', '$2a$12$e8YkY/mY1Wk3g.XjO9z6seQ4Nf8oH1z6Q9z6seQ4Nf8oH1z6Q9z6s', 'admin', 'Agile Admin', 'admin@agileassets.co.th', 1, GETUTCDATE());
+    VALUES (NEWID(), 'marketing', '$2a$12$e8YkY/mY1Wk3g.XjO9z6seQ4Nf8oH1z6Q9z6seQ4Nf8oH1z6Q9z6s', 'admin', 'Agile Admin', 'admin@agileassets.co.th', 1, GETUTCDATE());
 END
 ```
 
@@ -677,7 +677,7 @@ CREATE INDEX ix_job_applications_created_at ON job_applications(created_at DESC)
 ทีม Backend สามารถใช้ Checklist นี้ตรวจสอบความครบถ้วนของการเชื่อมต่อ API:
 
 ### Authentication & Database Setup
-- [ ] อัปเดตรหัสผ่าน Admin เป็น `dreamza007` / `123456789` ใน Seed Script
+- [ ] อัปเดตรหัสผ่าน Admin เป็น `marketing` / `123456789` ใน Seed Script
 - [ ] รัน Migration เพิ่ม 4 ตารางใหม่ (`ThemeSettings`, `PageContents`, `PageSectionItems`, `JobApplications`)
 
 ### Theme & Styling API
