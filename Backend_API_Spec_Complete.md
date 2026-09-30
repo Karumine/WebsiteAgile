@@ -838,3 +838,185 @@ VALUES (NEWID(), 'marketing', '$2a$12$<bcrypt_of_123456789>', 'admin', 'Marketin
 | `leasing-application` | `/leasing-application` | LeasingApplicationPage |
 | `asset-for-sale` | `/asset-for-sale` | AssetForSalePage |
 | `cookie-policy` | `/cookie-policy` | CookiePolicyPage |
+
+---
+
+## Performance Requirements (Backend)
+
+> ส่วนนี้เพิ่มเพื่อรองรับการปรับปรุง Performance ฝั่ง Frontend — Backend ต้องทำตามนี้เพื่อให้คะแนน Lighthouse ดีขึ้น
+
+---
+
+### P1. Image Upload — แปลงเป็น WebP อัตโนมัติ
+
+**ทุก Endpoint ที่รับ image upload ต้องทำ:**
+- รับไฟล์รูปทุกฟอร์แมต (JPEG, PNG, AVIF, WebP)
+- **แปลงเป็น WebP** ด้วย `SixLabors.ImageSharp` ก่อนบันทึก
+- ตั้งค่า quality ที่ **85** (balance ระหว่าง quality และขนาดไฟล์)
+- ส่ง URL กลับที่ชี้ไปไฟล์ `.webp` เสมอ
+
+**Endpoints ที่เกี่ยวข้อง:** PUT `/settings/banner`, POST/PUT `/news`, POST/PUT `/assets`, POST/PUT `/faqs`, PUT `/pages/{pageId}` (ทุก field ที่รับ imageUrl)
+
+**ตัวอย่าง ASP.NET Core:**
+```csharp
+// ติดตั้ง: dotnet add package SixLabors.ImageSharp
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Webp;
+
+public async Task<string> ConvertAndSaveAsWebp(IFormFile file, string outputPath)
+{
+    using var image = await Image.LoadAsync(file.OpenReadStream());
+    var webpPath = Path.ChangeExtension(outputPath, ".webp");
+    await image.SaveAsWebpAsync(webpPath, new WebpEncoder { Quality = 85 });
+    return webpPath;
+}
+```
+
+---
+
+### P2. Image Dimensions — ส่ง imageWidth / imageHeight ใน Response
+
+**ทุก Object ที่มี image field ต้องเพิ่ม:**
+
+```json
+{
+  "image": "https://cdn.example.com/img/machine.webp",
+  "imageWidth": 1920,
+  "imageHeight": 1080
+}
+```
+
+**Entities ที่ต้องเพิ่ม field:**
+
+| Entity | Fields เพิ่ม |
+|---|---|
+| News / Article | `imageWidth`, `imageHeight` |
+| Asset / Used Machinery | `imageWidth`, `imageHeight` |
+| FAQ (ถ้ามีรูป) | `imageWidth`, `imageHeight` |
+| PageContent (heroImage) | `heroImageWidth`, `heroImageHeight` |
+| Banner | `imageWidth`, `imageHeight` |
+
+**DB Schema — เพิ่ม columns:**
+```sql
+-- ตัวอย่างสำหรับ news table
+ALTER TABLE news ADD image_width INT NULL;
+ALTER TABLE news ADD image_height INT NULL;
+
+-- ตัวอย่างสำหรับ assets table
+ALTER TABLE assets ADD image_width INT NULL;
+ALTER TABLE assets ADD image_height INT NULL;
+```
+
+> Frontend จะใช้ค่านี้ใส่ใน `width` และ `height` attribute ของ `<img>` เพื่อป้องกัน Layout Shift (CLS) และเพิ่มคะแนน Lighthouse
+
+---
+
+### P3. HTTP Response Headers — Cache-Control
+
+**Backend API (ASP.NET Core) ต้องส่ง headers เหล่านี้:**
+
+```csharp
+// Program.cs
+// Static files (รูปที่ upload แล้วเก็บใน wwwroot/uploads)
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        // Cache รูปภาพ 30 วัน (ไม่ใช่ immutable เพราะ URL อาจซ้ำแต่ไฟล์เปลี่ยน)
+        ctx.Context.Response.Headers["Cache-Control"] = "public, max-age=2592000";
+    }
+});
+
+// API responses: no-store (ข้อมูล dynamic ไม่ควร cache)
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path.StartsWithSegments("/api"))
+    {
+        context.Response.Headers["Cache-Control"] = "no-store";
+    }
+    await next();
+});
+```
+
+**สรุป Cache Policy:**
+
+| Resource | Cache-Control | หมายเหตุ |
+|---|---|---|
+| API Response (dynamic data) | `no-store` | ข้อมูล real-time ไม่ cache |
+| Uploaded Images (`/uploads/...`) | `public, max-age=2592000` | 30 วัน |
+| API Health Check | `no-store` | - |
+
+> **หมายเหตุ:** Frontend static files (JS/CSS/รูป) ถูก cache โดย `web.config` แล้ว (1 ปี, immutable)
+
+---
+
+### P4. Gzip / Brotli Compression
+
+**Backend (ASP.NET Core) เปิด compression:**
+
+```csharp
+// Program.cs
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+    options.Providers.Add<BrotliCompressionProvider>();
+    options.Providers.Add<GzipCompressionProvider>();
+    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
+    {
+        "application/json",
+        "image/svg+xml",
+    });
+});
+
+builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
+{
+    options.Level = System.IO.Compression.CompressionLevel.Fastest;
+});
+
+// ต้องเรียกก่อน UseRouting
+app.UseResponseCompression();
+```
+
+> ลด payload ขนาด JSON response ลง **60–80%** โดยเฉพาะ endpoint ที่ส่งข้อมูลเยอะ เช่น GET /pages/{pageId}, GET /assets
+
+---
+
+### P5. CORS Headers — รองรับ CDN และ cross-origin image
+
+**ถ้าใช้ CDN หรือ S3 เป็น image host:**
+
+```csharp
+// Program.cs
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy
+            .WithOrigins(
+                "https://www.agileassets.co.th",
+                "https://agileassets.co.th",
+                "http://localhost:3001"  // dev
+            )
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .WithExposedHeaders("Content-Disposition");
+    });
+});
+
+app.UseCors("AllowFrontend");
+```
+
+> Frontend ใช้ `fetchPriority="high"` บน Hero Image — ถ้า CORS ไม่ถูกต้อง browser จะ downgrade priority และ LCP จะช้าลง
+
+---
+
+### Backend Performance Checklist (เพิ่มเติม)
+
+- [ ] ติดตั้ง `SixLabors.ImageSharp` และแปลง upload เป็น WebP (quality 85)
+- [ ] เพิ่ม `imageWidth` + `imageHeight` columns ใน `news`, `assets` tables
+- [ ] เพิ่ม `imageWidth` + `imageHeight` ใน API response ทุก entity ที่มีรูป
+- [ ] เปิด `UseResponseCompression` (Brotli + Gzip) ใน ASP.NET Core
+- [ ] ตั้ง `Cache-Control: no-store` สำหรับ API endpoints
+- [ ] ตั้ง `Cache-Control: public, max-age=2592000` สำหรับ uploaded static files
+- [ ] ตรวจสอบ CORS config ให้รองรับ production domain
+- [ ] (Optional) ย้าย image storage ไป Azure Blob Storage หรือ AWS S3 + CloudFront CDN

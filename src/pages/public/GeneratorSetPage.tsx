@@ -118,6 +118,9 @@ export function GeneratorSetPage() {
                             alt="Industrial Power Generator Set" 
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
+                            fetchPriority="high"
+                            width={1920}
+                            height={1080}
                         />
                         {/* Dynamic Vignette & Ambient Light Overlays */}
                         <div className="absolute inset-0 bg-gradient-to-t from-background via-slate-950/75 to-slate-950/60" />

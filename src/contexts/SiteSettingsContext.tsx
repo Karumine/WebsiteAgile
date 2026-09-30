@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
 import type { SiteSettings, ThemeSettings } from '@/types';
 import defaultSettingsData from '@/data/defaultSettings.json';
 import { themeService } from '@/services/themeService';
@@ -240,7 +240,7 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
         };
     }, []);
 
-    const updateSettings = (newSettings: Partial<SiteSettings>) => {
+    const updateSettings = useCallback((newSettings: Partial<SiteSettings>) => {
         setSettings((prev) => {
             const updated = {
                 ...prev,
@@ -271,9 +271,9 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
                 console.warn('Could not sync theme to backend API:', err);
             });
         }
-    };
+    }, []); // functional setState — no external deps needed
 
-    const resetSettings = () => {
+    const resetSettings = useCallback(() => {
         const defaults = {
             ...(defaultSettingsData as unknown as SiteSettings),
             themeSettings: DEFAULT_THEME_SETTINGS,
@@ -288,10 +288,16 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
             ch.close();
         } catch {}
         applyThemeToDom(defaults.themeSettings);
-    };
+    }, []);
+
+    const contextValue = useMemo(() => ({
+        settings,
+        updateSettings,
+        resetSettings,
+    }), [settings, updateSettings, resetSettings]);
 
     return (
-        <SiteSettingsContext.Provider value={{ settings, updateSettings, resetSettings }}>
+        <SiteSettingsContext.Provider value={contextValue}>
             {children}
         </SiteSettingsContext.Provider>
     );
