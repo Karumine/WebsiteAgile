@@ -3,10 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { 
     Menu, X, ChevronDown, ChevronRight, Sparkles, 
     Newspaper, Award, Droplets, Wheat, Factory, Flame, Sun, Snowflake, 
-    Cog, Zap, Boxes, BookOpen, Mail, Leaf, Calculator, Percent, HelpCircle, Phone, Briefcase
+    Cog, Zap, Boxes, BookOpen, Mail, Leaf, Calculator, Percent, HelpCircle, Phone, Briefcase, FileText,
+    TrendingUp, Tag
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { ThemeToggle } from '@/components/ui/ThemeToggle';
 import { AgileAssetsLogo } from '@/components/ui/AgileAssetsLogo';
 
@@ -99,32 +101,52 @@ export function Navbar() {
     const [mobileOpenMenu, setMobileOpenMenu] = useState<string | null>(null);
     const [mobileOpenSubMenu, setMobileOpenSubMenu] = useState<string | null>(null);
     const { lang, setLang, t } = useLanguage();
+    const { settings } = useSiteSettings();
     const navigate = useNavigate();
     const location = useLocation();
     const rafRef = useRef<number>(0);
 
+    // Custom pages grouped by nav group
+    const customPagesByGroup = useMemo(() => {
+        const map: Record<string, Array<{ id: string; nameTh: string; nameEn: string; path: string }>> = {};
+        for (const cp of (settings.customPages || [])) {
+            const gid = cp.groupId === 'leasing' ? 'leasing-industry' : cp.groupId;
+            if (!map[gid]) map[gid] = [];
+            map[gid].push(cp);
+        }
+        return map;
+    }, [settings.customPages]);
+
     // Automatically sync activeSubMenu with current route when page changes or menu opens
     useEffect(() => {
         for (const cat of EQUIPMENT_CATEGORIES) {
-            if (cat.items.some(item => isPathMatching(location.pathname, item.href))) {
+            const gid = cat.id === 'industry' ? 'leasing-industry' : 'leasing-equipment';
+            if (
+                cat.items.some(item => isPathMatching(location.pathname, item.href)) ||
+                customPagesByGroup[gid]?.some(cp => cp.path === location.pathname)
+            ) {
                 setActiveSubMenu(cat.id);
                 break;
             }
         }
-    }, [location.pathname, activeDropdown]);
+    }, [location.pathname, activeDropdown, customPagesByGroup]);
 
     // Automatically expand current route category in mobile drawer
     useEffect(() => {
         if (isOpen) {
             for (const cat of EQUIPMENT_CATEGORIES) {
-                if (cat.items.some(item => isPathMatching(location.pathname, item.href))) {
+                const gid = cat.id === 'industry' ? 'leasing-industry' : 'leasing-equipment';
+                if (
+                    cat.items.some(item => isPathMatching(location.pathname, item.href)) ||
+                    customPagesByGroup[gid]?.some(cp => cp.path === location.pathname)
+                ) {
                     setMobileOpenMenu('equipment');
                     setMobileOpenSubMenu(cat.id);
                     break;
                 }
             }
         }
-    }, [isOpen, location.pathname]);
+    }, [isOpen, location.pathname, customPagesByGroup]);
 
     // Throttled scroll handler using requestAnimationFrame
     useEffect(() => {
@@ -181,11 +203,33 @@ export function Navbar() {
     const currentSubItems = EQUIPMENT_CATEGORIES.find(c => c.id === activeSubMenu)?.items || EQUIPMENT_CATEGORIES[0].items;
 
     // Memoized active state checks
-    const isEquipmentActive = useMemo(() => EQUIPMENT_PATHS.has(location.pathname), [location.pathname]);
-    const isInvestorActive = useMemo(() => INVESTOR_PATHS.has(location.pathname), [location.pathname]);
-    const isPressActive = useMemo(() => PRESS_PATHS.has(location.pathname), [location.pathname]);
-    const isAboutActive = useMemo(() => ABOUT_PATHS.has(location.pathname), [location.pathname]);
-    const isAssetActive = useMemo(() => ASSET_PATHS.has(location.pathname), [location.pathname]);
+    const isEquipmentActive = useMemo(() => 
+        EQUIPMENT_PATHS.has(location.pathname) || 
+        Boolean(customPagesByGroup['leasing-industry']?.some(cp => cp.path === location.pathname)) ||
+        Boolean(customPagesByGroup['leasing-equipment']?.some(cp => cp.path === location.pathname))
+    , [location.pathname, customPagesByGroup]);
+
+    const isInvestorActive = useMemo(() => 
+        INVESTOR_PATHS.has(location.pathname) ||
+        Boolean(customPagesByGroup['investor']?.some(cp => cp.path === location.pathname))
+    , [location.pathname, customPagesByGroup]);
+
+    const isPressActive = useMemo(() => 
+        PRESS_PATHS.has(location.pathname) ||
+        Boolean(customPagesByGroup['news']?.some(cp => cp.path === location.pathname))
+    , [location.pathname, customPagesByGroup]);
+
+    const isAboutActive = useMemo(() => 
+        ABOUT_PATHS.has(location.pathname) ||
+        Boolean(customPagesByGroup['about']?.some(cp => cp.path === location.pathname))
+    , [location.pathname, customPagesByGroup]);
+
+    const isAssetActive = useMemo(() => 
+        ASSET_PATHS.has(location.pathname) ||
+        Boolean(customPagesByGroup['assets-sale']?.some(cp => cp.path === location.pathname))
+    , [location.pathname, customPagesByGroup]);
+
+
 
     return (
         <header
@@ -326,6 +370,33 @@ export function Navbar() {
                                                     </button>
                                                 );
                                             })}
+                                            {/* Dynamic custom pages in this sub-category */}
+                                            {(customPagesByGroup[activeSubMenu === 'industry' ? 'leasing-industry' : 'leasing-equipment'] || []).map((cp) => {
+                                                const isSubActive = location.pathname === cp.path;
+                                                const label = lang === 'th' ? cp.nameTh : cp.nameEn;
+                                                return (
+                                                    <button
+                                                        key={cp.id}
+                                                        onClick={() => handleNavClick(cp.path)}
+                                                        className={cn(
+                                                            "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium transition-all group",
+                                                            isSubActive
+                                                                ? "bg-sky-500/20 text-sky-400 font-semibold border-l-2 border-sky-400 pl-3.5 shadow-sm"
+                                                                : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                                        )}
+                                                    >
+                                                        <div className={cn(
+                                                            "w-6 h-6 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors",
+                                                            isSubActive
+                                                                ? "bg-sky-500 text-white shadow-sm shadow-sky-500/30"
+                                                                : "bg-sky-500/10 text-sky-400 group-hover:bg-sky-500 group-hover:text-white"
+                                                        )}>
+                                                            <FileText className="w-3.5 h-3.5" />
+                                                        </div>
+                                                        <span className="truncate">{label}</span>
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 </div>
@@ -333,22 +404,87 @@ export function Navbar() {
                         </div>
 
                         {/* Investor Relations */}
-                        <button
-                            onClick={() => handleNavClick('/investor-relations')}
-                            className={cn(
-                                'px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 relative',
-                                isInvestorActive
-                                    ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10'
-                                    : scrolled
-                                    ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
-                                    : 'text-slate-100 hover:text-white hover:bg-white/15'
-                            )}
-                        >
-                            {t('nav.investorRelations')}
-                            {isInvestorActive && (
-                                <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_var(--ring)]" />
-                            )}
-                        </button>
+                        {customPagesByGroup['investor'] && customPagesByGroup['investor'].length > 0 ? (
+                            <div
+                                className="relative"
+                                onMouseEnter={() => setActiveDropdown('investor')}
+                                onMouseLeave={() => setActiveDropdown(null)}
+                            >
+                                <button
+                                    type="button"
+                                    onClick={() => handleNavClick('/investor-relations')}
+                                    className={cn(
+                                        'inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 relative',
+                                        (isInvestorActive || activeDropdown === 'investor')
+                                            ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10'
+                                            : scrolled
+                                            ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
+                                            : 'text-slate-100 hover:text-white hover:bg-white/15'
+                                    )}
+                                >
+                                    {t('nav.investorRelations')}
+                                    <ChevronDown className={cn("w-3.5 h-3.5 opacity-70 transition-transform duration-200", activeDropdown === 'investor' && "rotate-180")} />
+                                    {isInvestorActive && (
+                                        <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_var(--ring)]" />
+                                    )}
+                                </button>
+
+                                {activeDropdown === 'investor' && (
+                                    <div className="absolute top-full left-0 w-60 pt-2 animate-fade-in">
+                                        <div className="glass rounded-2xl p-2 shadow-2xl border border-sky-500/20 bg-card/95 backdrop-blur-2xl space-y-1">
+                                            <button
+                                                onClick={() => handleNavClick('/investor-relations')}
+                                                className={cn(
+                                                    "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium transition-all",
+                                                    location.pathname === '/investor-relations'
+                                                        ? "bg-sky-500/20 text-sky-400 font-semibold border-l-2 border-sky-400 pl-3.5"
+                                                        : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                                )}
+                                            >
+                                                <TrendingUp className="w-4 h-4 text-sky-400 flex-shrink-0" />
+                                                <span>{t('nav.investorRelations')}</span>
+                                            </button>
+                                            {customPagesByGroup['investor'].map((cp) => {
+                                                const isSubActive = location.pathname === cp.path;
+                                                const label = lang === 'th' ? cp.nameTh : cp.nameEn;
+                                                return (
+                                                    <button
+                                                        key={cp.id}
+                                                        onClick={() => handleNavClick(cp.path)}
+                                                        className={cn(
+                                                            "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium transition-all group",
+                                                            isSubActive
+                                                                ? "bg-sky-500/20 text-sky-400 font-semibold border-l-2 border-sky-400 pl-3.5"
+                                                                : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                                        )}
+                                                    >
+                                                        <FileText className="w-4 h-4 text-sky-400 flex-shrink-0" />
+                                                        <span className="truncate">{label}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => handleNavClick('/investor-relations')}
+                                className={cn(
+                                    'px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 relative',
+                                    isInvestorActive
+                                        ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10'
+                                        : scrolled
+                                        ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
+                                        : 'text-slate-100 hover:text-white hover:bg-white/15'
+                                )}
+                            >
+                                {t('nav.investorRelations')}
+                                {isInvestorActive && (
+                                    <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_var(--ring)]" />
+                                )}
+                            </button>
+                        )}
 
                         {/* Press Center Dropdown */}
                         <div
@@ -396,6 +532,26 @@ export function Navbar() {
                                                 >
                                                     <item.icon className="w-4 h-4 text-sky-400" />
                                                     <span>{t(item.labelKey)}</span>
+                                                </button>
+                                            );
+                                        })}
+                                        {/* Dynamic custom pages in Press Center */}
+                                        {(customPagesByGroup['news'] || []).map((cp) => {
+                                            const isSubActive = location.pathname === cp.path;
+                                            const label = lang === 'th' ? cp.nameTh : cp.nameEn;
+                                            return (
+                                                <button
+                                                    key={cp.id}
+                                                    onClick={() => handleNavClick(cp.path)}
+                                                    className={cn(
+                                                        "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium transition-all group",
+                                                        isSubActive
+                                                            ? "bg-sky-500/20 text-sky-400 font-semibold border-l-2 border-sky-400 pl-3.5"
+                                                            : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                                    )}
+                                                >
+                                                    <FileText className="w-4 h-4 text-sky-400 flex-shrink-0" />
+                                                    <span className="truncate">{label}</span>
                                                 </button>
                                             );
                                         })}
@@ -449,28 +605,113 @@ export function Navbar() {
                                                 </button>
                                             );
                                         })}
+                                        {/* Dynamic custom pages in About Us */}
+                                        {(customPagesByGroup['about'] || []).map((cp) => {
+                                            const isSubActive = location.pathname === cp.path;
+                                            const label = lang === 'th' ? cp.nameTh : cp.nameEn;
+                                            return (
+                                                <button
+                                                    key={cp.id}
+                                                    onClick={() => handleNavClick(cp.path)}
+                                                    className={cn(
+                                                        "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium transition-all group",
+                                                        isSubActive
+                                                            ? "bg-sky-500/20 text-sky-400 font-semibold border-l-2 border-sky-400 pl-3.5"
+                                                            : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                                    )}
+                                                >
+                                                    <FileText className="w-4 h-4 text-sky-400 flex-shrink-0" />
+                                                    <span className="truncate">{label}</span>
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             )}
                         </div>
 
                         {/* Asset for Sale */}
-                        <button
-                            onClick={() => handleNavClick('/used-machine')}
-                            className={cn(
-                                'px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 relative',
-                                isAssetActive
-                                    ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10'
-                                    : scrolled
-                                    ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
-                                    : 'text-slate-100 hover:text-white hover:bg-white/15'
-                            )}
-                        >
-                            {t('nav.assetForSale')}
-                            {isAssetActive && (
-                                <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_var(--ring)]" />
-                            )}
-                        </button>
+                        {customPagesByGroup['assets-sale'] && customPagesByGroup['assets-sale'].length > 0 ? (
+                            <div
+                                className="relative"
+                                onMouseEnter={() => setActiveDropdown('assets-sale')}
+                                onMouseLeave={() => setActiveDropdown(null)}
+                            >
+                                <button
+                                    type="button"
+                                    onClick={() => handleNavClick('/used-machine')}
+                                    className={cn(
+                                        'inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 relative',
+                                        (isAssetActive || activeDropdown === 'assets-sale')
+                                            ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10'
+                                            : scrolled
+                                            ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
+                                            : 'text-slate-100 hover:text-white hover:bg-white/15'
+                                    )}
+                                >
+                                    {t('nav.assetForSale')}
+                                    <ChevronDown className={cn("w-3.5 h-3.5 opacity-70 transition-transform duration-200", activeDropdown === 'assets-sale' && "rotate-180")} />
+                                    {isAssetActive && (
+                                        <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_var(--ring)]" />
+                                    )}
+                                </button>
+
+                                {activeDropdown === 'assets-sale' && (
+                                    <div className="absolute top-full left-0 w-60 pt-2 animate-fade-in">
+                                        <div className="glass rounded-2xl p-2 shadow-2xl border border-sky-500/20 bg-card/95 backdrop-blur-2xl space-y-1">
+                                            <button
+                                                onClick={() => handleNavClick('/used-machine')}
+                                                className={cn(
+                                                    "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium transition-all",
+                                                    location.pathname === '/used-machine'
+                                                        ? "bg-sky-500/20 text-sky-400 font-semibold border-l-2 border-sky-400 pl-3.5"
+                                                        : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                                )}
+                                            >
+                                                <Tag className="w-4 h-4 text-sky-400 flex-shrink-0" />
+                                                <span>{t('nav.assetForSale')}</span>
+                                            </button>
+                                            {customPagesByGroup['assets-sale'].map((cp) => {
+                                                const isSubActive = location.pathname === cp.path;
+                                                const label = lang === 'th' ? cp.nameTh : cp.nameEn;
+                                                return (
+                                                    <button
+                                                        key={cp.id}
+                                                        onClick={() => handleNavClick(cp.path)}
+                                                        className={cn(
+                                                            "w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-left text-xs font-medium transition-all group",
+                                                            isSubActive
+                                                                ? "bg-sky-500/20 text-sky-400 font-semibold border-l-2 border-sky-400 pl-3.5"
+                                                                : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                                        )}
+                                                    >
+                                                        <FileText className="w-4 h-4 text-sky-400 flex-shrink-0" />
+                                                        <span className="truncate">{label}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <button
+                                onClick={() => handleNavClick('/used-machine')}
+                                className={cn(
+                                    'px-3.5 py-2 text-sm font-semibold rounded-xl transition-all duration-200 relative',
+                                    isAssetActive
+                                        ? 'text-sky-400 bg-sky-500/20 shadow-sm shadow-sky-500/10'
+                                        : scrolled
+                                        ? 'text-foreground/80 hover:text-sky-400 hover:bg-sky-500/10'
+                                        : 'text-slate-100 hover:text-white hover:bg-white/15'
+                                )}
+                            >
+                                {t('nav.assetForSale')}
+                                {isAssetActive && (
+                                    <span className="absolute bottom-1 left-3 right-3 h-[2.5px] bg-sky-400 rounded-full shadow-[0_0_8px_var(--ring)]" />
+                                )}
+                            </button>
+                        )}
                     </nav>
 
                     {/* Right Tools & Switchers (Desktop only, xl+) */}
@@ -637,6 +878,26 @@ export function Navbar() {
                                                         </button>
                                                     );
                                                 })}
+                                                {/* Dynamic custom pages for this category */}
+                                                {(customPagesByGroup[cat.id === 'industry' ? 'leasing-industry' : 'leasing-equipment'] || []).map((cp) => {
+                                                    const isSubActive = location.pathname === cp.path;
+                                                    const label = lang === 'th' ? cp.nameTh : cp.nameEn;
+                                                    return (
+                                                        <button
+                                                            key={cp.id}
+                                                            onClick={() => handleNavClick(cp.path)}
+                                                            className={cn(
+                                                                "w-full flex items-center gap-2 px-2.5 py-1.5 text-xs font-medium rounded-lg transition-colors text-left",
+                                                                isSubActive
+                                                                    ? "bg-sky-500/20 text-sky-400 font-semibold"
+                                                                    : "text-muted-foreground hover:text-sky-400 hover:bg-white/5"
+                                                            )}
+                                                        >
+                                                            <FileText className="w-3 h-3 text-sky-400 flex-shrink-0" />
+                                                            <span className="truncate">{label}</span>
+                                                        </button>
+                                                    );
+                                                })}
                                             </div>
                                         )}
                                     </div>
@@ -646,17 +907,69 @@ export function Navbar() {
                     </div>
 
                     {/* Investor Relations */}
-                    <button
-                        onClick={() => handleNavClick('/investor-relations')}
-                        className={cn(
-                            'w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-colors',
-                            isInvestorActive
-                                ? 'text-sky-400 bg-sky-500/15 font-semibold'
-                                : 'text-foreground hover:bg-sky-500/10'
-                        )}
-                    >
-                        {t('nav.investorRelations')}
-                    </button>
+                    {customPagesByGroup['investor'] && customPagesByGroup['investor'].length > 0 ? (
+                        <div>
+                            <button
+                                onClick={() => setMobileOpenMenu(mobileOpenMenu === 'investor' ? null : 'investor')}
+                                className={cn(
+                                    "w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors",
+                                    isInvestorActive
+                                        ? "text-sky-400 bg-sky-500/15 font-semibold"
+                                        : "text-foreground hover:bg-sky-500/10"
+                                )}
+                            >
+                                <span>{t('nav.investorRelations')}</span>
+                                <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", mobileOpenMenu === 'investor' && "rotate-180")} />
+                            </button>
+                            {mobileOpenMenu === 'investor' && (
+                                <div className="pl-4 pr-2 py-2 space-y-1 bg-sky-500/5 rounded-xl mt-1">
+                                    <button
+                                        onClick={() => handleNavClick('/investor-relations')}
+                                        className={cn(
+                                            "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left",
+                                            location.pathname === '/investor-relations'
+                                                ? "bg-sky-500/20 text-sky-400 font-semibold"
+                                                : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                        )}
+                                    >
+                                        <TrendingUp className="w-3.5 h-3.5 text-sky-400" />
+                                        <span>{t('nav.investorRelations')}</span>
+                                    </button>
+                                    {customPagesByGroup['investor'].map((cp) => {
+                                        const isSubActive = location.pathname === cp.path;
+                                        const label = lang === 'th' ? cp.nameTh : cp.nameEn;
+                                        return (
+                                            <button
+                                                key={cp.id}
+                                                onClick={() => handleNavClick(cp.path)}
+                                                className={cn(
+                                                    "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left",
+                                                    isSubActive
+                                                        ? "bg-sky-500/20 text-sky-400 font-semibold"
+                                                        : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                                )}
+                                            >
+                                                <FileText className="w-3.5 h-3.5 text-sky-400" />
+                                                <span className="truncate">{label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => handleNavClick('/investor-relations')}
+                            className={cn(
+                                'w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-colors',
+                                isInvestorActive
+                                    ? 'text-sky-400 bg-sky-500/15 font-semibold'
+                                    : 'text-foreground hover:bg-sky-500/10'
+                            )}
+                        >
+                            {t('nav.investorRelations')}
+                        </button>
+                    )}
 
                     {/* Press Center Expandable Mobile Menu */}
                     <div>
@@ -689,6 +1002,26 @@ export function Navbar() {
                                         >
                                             <item.icon className="w-3.5 h-3.5 text-sky-400" />
                                             <span>{t(item.labelKey)}</span>
+                                        </button>
+                                    );
+                                })}
+                                {/* Dynamic custom pages in Press Center */}
+                                {(customPagesByGroup['news'] || []).map((cp) => {
+                                    const isSubActive = location.pathname === cp.path;
+                                    const label = lang === 'th' ? cp.nameTh : cp.nameEn;
+                                    return (
+                                        <button
+                                            key={cp.id}
+                                            onClick={() => handleNavClick(cp.path)}
+                                            className={cn(
+                                                "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left",
+                                                isSubActive
+                                                    ? "bg-sky-500/20 text-sky-400 font-semibold"
+                                                    : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                            )}
+                                        >
+                                            <FileText className="w-3.5 h-3.5 text-sky-400" />
+                                            <span className="truncate">{label}</span>
                                         </button>
                                     );
                                 })}
@@ -730,22 +1063,94 @@ export function Navbar() {
                                         </button>
                                     );
                                 })}
+                                {/* Dynamic custom pages in About Us */}
+                                {(customPagesByGroup['about'] || []).map((cp) => {
+                                    const isSubActive = location.pathname === cp.path;
+                                    const label = lang === 'th' ? cp.nameTh : cp.nameEn;
+                                    return (
+                                        <button
+                                            key={cp.id}
+                                            onClick={() => handleNavClick(cp.path)}
+                                            className={cn(
+                                                "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left",
+                                                isSubActive
+                                                    ? "bg-sky-500/20 text-sky-400 font-semibold"
+                                                    : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                            )}
+                                        >
+                                            <FileText className="w-3.5 h-3.5 text-sky-400" />
+                                            <span className="truncate">{label}</span>
+                                        </button>
+                                    );
+                                })}
                             </div>
                         )}
                     </div>
 
                     {/* Asset for Sale */}
-                    <button
-                        onClick={() => handleNavClick('/used-machine')}
-                        className={cn(
-                            'w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-colors',
-                            isAssetActive
-                                ? "text-sky-400 bg-sky-500/15 font-semibold"
-                                : "text-foreground hover:bg-sky-500/10"
-                        )}
-                    >
-                        {t('nav.assetForSale')}
-                    </button>
+                    {customPagesByGroup['assets-sale'] && customPagesByGroup['assets-sale'].length > 0 ? (
+                        <div>
+                            <button
+                                onClick={() => setMobileOpenMenu(mobileOpenMenu === 'assets-sale' ? null : 'assets-sale')}
+                                className={cn(
+                                    "w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm font-semibold transition-colors",
+                                    isAssetActive
+                                        ? "text-sky-400 bg-sky-500/15 font-semibold"
+                                        : "text-foreground hover:bg-sky-500/10"
+                                )}
+                            >
+                                <span>{t('nav.assetForSale')}</span>
+                                <ChevronDown className={cn("w-4 h-4 transition-transform duration-200", mobileOpenMenu === 'assets-sale' && "rotate-180")} />
+                            </button>
+                            {mobileOpenMenu === 'assets-sale' && (
+                                <div className="pl-4 pr-2 py-2 space-y-1 bg-sky-500/5 rounded-xl mt-1">
+                                    <button
+                                        onClick={() => handleNavClick('/used-machine')}
+                                        className={cn(
+                                            "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left",
+                                            location.pathname === '/used-machine'
+                                                ? "bg-sky-500/20 text-sky-400 font-semibold"
+                                                : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                        )}
+                                    >
+                                        <Tag className="w-3.5 h-3.5 text-sky-400" />
+                                        <span>{t('nav.assetForSale')}</span>
+                                    </button>
+                                    {customPagesByGroup['assets-sale'].map((cp) => {
+                                        const isSubActive = location.pathname === cp.path;
+                                        const label = lang === 'th' ? cp.nameTh : cp.nameEn;
+                                        return (
+                                            <button
+                                                key={cp.id}
+                                                onClick={() => handleNavClick(cp.path)}
+                                                className={cn(
+                                                    "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-colors text-left",
+                                                    isSubActive
+                                                        ? "bg-sky-500/20 text-sky-400 font-semibold"
+                                                        : "text-foreground hover:bg-sky-500/15 hover:text-sky-400"
+                                                )}
+                                            >
+                                                <FileText className="w-3.5 h-3.5 text-sky-400" />
+                                                <span className="truncate">{label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => handleNavClick('/used-machine')}
+                            className={cn(
+                                'w-full text-left px-4 py-3 rounded-xl text-sm font-semibold transition-colors',
+                                isAssetActive
+                                    ? "text-sky-400 bg-sky-500/15 font-semibold"
+                                    : "text-foreground hover:bg-sky-500/10"
+                            )}
+                        >
+                            {t('nav.assetForSale')}
+                        </button>
+                    )}
                 </div>
             </div>
         </header>

@@ -9,7 +9,7 @@ import {
     Globe, Dices, ArrowUp, ArrowDown, Copy, Droplets, Wheat,
     Factory, Flame, Sun, Box, ArrowRight,
     Home, Wrench, TrendingUp, Newspaper, Users, ShoppingBag,
-    ChevronDown, ChevronRight, X, FolderPlus
+    ChevronDown, ChevronRight, X, FolderPlus, FolderInput
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { cn } from '@/lib/utils';
@@ -612,13 +612,27 @@ export function PageContentEditor() {
     const [newPageNameEn, setNewPageNameEn] = useState('');
     const [newPagePath, setNewPagePath] = useState('');
 
+    // Move Page Modal State
+    const [isMoveModalOpen, setIsMoveModalOpen] = useState(false);
+    const [moveTargetPageId, setMoveTargetPageId] = useState<string | null>(null);
+    const [moveTargetGroupId, setMoveTargetGroupId] = useState('home');
+
     const allPages = useMemo<PageDefinition[]>(() => {
         const customList: PageDefinition[] = (settings.customPages || []).map((cp) => {
             const mappedGroupId = cp.groupId === 'leasing' ? 'leasing-industry' : cp.groupId;
             return getPageDef(cp.id, mappedGroupId, cp.nameTh, cp.nameEn, cp.path, true);
         });
-        return [...BASE_PAGES_LIST, ...customList];
-    }, [settings.customPages]);
+        // Apply groupIdOverride from pageContents for built-in pages
+        const baseWithOverrides = BASE_PAGES_LIST.map((p) => {
+            const saved = settings.pageContents?.[p.id] as (typeof settings.pageContents extends Record<string, infer V> ? V : never) & { groupIdOverride?: string } | undefined;
+            const override = (saved as { groupIdOverride?: string } | undefined)?.groupIdOverride;
+            if (override && override !== p.groupId) {
+                return { ...p, groupId: override };
+            }
+            return p;
+        });
+        return [...baseWithOverrides, ...customList];
+    }, [settings.customPages, settings.pageContents]);
 
     const activePageDef = useMemo(() => {
         return allPages.find((p) => p.id === selectedPageId) || allPages[0];
@@ -842,6 +856,56 @@ export function PageContentEditor() {
                 ? `สร้างหน้าใหม่ "${newCustomItem.nameTh}" ในหัวข้อ "${groupDef.labelTh}" เรียบร้อยแล้ว!`
                 : `Created new page "${newCustomItem.nameEn}" successfully!`
         );
+    };
+
+    const openMoveModal = (pageId: string, currentGroupId: string, e: React.MouseEvent) => {
+        e.stopPropagation();
+        setMoveTargetPageId(pageId);
+        setMoveTargetGroupId(currentGroupId);
+        setIsMoveModalOpen(true);
+    };
+
+    const handleMovePage = () => {
+        if (!moveTargetPageId || !moveTargetGroupId) return;
+        const pageDef = allPages.find((p) => p.id === moveTargetPageId);
+        if (!pageDef) return;
+
+        // For custom pages: update groupId in customPages
+        if (pageDef.isCustom) {
+            const updatedCustom = (settings.customPages || []).map((cp) =>
+                cp.id === moveTargetPageId ? { ...cp, groupId: moveTargetGroupId } : cp
+            );
+            updateSettings({ customPages: updatedCustom });
+        } else {
+            // For built-in pages: store override in pageContents
+            const existing = settings.pageContents || {};
+            const updatedContents = {
+                ...existing,
+                [moveTargetPageId]: {
+                    ...(existing[moveTargetPageId] || {}),
+                    id: moveTargetPageId,
+                    pageName: pageDef.nameTh,
+                    groupIdOverride: moveTargetGroupId,
+                },
+            };
+            updateSettings({ pageContents: updatedContents });
+        }
+
+        // Expand target group
+        setExpandedGroups((prev) => ({ ...prev, [moveTargetGroupId]: true }));
+
+        const targetGroup = NAV_GROUPS.find((g) => g.id === moveTargetGroupId);
+        const targetGroupName = lang === 'th'
+            ? (targetGroup?.parentLabelTh ? `${targetGroup.parentLabelTh} > ${targetGroup.labelTh}` : targetGroup?.labelTh || moveTargetGroupId)
+            : (targetGroup?.parentLabelEn ? `${targetGroup.parentLabelEn} > ${targetGroup.labelEn}` : targetGroup?.labelEn || moveTargetGroupId);
+
+        toast.success(
+            lang === 'th'
+                ? `ย้ายหน้า "${pageDef.nameTh}" ไปยัง "${targetGroupName}" เรียบร้อยแล้ว!`
+                : `Moved page "${pageDef.nameEn}" to "${targetGroupName}" successfully!`
+        );
+        setIsMoveModalOpen(false);
+        setMoveTargetPageId(null);
     };
 
     const handleDeleteCustomPage = (pageId: string, pageName: string, e: React.MouseEvent) => {
@@ -1501,6 +1565,15 @@ export function PageContentEditor() {
                                                                         </div>
 
                                                                         <div className="flex items-center gap-1 shrink-0">
+                                                                            {/* Move Page button – visible on hover for all pages */}
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={(e) => openMoveModal(page.id, page.groupId, e)}
+                                                                                title={lang === 'th' ? 'ย้ายหน้าไปยังหมวดอื่น' : 'Move to another category'}
+                                                                                className="opacity-0 group-hover:opacity-100 p-1 rounded hover:bg-sky-500/20 text-muted-foreground hover:text-sky-400 transition-all"
+                                                                            >
+                                                                                <FolderInput className="w-3 h-3" />
+                                                                            </button>
                                                                             {page.isCustom && (
                                                                                 <button
                                                                                     type="button"
@@ -2909,6 +2982,143 @@ export function PageContentEditor() {
                     </div>
                 </div>
             )}
+
+            {/* Modal: ย้ายหน้าไปยังหมวดอื่น */}
+            {isMoveModalOpen && (() => {
+                const movingPage = allPages.find((p) => p.id === moveTargetPageId);
+                const currentGroup = NAV_GROUPS.find((g) => g.id === movingPage?.groupId);
+                const targetGroup = NAV_GROUPS.find((g) => g.id === moveTargetGroupId);
+                const CurrentGroupIcon = currentGroup?.icon;
+                const TargetGroupIcon = targetGroup?.icon;
+                return (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
+                        <div className="glass rounded-3xl border border-sky-500/30 bg-card/95 p-6 w-full max-w-md shadow-2xl space-y-5 animate-scale-up">
+                            {/* Header */}
+                            <div className="flex items-start justify-between gap-3 border-b border-border pb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400">
+                                        <FolderInput className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-base font-bold text-foreground">
+                                            {lang === 'th' ? 'ย้ายหน้าไปยังหมวดอื่น' : 'Move Page to Category'}
+                                        </h3>
+                                        <p className="text-xs text-muted-foreground mt-0.5 truncate max-w-[240px]">
+                                            {lang === 'th' ? movingPage?.nameTh : movingPage?.nameEn}
+                                        </p>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsMoveModalOpen(false)}
+                                    className="p-1.5 rounded-xl hover:bg-white/10 text-muted-foreground hover:text-foreground transition-colors"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                {/* Current location */}
+                                <div className="p-3 rounded-xl bg-white/[0.03] border border-border/60">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                                        {lang === 'th' ? 'หมวดปัจจุบัน' : 'Current Category'}
+                                    </span>
+                                    <div className="flex items-center gap-2 mt-1.5">
+                                        {CurrentGroupIcon && (
+                                            <div className={cn('w-6 h-6 rounded-lg flex items-center justify-center border shrink-0', currentGroup?.badgeColor || '')}>
+                                                <CurrentGroupIcon className="w-3.5 h-3.5" />
+                                            </div>
+                                        )}
+                                        <span className="text-xs font-semibold text-foreground">
+                                            {lang === 'th'
+                                                ? (currentGroup?.parentLabelTh ? `${currentGroup.parentLabelTh} › ${currentGroup.labelTh}` : currentGroup?.labelTh)
+                                                : (currentGroup?.parentLabelEn ? `${currentGroup.parentLabelEn} › ${currentGroup.labelEn}` : currentGroup?.labelEn)}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {/* Arrow indicator */}
+                                <div className="flex items-center justify-center gap-3 text-muted-foreground">
+                                    <div className="h-px flex-1 bg-border" />
+                                    <ArrowRight className="w-4 h-4 text-sky-400 shrink-0" />
+                                    <div className="h-px flex-1 bg-border" />
+                                </div>
+
+                                {/* Target group selector */}
+                                <div>
+                                    <label className="block text-xs font-bold text-foreground mb-2">
+                                        <span className="flex items-center gap-1">
+                                            <FolderInput className="w-3.5 h-3.5 text-sky-400" />
+                                            {lang === 'th' ? 'ย้ายไปยังหมวดหมู่ *' : 'Move to Category *'}
+                                        </span>
+                                    </label>
+                                    <CustomSelect
+                                        value={moveTargetGroupId}
+                                        onChange={setMoveTargetGroupId}
+                                        options={NAV_GROUPS.map((g) => ({
+                                            value: g.id,
+                                            label: lang === 'th'
+                                                ? (g.parentLabelTh ? `${g.parentLabelTh} › ${g.labelTh}` : g.labelTh)
+                                                : (g.parentLabelEn ? `${g.parentLabelEn} › ${g.labelEn}` : g.labelEn),
+                                            description: g.descriptionTh,
+                                            icon: g.icon,
+                                            badgeColor: g.badgeColor,
+                                        }))}
+                                        placeholder={lang === 'th' ? 'เลือกหมวดหมู่ปลายทาง...' : 'Select target category...'}
+                                    />
+                                </div>
+
+                                {/* Preview target */}
+                                {moveTargetGroupId && moveTargetGroupId !== movingPage?.groupId && (
+                                    <div className="p-3 rounded-xl bg-sky-500/5 border border-sky-500/20">
+                                        <span className="text-[10px] font-bold uppercase tracking-wider text-sky-400">
+                                            {lang === 'th' ? 'จะย้ายไปยัง' : 'Moving to'}
+                                        </span>
+                                        <div className="flex items-center gap-2 mt-1.5">
+                                            {TargetGroupIcon && (
+                                                <div className={cn('w-6 h-6 rounded-lg flex items-center justify-center border shrink-0', targetGroup?.badgeColor || '')}>
+                                                    <TargetGroupIcon className="w-3.5 h-3.5" />
+                                                </div>
+                                            )}
+                                            <span className="text-xs font-semibold text-sky-300">
+                                                {lang === 'th'
+                                                    ? (targetGroup?.parentLabelTh ? `${targetGroup.parentLabelTh} › ${targetGroup.labelTh}` : targetGroup?.labelTh)
+                                                    : (targetGroup?.parentLabelEn ? `${targetGroup.parentLabelEn} › ${targetGroup.labelEn}` : targetGroup?.labelEn)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {moveTargetGroupId === movingPage?.groupId && (
+                                    <p className="text-xs text-amber-400 text-center py-1">
+                                        ⚠️ {lang === 'th' ? 'หน้านี้อยู่ในหมวดนี้อยู่แล้ว' : 'This page is already in this category'}
+                                    </p>
+                                )}
+                            </div>
+
+                            {/* Actions */}
+                            <div className="flex items-center justify-end gap-3 pt-3 border-t border-border">
+                                <button
+                                    type="button"
+                                    onClick={() => setIsMoveModalOpen(false)}
+                                    className="px-4 py-2.5 rounded-xl border border-border text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-white/5 transition-all"
+                                >
+                                    {lang === 'th' ? 'ยกเลิก' : 'Cancel'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={handleMovePage}
+                                    disabled={moveTargetGroupId === movingPage?.groupId}
+                                    className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold shadow-lg shadow-sky-500/25 transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5"
+                                >
+                                    <FolderInput className="w-4 h-4" />
+                                    <span>{lang === 'th' ? 'ย้ายหน้านี้' : 'Move Page'}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
         </div>
     );
 }

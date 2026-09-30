@@ -39,7 +39,7 @@ const AssetForSalePage = lazy(() => import('@/pages/public/AssetForSalePage').th
 const CookiePolicyPage = lazy(() => import('@/pages/public/CookiePolicyPage').then(m => ({ default: m.CookiePolicyPage })));
 const NcNdaPage = lazy(() => import('@/pages/public/NcNdaPage').then(m => ({ default: m.NcNdaPage })));
 const WorkForUsPage = lazy(() => import('@/pages/public/WorkForUsPage').then(m => ({ default: m.WorkForUsPage })));
-const NotFoundPage = lazy(() => import('@/pages/public/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
+const CustomPageView = lazy(() => import('@/pages/public/CustomPageView').then(m => ({ default: m.CustomPageView })));
 const LoginPage = lazy(() => import('@/pages/admin/LoginPage').then(m => ({ default: m.LoginPage })));
 const DashboardPage = lazy(() => import('@/pages/admin/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const RatesEditor = lazy(() => import('@/pages/admin/RatesEditor').then(m => ({ default: m.RatesEditor })));
@@ -184,8 +184,8 @@ export default function App() {
                           <Route path="/management-portal/company" element={<CompanyInfoEditor />} />
                         </Route>
                       </Route>
-                      {/* 404 Catch-All Route for Missing / Unloaded Pages */}
-                      <Route path="*" element={<NotFoundPage />} />
+                      {/* Dynamic Custom Pages created via CMS "เพิ่มหน้า" */}
+                      <Route path="*" element={<CustomPageView />} />
                     </Routes>
                   </Suspense>
                 </BrowserRouter>
