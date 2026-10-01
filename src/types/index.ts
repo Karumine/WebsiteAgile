@@ -230,11 +230,24 @@ export interface JobApplication extends JobApplicationCreate {
     notes?: string;
 }
 
+export interface PagedResult<T> {
+    items: T[];
+    total: number;
+    page: number;
+    limit: number;
+}
+
+export type LoginOutcome =
+    | { ok: true }
+    | { ok: false; reason: 'invalid' | 'locked' | 'unavailable'; retryAfterSec?: number };
+
 export interface AuthState {
     user: User | null;
     isAuthenticated: boolean;
+    /** True when signed in with a backend JWT (changes are published to the live site). */
+    isServerSession: boolean;
     isLoading: boolean;
-    login: (username: string, password: string) => Promise<boolean>;
+    login: (username: string, password: string) => Promise<LoginOutcome>;
     logout: () => void;
 }
 

@@ -8,7 +8,10 @@ import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLeadSubmit } from '@/lib/useLeadSubmit';
+import { formService } from '@/services/formService';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 
 export function LeasingApplicationPage() {
@@ -32,19 +35,41 @@ export function LeasingApplicationPage() {
         purposeReplace: false,
         purposeOther: false,
         otherDetails: '',
-        acceptConsent: true,
+        acceptConsent: false,
     });
 
     const [submitted, setSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { send, guardFields } = useLeadSubmit();
+    const isCorporate = applicantType === 'corporate';
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        const result = await send((meta) =>
+            formService.submitLeasing({
+                applicantType,
+                firstName: formData.firstName.trim(),
+                lastName: formData.lastName.trim(),
+                companyName: formData.companyName.trim() || undefined,
+                businessType: formData.businessType.trim(),
+                machineInterest: formData.machineInterest.trim(),
+                address1: formData.address1.trim(),
+                address2: formData.address2.trim() || undefined,
+                district: formData.district.trim(),
+                province: formData.province.trim(),
+                postalCode: formData.postalCode.trim(),
+                phone: formData.phone.trim(),
+                email: formData.email.trim(),
+                purpose: { new: formData.purposeNew, replace: formData.purposeReplace, other: formData.purposeOther },
+                otherDetails: formData.otherDetails.trim() || undefined,
+                acceptConsent: formData.acceptConsent,
+            }, meta)
+        );
         setIsSubmitting(false);
+        if (!result) return;
         setSubmitted(true);
-        window.scrollTo({ top: 400, behavior: 'smooth' });
+        document.getElementById('leasing-form-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
     const title = lang === 'en'
@@ -72,7 +97,7 @@ export function LeasingApplicationPage() {
                 <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-28 overflow-hidden bg-slate-950 text-white">
                     <div className="absolute inset-0 z-0">
                         <img
-                            src="https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=1800&q=80"
+                            src="https://images.unsplash.com/photo-1567789884554-0b844b597180?w=1800&q=80"
                             alt="Leasing Application Form"
                             className="w-full h-full object-cover object-center"
                             loading="eager"
@@ -253,7 +278,7 @@ export function LeasingApplicationPage() {
 
                             {/* Right Column: Application Form */}
                             <ScrollReveal animation="fade-left" delay={150} className="lg:col-span-7">
-                                <div className="glass-card rounded-3xl p-6 sm:p-10 border border-sky-500/25 shadow-2xl bg-card">
+                                <div id="leasing-form-card" className="glass-card rounded-3xl p-6 sm:p-10 border border-sky-500/25 shadow-2xl bg-card scroll-mt-28">
                                     {submitted ? (
                                         <div className="py-12 text-center space-y-4">
                                             <div className="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto shadow-lg">
@@ -311,10 +336,10 @@ export function LeasingApplicationPage() {
                                             {/* Row 1: Name | Last Name */}
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div>
-                                                    <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                                                    <label htmlFor="leasing-application-field-1" className="block text-xs font-semibold text-muted-foreground mb-1">
                                                         {lang === 'th' ? 'ชื่อ *' : 'First Name *'}
                                                     </label>
-                                                    <input
+                                                    <input id="leasing-application-field-1"
                                                         type="text"
                                                         required
                                                         value={formData.firstName}
@@ -325,10 +350,10 @@ export function LeasingApplicationPage() {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                                                    <label htmlFor="leasing-application-field-2" className="block text-xs font-semibold text-muted-foreground mb-1">
                                                         {lang === 'th' ? 'นามสกุล *' : 'Last Name *'}
                                                     </label>
-                                                    <input
+                                                    <input id="leasing-application-field-2"
                                                         type="text"
                                                         required
                                                         value={formData.lastName}
@@ -342,12 +367,13 @@ export function LeasingApplicationPage() {
 
                                             {/* Row 2: Company Name */}
                                             <div>
-                                                <label className="block text-xs font-semibold text-muted-foreground mb-1">
-                                                    {lang === 'th' ? 'ชื่อกิจการ / ธุรกิจ / บริษัท *' : 'Company / Enterprise Name *'}
+                                                <label htmlFor="leasing-application-field-3" className="block text-xs font-semibold text-muted-foreground mb-1">
+                                                    {lang === 'th' ? 'ชื่อกิจการ / ธุรกิจ / บริษัท' : 'Company / Enterprise Name'}{isCorporate ? ' *' : ''}
                                                 </label>
-                                                <input
+                                                <input id="leasing-application-field-3"
                                                     type="text"
-                                                    required
+                                                    required={isCorporate}
+                                                    maxLength={200}
                                                     value={formData.companyName}
                                                     onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
                                                     placeholder={lang === 'th' ? 'ชื่อบริษัท' : 'Company name'}
@@ -359,10 +385,10 @@ export function LeasingApplicationPage() {
                                             {/* Row 3: Business Type | Machine Interest */}
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div>
-                                                    <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                                                    <label htmlFor="leasing-application-field-4" className="block text-xs font-semibold text-muted-foreground mb-1">
                                                         {lang === 'th' ? 'ประเภทธุรกิจของท่าน *' : 'Business Type *'}
                                                     </label>
-                                                    <input
+                                                    <input id="leasing-application-field-4"
                                                         type="text"
                                                         required
                                                         value={formData.businessType}
@@ -373,10 +399,10 @@ export function LeasingApplicationPage() {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs font-semibold text-muted-foreground mb-1">
+                                                    <label htmlFor="leasing-application-field-5" className="block text-xs font-semibold text-muted-foreground mb-1">
                                                         {lang === 'th' ? 'เครื่องจักรที่สนใจ *' : 'Machinery Interested *'}
                                                     </label>
-                                                    <input
+                                                    <input id="leasing-application-field-5"
                                                         type="text"
                                                         required
                                                         value={formData.machineInterest}
@@ -395,10 +421,10 @@ export function LeasingApplicationPage() {
                                                 </label>
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                     <div>
-                                                        <label className="block text-xs text-muted-foreground mb-1">
+                                                        <label htmlFor="leasing-application-field-6" className="block text-xs text-muted-foreground mb-1">
                                                             {lang === 'th' ? 'ที่อยู่ 1 *' : 'Address 1 *'}
                                                         </label>
-                                                        <input
+                                                        <input id="leasing-application-field-6"
                                                             type="text"
                                                             required
                                                             value={formData.address1}
@@ -409,10 +435,10 @@ export function LeasingApplicationPage() {
                                                         />
                                                     </div>
                                                     <div>
-                                                        <label className="block text-xs text-muted-foreground mb-1">
+                                                        <label htmlFor="leasing-application-field-7" className="block text-xs text-muted-foreground mb-1">
                                                             {lang === 'th' ? 'ที่อยู่ 2' : 'Address 2'}
                                                         </label>
-                                                        <input
+                                                        <input id="leasing-application-field-7"
                                                             type="text"
                                                             value={formData.address2}
                                                             onChange={(e) => setFormData({ ...formData, address2: e.target.value })}
@@ -427,10 +453,10 @@ export function LeasingApplicationPage() {
                                             {/* Row 5: District | Province */}
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div>
-                                                    <label className="block text-xs text-muted-foreground mb-1">
+                                                    <label htmlFor="leasing-application-field-8" className="block text-xs text-muted-foreground mb-1">
                                                         {lang === 'th' ? 'อำเภอ / เขต *' : 'District *'}
                                                     </label>
-                                                    <input
+                                                    <input id="leasing-application-field-8"
                                                         type="text"
                                                         required
                                                         value={formData.district}
@@ -441,10 +467,10 @@ export function LeasingApplicationPage() {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs text-muted-foreground mb-1">
+                                                    <label htmlFor="leasing-application-field-9" className="block text-xs text-muted-foreground mb-1">
                                                         {lang === 'th' ? 'จังหวัด *' : 'Province *'}
                                                     </label>
-                                                    <input
+                                                    <input id="leasing-application-field-9"
                                                         type="text"
                                                         required
                                                         value={formData.province}
@@ -459,26 +485,36 @@ export function LeasingApplicationPage() {
                                             {/* Row 6: Postal Code | Mobile Phone */}
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div>
-                                                    <label className="block text-xs text-muted-foreground mb-1">
+                                                    <label htmlFor="leasing-application-field-10" className="block text-xs text-muted-foreground mb-1">
                                                         {lang === 'th' ? 'รหัสไปรษณีย์ *' : 'Postal Code *'}
                                                     </label>
-                                                    <input
+                                                    <input id="leasing-application-field-10"
                                                         type="text"
                                                         required
+                                                        inputMode="numeric"
+                                                        pattern="[0-9]{5}"
+                                                        maxLength={5}
+                                                        title={lang === 'th' ? 'รหัสไปรษณีย์ 5 หลัก' : '5-digit postal code'}
+                                                        autoComplete="postal-code"
                                                         value={formData.postalCode}
-                                                        onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
+                                                        onChange={(e) => setFormData({ ...formData, postalCode: e.target.value.replace(/D/g, '') })}
                                                         placeholder={lang === 'th' ? 'รหัสไปรษณีย์' : 'Postal code'}
                                                         className="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all"
                                                         disabled={isSubmitting}
                                                     />
                                                 </div>
                                                 <div>
-                                                    <label className="block text-xs text-muted-foreground mb-1">
+                                                    <label htmlFor="leasing-application-field-11" className="block text-xs text-muted-foreground mb-1">
                                                         {lang === 'th' ? 'โทรศัพท์มือถือ *' : 'Mobile Phone *'}
                                                     </label>
-                                                    <input
+                                                    <input id="leasing-application-field-11"
                                                         type="tel"
                                                         required
+                                                        inputMode="tel"
+                                                        pattern="[0-9+-s]{9,15}"
+                                                        maxLength={15}
+                                                        title={lang === 'th' ? 'เบอร์โทรศัพท์ 9-10 หลัก' : 'Phone number (9-10 digits)'}
+                                                        autoComplete="tel"
                                                         value={formData.phone}
                                                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                                         placeholder={lang === 'th' ? 'หมายเลขโทรศัพท์มือถือ' : '081-234-5678'}
@@ -490,12 +526,14 @@ export function LeasingApplicationPage() {
 
                                             {/* Row 7: Email */}
                                             <div>
-                                                <label className="block text-xs text-muted-foreground mb-1">
+                                                <label htmlFor="leasing-application-field-12" className="block text-xs text-muted-foreground mb-1">
                                                     {lang === 'th' ? 'อีเมล *' : 'Email Address *'}
                                                 </label>
-                                                <input
+                                                <input id="leasing-application-field-12"
                                                     type="email"
                                                     required
+                                                    maxLength={200}
+                                                    autoComplete="email"
                                                     value={formData.email}
                                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                                     placeholder={lang === 'th' ? 'อีเมล' : 'yourname@company.com'}
@@ -544,10 +582,10 @@ export function LeasingApplicationPage() {
 
                                             {/* Row 9: Other Details Textarea */}
                                             <div>
-                                                <label className="block text-xs text-muted-foreground mb-1">
+                                                <label htmlFor="leasing-application-field-13" className="block text-xs text-muted-foreground mb-1">
                                                     {lang === 'th' ? 'อื่นๆ ระบุรายละเอียด' : 'Additional Project Details'}
                                                 </label>
-                                                <textarea
+                                                <textarea id="leasing-application-field-13"
                                                     rows={3}
                                                     value={formData.otherDetails}
                                                     onChange={(e) => setFormData({ ...formData, otherDetails: e.target.value })}
@@ -568,12 +606,16 @@ export function LeasingApplicationPage() {
                                                         className="w-4 h-4 text-sky-500 rounded focus:ring-sky-400 mt-0.5"
                                                     />
                                                     <span>
-                                                        {lang === 'th'
-                                                            ? 'ข้าพเจ้าได้อ่านและยอมรับข้อกำหนด เงื่อนไข และนโยบายความเป็นส่วนตัว'
-                                                            : 'I have read and agree to the Terms of Service and Privacy Policy.'}
+                                                        {lang === 'th' ? 'ข้าพเจ้าได้อ่านและยอมรับข้อกำหนด เงื่อนไข และ' : 'I have read and agree to the Terms of Service and '}
+                                                        <Link to="/privacy-policy" target="_blank" className="text-sky-600 dark:text-sky-400 underline underline-offset-2 hover:text-sky-500">
+                                                            {lang === 'th' ? 'นโยบายความเป็นส่วนตัว' : 'Privacy Policy'}
+                                                        </Link>
+                                                        {' *'}
                                                     </span>
                                                 </label>
                                             </div>
+
+                                            {guardFields}
 
                                             {/* Submit Button */}
                                             <div className="pt-2">

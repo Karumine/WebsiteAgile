@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { RotateCcw, Send, CheckCircle2, PhoneCall } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
@@ -21,41 +21,30 @@ export function CalculatorPage() {
     const [downPaymentRate, setDownPaymentRate] = useState<number>(0);
     const [installmentPeriod, setInstallmentPeriod] = useState<number>(15);
     const [interestRate, setInterestRate] = useState<string>('8.90');
-    const [monthlyPayment, setMonthlyPayment] = useState<string>('');
-    const [totalInterest, setTotalInterest] = useState<number>(0);
-    const [loanPrincipal, setLoanPrincipal] = useState<number>(0);
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
 
-    // Calculate loan details
-    useEffect(() => {
+    // Loan figures are derived directly from the inputs
+    const { loanPrincipal, monthlyPayment, totalInterest } = useMemo(() => {
         const rawPrice = parseFloat(machinePrice.replace(/,/g, '')) || 0;
         const principal = rawPrice * (1 - downPaymentRate);
-        setLoanPrincipal(principal);
-
         const months = installmentPeriod;
         const years = months / 12;
         const rate = parseFloat(interestRate) || 0;
+        const format = (n: number) => n.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
         if (principal <= 0 || months <= 0 || rate <= 0) {
-            setMonthlyPayment('');
-            setTotalInterest(0);
-            return;
+            return { loanPrincipal: principal, monthlyPayment: '', totalInterest: 0 };
         }
 
         if (interestType === 'flat') {
-            const flatRateDecimal = rate / 100;
-            const interest = principal * flatRateDecimal * years;
-            const monthly = (principal + interest) / months;
-            setTotalInterest(interest);
-            setMonthlyPayment(monthly.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
-        } else {
-            const effectiveRateDecimal = rate / 100;
-            const monthlyRate = effectiveRateDecimal / 12;
-            const monthly = (monthlyRate * principal) / (1 - Math.pow(1 + monthlyRate, -months));
-            const interest = (monthly * months) - principal;
-            setTotalInterest(interest > 0 ? interest : 0);
-            setMonthlyPayment(monthly.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+            const interest = principal * (rate / 100) * years;
+            return { loanPrincipal: principal, monthlyPayment: format((principal + interest) / months), totalInterest: interest };
         }
+
+        const monthlyRate = rate / 100 / 12;
+        const monthly = (monthlyRate * principal) / (1 - Math.pow(1 + monthlyRate, -months));
+        const interest = monthly * months - principal;
+        return { loanPrincipal: principal, monthlyPayment: format(monthly), totalInterest: interest > 0 ? interest : 0 };
     }, [machinePrice, interestType, downPaymentRate, installmentPeriod, interestRate]);
 
     const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -74,7 +63,6 @@ export function CalculatorPage() {
         setDownPaymentRate(0);
         setInstallmentPeriod(15);
         setInterestRate('8.90');
-        setMonthlyPayment('');
         setIsSubmitted(false);
     };
 

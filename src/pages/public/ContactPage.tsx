@@ -12,6 +12,8 @@ import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { cn } from '@/lib/utils';
+import { useLeadSubmit } from '@/lib/useLeadSubmit';
+import { formService } from '@/services/formService';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
 interface FaqItem {
@@ -37,30 +39,38 @@ export function ContactPage() {
     const [message, setMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSubmitted, setIsSubmitted] = useState(false);
+    const { send, guardFields } = useLeadSubmit();
 
     const toggleAccordion = (index: number) => {
         setOpenIndex(openIndex === index ? null : index);
     };
 
-    const handleFormSubmit = (e: React.FormEvent) => {
+    const handleFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmitting(true);
+        const result = await send((meta) =>
+            formService.submitContact({
+                firstName: firstName.trim(),
+                lastName: lastName.trim(),
+                email: email.trim(),
+                subject: subject.trim(),
+                message: message.trim(),
+            }, meta)
+        );
+        setIsSubmitting(false);
+        if (!result) return;
 
-        setTimeout(() => {
-            setIsSubmitting(false);
-            setIsSubmitted(true);
-            toast.success(
-                lang === 'th'
-                    ? 'ส่งข้อความเรียบร้อยแล้ว เจ้าหน้าที่จะติดต่อกลับภายใน 24 ชั่วโมง'
-                    : 'Your message has been sent successfully. Our team will contact you within 24 hours.'
-            );
-            // Reset form
-            setFirstName('');
-            setLastName('');
-            setEmail('');
-            setSubject('');
-            setMessage('');
-        }, 1000);
+        setIsSubmitted(true);
+        toast.success(
+            lang === 'th'
+                ? 'ส่งข้อความเรียบร้อยแล้ว เจ้าหน้าที่จะติดต่อกลับภายใน 24 ชั่วโมง'
+                : 'Your message has been sent successfully. Our team will contact you within 24 hours.'
+        );
+        setFirstName('');
+        setLastName('');
+        setEmail('');
+        setSubject('');
+        setMessage('');
     };
 
     const faqs: FaqItem[] = [
@@ -360,10 +370,10 @@ export function ContactPage() {
                                 <ScrollReveal animation="fade-up">
                                     <div className="bg-blue-900 dark:bg-slate-900 text-white rounded-3xl p-6 sm:p-10 shadow-2xl border border-blue-800 dark:border-slate-800">
                                         <h2 className="text-2xl sm:text-3xl font-extrabold font-sans mb-2 tracking-tight">
-                                            ส่งข้อความถึงเรา
+                                            {lang === 'th' ? 'ส่งข้อความถึงเรา' : 'Send Us a Message'}
                                         </h2>
                                         <p className="text-xs sm:text-sm text-sky-200/90 font-light mb-8">
-                                            เจ้าหน้าที่ของบริษัทจะติดต่อกลับภายใน 24 ชั่วโมง หลังจากได้รับข้อความ
+                                            {lang === 'th' ? 'เจ้าหน้าที่ของบริษัทจะติดต่อกลับภายใน 24 ชั่วโมง หลังจากได้รับข้อความ' : 'Our team will get back to you within 24 hours of receiving your message.'}
                                         </p>
 
                                         {isSubmitted ? (
@@ -372,16 +382,16 @@ export function ContactPage() {
                                                     <CheckCircle2 className="w-7 h-7" />
                                                 </div>
                                                 <h3 className="text-base font-bold text-white">
-                                                    ส่งข้อความสำเร็จ!
+                                                    {lang === 'th' ? 'ส่งข้อความสำเร็จ!' : 'Message sent!'}
                                                 </h3>
                                                 <p className="text-xs text-sky-200">
-                                                    ขอบคุณที่สนใจบริการของเรา เจ้าหน้าที่จะติดต่อกลับไปยังอีเมลหรือเบอร์โทรศัพท์ของท่านโดยเร็วที่สุด
+                                                    {lang === 'th' ? 'ขอบคุณที่สนใจบริการของเรา เจ้าหน้าที่จะติดต่อกลับไปยังอีเมลหรือเบอร์โทรศัพท์ของท่านโดยเร็วที่สุด' : 'Thank you for your interest. Our team will contact you by email or phone shortly.'}
                                                 </p>
                                                 <button
                                                     onClick={() => setIsSubmitted(false)}
                                                     className="mt-3 px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold transition-all"
                                                 >
-                                                    ส่งข้อความใหม่
+                                                    {lang === 'th' ? 'ส่งข้อความใหม่' : 'Send another message'}
                                                 </button>
                                             </div>
                                         ) : (
@@ -390,14 +400,21 @@ export function ContactPage() {
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                     <input
                                                         type="text"
-                                                        placeholder="First Name"
+                                                        placeholder={lang === 'th' ? 'ชื่อ *' : 'First Name'}
+                                                        aria-label={lang === 'th' ? 'ชื่อ *' : 'First Name'}
+                                                        required
+                                                        maxLength={100}
+                                                        autoComplete="given-name"
                                                         value={firstName}
                                                         onChange={(e) => setFirstName(e.target.value)}
                                                         className="w-full px-4 py-3 rounded-xl bg-white text-slate-900 text-xs sm:text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-sm"
                                                     />
                                                     <input
                                                         type="text"
-                                                        placeholder="Last Name"
+                                                        placeholder={lang === 'th' ? 'นามสกุล' : 'Last Name'}
+                                                        aria-label={lang === 'th' ? 'นามสกุล' : 'Last Name'}
+                                                        maxLength={100}
+                                                        autoComplete="family-name"
                                                         value={lastName}
                                                         onChange={(e) => setLastName(e.target.value)}
                                                         className="w-full px-4 py-3 rounded-xl bg-white text-slate-900 text-xs sm:text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-sm"
@@ -408,7 +425,10 @@ export function ContactPage() {
                                                 <div>
                                                     <input
                                                         type="email"
-                                                        placeholder="Email Address"
+                                                        placeholder={lang === 'th' ? 'อีเมล *' : 'Email Address'}
+                                                        aria-label={lang === 'th' ? 'อีเมล *' : 'Email Address'}
+                                                        maxLength={200}
+                                                        autoComplete="email"
                                                         required
                                                         value={email}
                                                         onChange={(e) => setEmail(e.target.value)}
@@ -420,7 +440,9 @@ export function ContactPage() {
                                                 <div>
                                                     <input
                                                         type="text"
-                                                        placeholder="Subject"
+                                                        placeholder={lang === 'th' ? 'หัวข้อ' : 'Subject'}
+                                                        aria-label={lang === 'th' ? 'หัวข้อ' : 'Subject'}
+                                                        maxLength={300}
                                                         value={subject}
                                                         onChange={(e) => setSubject(e.target.value)}
                                                         className="w-full px-4 py-3 rounded-xl bg-white text-slate-900 text-xs sm:text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-sm"
@@ -431,13 +453,17 @@ export function ContactPage() {
                                                 <div>
                                                     <textarea
                                                         rows={4}
-                                                        placeholder="Your Message"
+                                                        placeholder={lang === 'th' ? 'ข้อความของคุณ *' : 'Your Message'}
+                                                        aria-label={lang === 'th' ? 'ข้อความของคุณ *' : 'Your Message'}
+                                                        maxLength={5000}
                                                         required
                                                         value={message}
                                                         onChange={(e) => setMessage(e.target.value)}
                                                         className="w-full px-4 py-3 rounded-xl bg-white text-slate-900 text-xs sm:text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-400 shadow-sm resize-none"
                                                     />
                                                 </div>
+
+                                                {guardFields}
 
                                                 {/* Submit Button */}
                                                 <div className="pt-2">
@@ -451,7 +477,7 @@ export function ContactPage() {
                                                         ) : (
                                                             <Send className="w-4 h-4" />
                                                         )}
-                                                        <span>Submit Form</span>
+                                                        <span>{lang === 'th' ? 'ส่งข้อความ' : 'Submit Form'}</span>
                                                     </button>
                                                 </div>
                                             </form>

@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { cn } from '@/lib/utils';
+import defaultHeroImg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
 export interface NavGroupConfig {
     id: string;
@@ -255,7 +256,7 @@ const getPageDef = (
         defaultHeroSubtitleEn: master?.heroSubtitleEn || '',
         defaultBadgeTh: master?.heroBadgeTh || group?.labelTh || '',
         defaultBadgeEn: master?.heroBadgeEn || group?.labelEn || '',
-        defaultImage: master?.heroImage || '/assets/Hero-Banner-Website-3-scaled.png',
+        defaultImage: master?.heroImage || defaultHeroImg,
         defaultCtaTextTh: master?.ctaTextTh || 'ขอสินเชื่อกับเรา',
         defaultCtaTextEn: master?.ctaTextEn || 'Financing with Us',
         defaultCtaLink: master?.ctaLink || '/leasing-application',
@@ -388,7 +389,7 @@ const SAMPLE_INDUSTRY_POOL: PageSectionItem[] = [
         subTitleEn: 'Turnkey Solar Rooftop & Battery Energy Storage',
         description: 'สินเชื่อ Solar Rooftop โรงงาน, Solar Farm และ Solar Floating พร้อมอินเวอร์เตอร์มาตรฐานสูงและระบบกักเก็บพลังงาน BESS',
         descEn: 'Turnkey commercial solar rooftop installations, high-efficiency inverters, and battery energy storage (BESS).',
-        image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=900&q=80',
+        image: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=900&q=80',
         link: '/solar-power-generation',
         badge: 'Solar Rooftop & Farm',
         icon: 'sun',
@@ -482,7 +483,7 @@ const SAMPLE_MACHINERY_POOL: PageSectionItem[] = [
         subTitleEn: 'Automated High-Speed PET Bottle Blowing Machine',
         description: 'สินเชื่อเช่าซื้อเครื่องเป่าขวดพลาสติกความเร็วสูงพร้อมชุดแม่พิมพ์ รองรับการผลิตขวดน้ำดื่มและน้ำผลไม้',
         descEn: 'High-speed automated stretch blow molding systems with precision servo drive and custom tooling.',
-        image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2021/11/Blowing-Machine-Agile-Assets-1024x683.jpg',
+        image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=1024&q=80',
         link: '/drinking-water-production',
         badge: 'เครื่องเป่าขวด',
         btnText: 'ดูรายละเอียด',
@@ -496,7 +497,7 @@ const SAMPLE_MACHINERY_POOL: PageSectionItem[] = [
         subTitleEn: 'High-Precision Servo-Hydraulic Injection Molding Machine',
         description: 'สินเชื่อเช่าซื้อเครื่องฉีดพลาสติกแรงหนีบสูง สำหรับฝาขวดน้ำ ชิ้นส่วนยานยนต์ และเครื่องใช้ไฟฟ้า',
         descEn: 'Precision servo-hydraulic and all-electric injection molding machines with rapid cycle times.',
-        image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2021/11/Injection-Machine-Agile-Assets-1024x683.jpg',
+        image: 'https://images.unsplash.com/photo-1567789884554-0b844b597180?w=1024&q=80',
         link: '/injection-molding-machine',
         badge: 'เครื่องฉีดพลาสติก',
         btnText: 'ดูรายละเอียด',
@@ -510,7 +511,7 @@ const SAMPLE_MACHINERY_POOL: PageSectionItem[] = [
         subTitleEn: 'High-Efficiency Screw & Magnetic Bearing Water Chiller',
         description: 'ระบบชิลเลอร์ทำความเย็นประสิทธิภาพสูง ควบคุมอุณหภูมิแม่นยำ ประหยัดค่าไฟในสายการผลิตต่อเนื่อง',
         descEn: 'High-efficiency magnetic bearing & screw chillers for industrial cooling and HVAC systems.',
-        image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2021/11/Chiller-Agile-Assets-1024x683.jpg',
+        image: 'https://images.unsplash.com/photo-1513828583688-c52646db42da?w=1024&q=80',
         link: '/chiller',
         badge: 'เครื่องทำความเย็น',
         btnText: 'ดูรายละเอียด',
@@ -524,7 +525,7 @@ const SAMPLE_MACHINERY_POOL: PageSectionItem[] = [
         subTitleEn: 'Heavy-Duty Prime & Standby Power Gen-Set',
         description: 'เครื่องกำเนิดไฟฟ้าดีเซลและก๊าซธรรมชาติสำหรับโรงงานอุตสาหกรรม ฟาร์มปศุสัตว์ และศูนย์ข้อมูล',
         descEn: 'Heavy-duty continuous and standby prime power diesel/gas gen-sets with soundproof acoustic enclosure.',
-        image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2021/11/Generator-Agile-Assets-1024x683.jpg',
+        image: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=1024&q=80',
         link: '/generator-set',
         badge: 'เครื่องกำเนิดไฟฟ้า',
         btnText: 'ดูรายละเอียด',
@@ -538,7 +539,7 @@ const SAMPLE_MACHINERY_POOL: PageSectionItem[] = [
         subTitleEn: 'Tier-1 High-Efficiency Industrial Solar Photovoltaic System',
         description: 'ระบบโซลาร์เซลล์ติดตั้งบนหลังคาโรงงาน ช่วยลดต้นทุนค่าไฟฟ้าพีคโหลดและเพิ่มแต้ม ESG คืนทุนไว',
         descEn: 'Complete turnkey commercial & industrial solar rooftop engineering, smart monitoring, and leasing.',
-        image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2021/11/Solar-Rooftop-Agile-Assets-1-1024x683.jpg',
+        image: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=1024&q=80',
         link: '/solar-power-generation',
         badge: 'โซลาร์เซลล์',
         btnText: 'ดูรายละเอียด',
@@ -580,7 +581,7 @@ const SAMPLE_MACHINERY_POOL: PageSectionItem[] = [
         subTitleEn: 'Heavy-Duty 12kW Fiber Laser Sheet Metal Cutter',
         description: 'เครื่องตัดเลเซอร์ความแม่นยำสูง ตัดเหล็ก สแตนเลส และอลูมิเนียมความหนาสูงได้อย่างรวดเร็วและเรียบเนียน',
         descEn: 'High-power CNC fiber laser cutting machine with dual shuttle exchange table and auto nesting.',
-        image: 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?w=900&q=80',
+        image: 'https://images.unsplash.com/photo-1513828583688-c52646db42da?w=900&q=80',
         link: '/leasing-application',
         badge: 'เลเซอร์ไฟเบอร์',
         btnText: 'ดูรายละเอียด',
@@ -792,15 +793,18 @@ export function PageContentEditor() {
             return;
         }
 
-        let rawPath = newPagePath.trim();
-        if (!rawPath) {
-            rawPath = '/' + newPageNameTh.trim().toLowerCase().replace(/[^a-zA-Z0-9\s-]/g, '').trim().replace(/\s+/g, '-');
-        }
-        if (!rawPath.startsWith('/')) {
-            rawPath = '/' + rawPath;
-        }
-
         const generatedId = `page-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
+        const toSlug = (value: string) => value.trim().toLowerCase().replace(/[^a-z0-9\s/-]/g, '').trim().replace(/\s+/g, '-').replace(/-+/g, '-');
+
+        // Thai-only names produce an empty slug; fall back to the English name, then the page id.
+        let rawPath = toSlug(newPagePath) || toSlug(newPageNameEn) || generatedId;
+        rawPath = '/' + rawPath.replace(/^\/+|\/+$/g, '');
+
+        const takenByCustomPage = (settings.customPages || []).some((p) => p.path === rawPath);
+        if (rawPath === '/' || rawPath.startsWith('/management-portal') || takenByCustomPage) {
+            toast.error(lang === 'th' ? `URL ${rawPath} ถูกใช้งานแล้ว กรุณาตั้ง URL ใหม่` : `URL ${rawPath} is already in use. Please choose another.`);
+            return;
+        }
         const groupDef = NAV_GROUPS.find((g) => g.id === newPageGroupId) || NAV_GROUPS[0];
 
         const newCustomItem: CustomPageItem = {
@@ -823,7 +827,7 @@ export function PageContentEditor() {
             heroTitleEn: newPageNameEn.trim() || newPageNameTh.trim(),
             heroSubtitleTh: `รายละเอียดและข้อมูลบริการ ${newPageNameTh.trim()}`,
             heroSubtitleEn: `Information and services for ${newPageNameEn.trim() || newPageNameTh.trim()}`,
-            heroImage: '/assets/Hero-Banner-Website-3-scaled.png',
+            heroImage: '',
             ctaTextTh: 'ขอสินเชื่อกับเรา',
             ctaTextEn: 'Financing with Us',
             ctaLink: '/leasing-application',

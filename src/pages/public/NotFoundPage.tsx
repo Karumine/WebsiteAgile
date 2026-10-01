@@ -51,6 +51,7 @@ export function NotFoundPage() {
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-sky-500 selection:text-white">
             <Helmet>
+                <meta name="robots" content="noindex, follow" />
                 <title>{isTh ? '404 ไม่พบหน้านี้ (Page Not Found) | Agile Assets' : '404 Page Not Found | Agile Assets'}</title>
                 <meta
                     name="description"

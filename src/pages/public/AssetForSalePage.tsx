@@ -10,6 +10,8 @@ import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { cn } from '@/lib/utils';
+import { useLeadSubmit } from '@/lib/useLeadSubmit';
+import { formService } from '@/services/formService';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
 export function AssetForSalePage() {
@@ -47,25 +49,34 @@ export function AssetForSalePage() {
     const [commentText, setCommentText] = useState('');
     const [authorName, setAuthorName] = useState('');
     const [authorEmail, setAuthorEmail] = useState('');
-    const [authorWebsite, setAuthorWebsite] = useState('');
+    const [authorPhone, setAuthorPhone] = useState('');
     const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+    const { send, guardFields } = useLeadSubmit();
 
-    const handleCommentSubmit = (e: React.FormEvent) => {
+    const handleCommentSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsSubmittingComment(true);
+        const result = await send((meta) =>
+            formService.submitInquiry({
+                source: 'asset-for-sale',
+                name: authorName.trim(),
+                email: authorEmail.trim(),
+                phone: authorPhone.trim(),
+                message: commentText.trim(),
+            }, meta)
+        );
+        setIsSubmittingComment(false);
+        if (!result) return;
 
-        setTimeout(() => {
-            setIsSubmittingComment(false);
-            toast.success(
-                lang === 'th'
-                    ? 'ส่งความคิดเห็นเรียบร้อยแล้ว ความคิดเห็นของคุณจะปรากฏหลังผ่านการอนุมัติ'
-                    : 'Your comment has been submitted and is pending moderation.'
-            );
-            setCommentText('');
-            setAuthorName('');
-            setAuthorEmail('');
-            setAuthorWebsite('');
-        }, 800);
+        toast.success(
+            lang === 'th'
+                ? 'ส่งคำถามเรียบร้อยแล้ว เจ้าหน้าที่จะติดต่อกลับโดยเร็วที่สุด'
+                : 'Your inquiry has been sent. Our team will contact you shortly.'
+        );
+        setCommentText('');
+        setAuthorName('');
+        setAuthorEmail('');
+        setAuthorPhone('');
     };
 
     const specs = [
@@ -411,27 +422,28 @@ export function AssetForSalePage() {
                             </ScrollReveal>
                         )}
 
-                        {/* ─── 5. Comment Section (ใส่ความเห็น) ─── */}
+                        {/* ─── 5. Asset Inquiry ─── */}
                         <ScrollReveal animation="fade-up">
                             <div className="border-t border-slate-200 dark:border-slate-800 pt-10">
                                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-sans mb-1">
-                                    {lang === 'th' ? 'ใส่ความเห็น' : 'Leave a Reply'}
+                                    {lang === 'th' ? 'สอบถามข้อมูลเครื่องจักร' : 'Ask About This Machinery'}
                                 </h3>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
                                     {lang === 'th'
-                                        ? 'อีเมลของคุณจะไม่แสดงให้คนอื่นเห็น ช่องข้อมูลที่จำเป็นถูกทำเครื่องหมาย *'
-                                        : 'Your email address will not be published. Required fields are marked *'}
+                                        ? 'สนใจเครื่องจักร ต้องการนัดดูเครื่อง หรือสอบถามราคา ฝากข้อความไว้ เจ้าหน้าที่จะติดต่อกลับ ช่องที่จำเป็นมีเครื่องหมาย *'
+                                        : 'Interested, want to schedule a viewing, or need a price? Leave a message and our team will reach out. Required fields are marked *'}
                                 </p>
 
                                 <form onSubmit={handleCommentSubmit} className="space-y-4 max-w-4xl">
                                     {/* Textarea */}
                                     <div>
-                                        <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                                            {lang === 'th' ? 'ความเห็น *' : 'Comment *'}
+                                        <label htmlFor="asset-for-sale-field-1" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                                            {lang === 'th' ? 'ข้อความ / เครื่องจักรที่สนใจ *' : 'Message / Machinery of interest *'}
                                         </label>
-                                        <textarea
+                                        <textarea id="asset-for-sale-field-1"
                                             rows={6}
                                             required
+                                            maxLength={5000}
                                             value={commentText}
                                             onChange={(e) => setCommentText(e.target.value)}
                                             className="w-full px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm resize-none"
@@ -441,13 +453,15 @@ export function AssetForSalePage() {
                                     {/* 3 Inputs Grid */}
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                         <div>
-                                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                                            <label htmlFor="asset-for-sale-field-2" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                                                 {lang === 'th' ? 'ชื่อ *' : 'Name *'}
                                             </label>
-                                            <input
+                                            <input id="asset-for-sale-field-2"
                                                 type="text"
                                                 required
-                                                placeholder="Name"
+                                                placeholder={lang === 'th' ? 'ชื่อ-นามสกุล' : 'Name'}
+                                                maxLength={200}
+                                                autoComplete="name"
                                                 value={authorName}
                                                 onChange={(e) => setAuthorName(e.target.value)}
                                                 className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
@@ -455,13 +469,15 @@ export function AssetForSalePage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                                            <label htmlFor="asset-for-sale-field-3" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
                                                 {lang === 'th' ? 'อีเมล *' : 'Email *'}
                                             </label>
-                                            <input
+                                            <input id="asset-for-sale-field-3"
                                                 type="email"
                                                 required
-                                                placeholder="Email"
+                                                placeholder="name@company.com"
+                                                maxLength={200}
+                                                autoComplete="email"
                                                 value={authorEmail}
                                                 onChange={(e) => setAuthorEmail(e.target.value)}
                                                 className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
@@ -469,18 +485,22 @@ export function AssetForSalePage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                                                {lang === 'th' ? 'เว็บไซต์' : 'Website'}
+                                            <label htmlFor="asset-for-sale-field-4" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                                                {lang === 'th' ? 'เบอร์โทรศัพท์' : 'Phone'}
                                             </label>
-                                            <input
-                                                type="url"
-                                                placeholder="Website"
-                                                value={authorWebsite}
-                                                onChange={(e) => setAuthorWebsite(e.target.value)}
+                                            <input id="asset-for-sale-field-4"
+                                                type="tel"
+                                                placeholder="08X-XXX-XXXX"
+                                                maxLength={20}
+                                                autoComplete="tel"
+                                                value={authorPhone}
+                                                onChange={(e) => setAuthorPhone(e.target.value)}
                                                 className="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
                                             />
                                         </div>
                                     </div>
+
+                                    {guardFields}
 
                                     {/* Submit Button */}
                                     <div className="pt-2">
@@ -494,7 +514,7 @@ export function AssetForSalePage() {
                                             ) : (
                                                 <Send className="w-3.5 h-3.5" />
                                             )}
-                                            <span>{lang === 'th' ? 'ส่งความคิดเห็น' : 'Post Comment'}</span>
+                                            <span>{lang === 'th' ? 'ส่งคำถาม' : 'Send Inquiry'}</span>
                                         </button>
                                     </div>
                                 </form>

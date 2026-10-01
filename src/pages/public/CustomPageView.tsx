@@ -8,6 +8,8 @@ import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
+import { NotFoundPage } from '@/pages/public/NotFoundPage';
+import { sanitizeHtml, safeHref, isExternalUrl } from '@/lib/sanitize';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
 /**
@@ -26,32 +28,8 @@ export function CustomPageView() {
         (p) => p.path === location.pathname
     );
 
-    // If no custom page matched → show a styled 404 message inline
     if (!customPage) {
-        return (
-            <div className="min-h-screen bg-background text-foreground flex flex-col items-center justify-center gap-6 px-4">
-                <Navbar />
-                <div className="flex-1 flex flex-col items-center justify-center text-center">
-                    <p className="text-8xl font-black text-sky-500/30 mb-4">404</p>
-                    <h1 className="text-2xl font-bold text-foreground mb-2">
-                        {isEn ? 'Page Not Found' : 'ไม่พบหน้าที่ต้องการ'}
-                    </h1>
-                    <p className="text-muted-foreground text-sm mb-6">
-                        {isEn
-                            ? 'The page you are looking for does not exist or has been removed.'
-                            : 'หน้าที่คุณต้องการไม่มีอยู่ในระบบ หรืออาจถูกลบไปแล้ว'}
-                    </p>
-                    <button
-                        onClick={() => navigate('/')}
-                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm bg-gradient-to-r from-sky-500 to-blue-600 text-white hover:from-sky-400 hover:to-blue-500 transition-all duration-300 shadow-lg shadow-sky-500/20"
-                    >
-                        <ArrowRight className="w-4 h-4" />
-                        {isEn ? 'Back to Home' : 'กลับหน้าหลัก'}
-                    </button>
-                </div>
-                <Footer />
-            </div>
-        );
+        return <NotFoundPage />;
     }
 
     const pc = settings.pageContents?.[customPage.id];
@@ -60,11 +38,15 @@ export function CustomPageView() {
     const heroTitle   = isEn ? (pc?.heroTitleEn   || pc?.heroTitleTh   || customPage.nameEn)  : (pc?.heroTitleTh   || pc?.heroTitleEn   || customPage.nameTh);
     const heroSub     = isEn ? (pc?.heroSubtitleEn || pc?.heroSubtitleTh || '')               : (pc?.heroSubtitleTh || pc?.heroSubtitleEn || '');
     const ctaText     = isEn ? (pc?.ctaTextEn     || pc?.ctaTextTh     || 'Financing with Us') : (pc?.ctaTextTh || pc?.ctaTextEn || 'ขอสินเชื่อกับเรา');
-    const ctaLink     = pc?.ctaLink || '/leasing-application';
+    const ctaLink     = safeHref(pc?.ctaLink, '/leasing-application');
     const heroImage   = pc?.heroImage || heroBg;
     const metaTitle   = pc?.metaTitle || `${isEn ? customPage.nameEn : customPage.nameTh} | Agile Assets`;
     const metaDesc    = pc?.metaDescription || heroSub || '';
-    const bodyContent = (isEn ? (pc?.contentEn || pc?.contentTh) : (pc?.contentTh || pc?.contentEn)) || '';
+    const bodyContent = sanitizeHtml(isEn ? (pc?.contentEn || pc?.contentTh) : (pc?.contentTh || pc?.contentEn));
+    const goToCta = () => {
+        if (isExternalUrl(ctaLink)) window.open(ctaLink, '_blank', 'noopener,noreferrer');
+        else navigate(ctaLink);
+    };
     const items       = pc?.items || [];
 
     return (
@@ -122,7 +104,7 @@ export function CustomPageView() {
 
                         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
                             <button
-                                onClick={() => navigate(ctaLink)}
+                                onClick={goToCta}
                                 className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-xl font-bold text-sm
                                     bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500
                                     text-white shadow-xl shadow-sky-500/30 transition-all duration-300 hover:scale-105 hover:shadow-sky-500/50"
@@ -182,7 +164,8 @@ export function CustomPageView() {
                                                 {(item.link || b) && (
                                                     <div className="mt-4">
                                                         <a
-                                                            href={item.link || '#'}
+                                                            href={safeHref(item.link)}
+                                                            {...(isExternalUrl(safeHref(item.link)) ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                                                             className="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-400 hover:text-sky-300 transition-colors"
                                                         >
                                                             {b || (isEn ? 'Learn More' : 'อ่านเพิ่มเติม')}
@@ -212,7 +195,7 @@ export function CustomPageView() {
                                     : 'ทีมงานของเราพร้อมออกแบบแผนการเงินที่เหมาะสมกับธุรกิจของคุณ'}
                             </p>
                             <button
-                                onClick={() => navigate(ctaLink)}
+                                onClick={goToCta}
                                 className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm
                                     bg-gradient-to-r from-sky-500 to-blue-600 text-white
                                     hover:from-sky-400 hover:to-blue-500 transition-all duration-300 hover:scale-105

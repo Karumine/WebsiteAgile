@@ -1,118 +1,159 @@
-import { createContext, useContext, useState, type ReactNode } from 'react';
-import type { AuthState, User } from '@/types';
-import { authService } from '@/services/authService';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import type { AuthState, LoginOutcome, User } from '@/types';
+import { authService, getTokenExpiry } from '@/services/authService';
+import { AUTH_EXPIRED_EVENT, getAuthToken } from '@/services/apiClient';
 
 const AuthContext = createContext<AuthState | undefined>(undefined);
 
-const ADMIN_CREDENTIALS = {
-    username: 'marketing',
-    password: '123456789',
-};
-
 const STORAGE_KEY = 'agile_assets_auth';
-const SESSION_DURATION_MS = 24 * 60 * 60 * 1000; // 24 hours
+const LOCKOUT_KEY = 'agile_assets_login_lock';
+const SESSION_DURATION_MS = 8 * 60 * 60 * 1000;
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_MS = 60 * 1000;
+
+type SessionMode = 'server' | 'local';
 
 interface StoredAuth {
     user: User;
     expiresAt: number;
+    mode: SessionMode;
 }
 
-// ─── Synchronous loader (runs BEFORE first render) ───
-function loadUserFromStorage(): User | null {
+interface LockState {
+    failures: number;
+    lockedUntil: number;
+}
+
+function readLock(): LockState {
     try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (!stored) return null;
-
-        const parsed = JSON.parse(stored);
-
-        // New format { user, expiresAt }
-        if (parsed.expiresAt && parsed.user) {
-            if (Date.now() < parsed.expiresAt) {
-                return parsed.user;
-            }
-            localStorage.removeItem(STORAGE_KEY);
-            return null;
-        }
-
-        // Old format (just User object: { username, role })
-        if (parsed.username && parsed.role) {
-            const migratedUser: User = { username: parsed.username, role: parsed.role };
-            const authData: StoredAuth = {
-                user: migratedUser,
-                expiresAt: Date.now() + SESSION_DURATION_MS,
-            };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(authData));
-            return migratedUser;
-        }
-
-        localStorage.removeItem(STORAGE_KEY);
-        return null;
+        return JSON.parse(sessionStorage.getItem(LOCKOUT_KEY) || '') as LockState;
     } catch {
-        localStorage.removeItem(STORAGE_KEY);
+        return { failures: 0, lockedUntil: 0 };
+    }
+}
+
+function writeLock(lock: LockState) {
+    sessionStorage.setItem(LOCKOUT_KEY, JSON.stringify(lock));
+}
+
+/** Offline admin login for `npm run dev` only; the whole branch is removed from production builds. */
+function matchesDevCredentials(username: string, password: string): boolean {
+    if (!import.meta.env.DEV) return false;
+    const devUser = import.meta.env.VITE_DEV_ADMIN_USER as string | undefined;
+    const devPass = import.meta.env.VITE_DEV_ADMIN_PASS as string | undefined;
+    return Boolean(devUser && devPass && username === devUser && password === devPass);
+}
+
+function loadSession(): StoredAuth | null {
+    try {
+        const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') as Partial<StoredAuth> | null;
+        if (!parsed?.user || !parsed.expiresAt || Date.now() >= parsed.expiresAt) return null;
+
+        if (parsed.mode === 'server') {
+            const token = getAuthToken();
+            const tokenExpiry = token ? getTokenExpiry(token) : null;
+            if (!token || (tokenExpiry !== null && Date.now() >= tokenExpiry)) return null;
+            return parsed as StoredAuth;
+        }
+
+        return parsed.mode === 'local' && import.meta.env.DEV ? (parsed as StoredAuth) : null;
+    } catch {
         return null;
     }
 }
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-    // Initialize synchronously — auth is available on first render
-    const [user, setUser] = useState<User | null>(() => loadUserFromStorage());
-
-    const login = async (username: string, password: string): Promise<boolean> => {
-        try {
-            // 1. Attempt API login with Backend
-            const apiRes = await authService.login(username, password);
-            if (apiRes.success && apiRes.user) {
-                setUser(apiRes.user);
-                const authData: StoredAuth = {
-                    user: apiRes.user,
-                    expiresAt: Date.now() + SESSION_DURATION_MS,
-                };
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(authData));
-                return true;
-            }
-        } catch (err) {
-            console.warn('API login failed, checking fallback credentials:', err);
-        }
-
-        // 2. Fallback to local admin credentials (e.g. while backend DB is returning 500)
-        if (
-            username === ADMIN_CREDENTIALS.username &&
-            password === ADMIN_CREDENTIALS.password
-        ) {
-            const adminUser: User = { username, role: 'admin' };
-            setUser(adminUser);
-            const authData: StoredAuth = {
-                user: adminUser,
-                expiresAt: Date.now() + SESSION_DURATION_MS,
-            };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(authData));
-            return true;
-        }
-
-        return false;
-    };
-
-    const logout = () => {
-        authService.logout();
-        setUser(null);
-        localStorage.removeItem(STORAGE_KEY);
-    };
-
-    return (
-        <AuthContext.Provider
-            value={{
-                user,
-                isAuthenticated: !!user,
-                isLoading: false, // Always false since we load synchronously
-                login,
-                logout,
-            }}
-        >
-            {children}
-        </AuthContext.Provider>
-    );
+function persistSession(session: StoredAuth | null) {
+    if (session) localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    else localStorage.removeItem(STORAGE_KEY);
 }
 
+export function AuthProvider({ children }: { children: ReactNode }) {
+    const [session, setSession] = useState<StoredAuth | null>(() => {
+        const loaded = loadSession();
+        if (!loaded) {
+            localStorage.removeItem(STORAGE_KEY);
+        }
+        return loaded;
+    });
+
+    const logout = useCallback(() => {
+        authService.logout();
+        persistSession(null);
+        setSession(null);
+    }, []);
+
+    useEffect(() => {
+        const onExpired = () => {
+            persistSession(null);
+            setSession(null);
+        };
+        window.addEventListener(AUTH_EXPIRED_EVENT, onExpired);
+        return () => window.removeEventListener(AUTH_EXPIRED_EVENT, onExpired);
+    }, []);
+
+    useEffect(() => {
+        if (!session) return;
+        const remaining = session.expiresAt - Date.now();
+        const timer = setTimeout(logout, Math.max(remaining, 0));
+        return () => clearTimeout(timer);
+    }, [session, logout]);
+
+    const login = useCallback(async (username: string, password: string): Promise<LoginOutcome> => {
+        const lock = readLock();
+        if (lock.lockedUntil > Date.now()) {
+            return { ok: false, reason: 'locked', retryAfterSec: Math.ceil((lock.lockedUntil - Date.now()) / 1000) };
+        }
+
+        const start = (user: User, mode: SessionMode, expiresAt: number) => {
+            const next: StoredAuth = { user, mode, expiresAt };
+            persistSession(next);
+            setSession(next);
+            sessionStorage.removeItem(LOCKOUT_KEY);
+            return { ok: true } as const;
+        };
+
+        const res = await authService.login(username, password);
+        if (res.success && res.user) {
+            const token = getAuthToken();
+            const tokenExpiry = token ? getTokenExpiry(token) : null;
+            return start(res.user, 'server', tokenExpiry ?? Date.now() + SESSION_DURATION_MS);
+        }
+
+        if (res.status === 429) {
+            return { ok: false, reason: 'locked', retryAfterSec: 60 };
+        }
+
+        const backendDown = res.status === 0 || res.status >= 500 || res.status === 404 || res.status === 408;
+        if (backendDown && matchesDevCredentials(username, password)) {
+            return start({ username, role: 'admin' }, 'local', Date.now() + SESSION_DURATION_MS);
+        }
+
+        if (backendDown) {
+            return { ok: false, reason: 'unavailable' };
+        }
+
+        const failures = lock.failures + 1;
+        if (failures >= MAX_FAILED_ATTEMPTS) {
+            writeLock({ failures: 0, lockedUntil: Date.now() + LOCKOUT_MS });
+            return { ok: false, reason: 'locked', retryAfterSec: LOCKOUT_MS / 1000 };
+        }
+        writeLock({ failures, lockedUntil: 0 });
+        return { ok: false, reason: 'invalid' };
+    }, []);
+
+    const value = useMemo<AuthState>(() => ({
+        user: session?.user ?? null,
+        isAuthenticated: !!session,
+        isServerSession: session?.mode === 'server',
+        isLoading: false,
+        login,
+        logout,
+    }), [session, login, logout]);
+
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth(): AuthState {
     const context = useContext(AuthContext);
     if (!context) {

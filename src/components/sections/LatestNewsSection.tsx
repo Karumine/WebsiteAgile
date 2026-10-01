@@ -4,6 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { formatDate } from '@/lib/utils';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 export interface NewsItem {
     id: string;
@@ -289,7 +290,7 @@ export function LatestNewsSection() {
                             <div
                                 className="text-slate-600 dark:text-slate-300 text-sm sm:text-base leading-relaxed space-y-3"
                                 dangerouslySetInnerHTML={{
-                                    __html: lang === 'en' ? selectedArticle.contentEn : selectedArticle.contentTh,
+                                    __html: sanitizeHtml(lang === 'en' ? selectedArticle.contentEn : selectedArticle.contentTh),
                                 }}
                             />
                         </div>

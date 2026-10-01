@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Send, CheckCircle2 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import { useLeadSubmit } from '@/lib/useLeadSubmit';
+import { formService } from '@/services/formService';
 
 export function ContactSection() {
     const { lang } = useLanguage();
@@ -15,15 +17,23 @@ export function ContactSection() {
     });
     const [submitted, setSubmitted] = useState(false);
     const [isVerifying, setIsVerifying] = useState(false);
+    const { send, guardFields } = useLeadSubmit();
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsVerifying(true);
-
-        // Simulation delay
-        await new Promise((resolve) => setTimeout(resolve, 1200));
-
+        const result = await send((meta) =>
+            formService.submitInquiry({
+                source: 'home-contact',
+                name: formData.name,
+                phone: formData.phone,
+                email: formData.email,
+                company: formData.company,
+                message: formData.message,
+            }, meta)
+        );
         setIsVerifying(false);
+        if (!result) return;
         setSubmitted(true);
         setFormData({
             name: '',
@@ -69,7 +79,7 @@ export function ContactSection() {
                         {submitted && (
                             <div className="mb-6 p-4 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-sm flex items-center justify-center gap-3 animate-fade-in">
                                 <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-                                <span>{lang === 'th' ? 'ส่งข้อความเรียบรธ์แล้ว เจ้าหน้าที่จะติดต่อกลับโดยเร็วที่สุด' : 'Thank you! Your message has been sent successfully.'}</span>
+                                <span>{lang === 'th' ? 'ส่งข้อความเรียบร้อยแล้ว เจ้าหน้าที่จะติดต่อกลับโดยเร็วที่สุด' : 'Thank you! Your message has been sent successfully.'}</span>
                             </div>
                         )}
 
@@ -83,6 +93,7 @@ export function ContactSection() {
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         className="w-full px-4 py-3.5 rounded-xl bg-white/90 dark:bg-slate-950/80 border border-white/30 text-slate-900 dark:text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all"
+                                        aria-label={lang === 'th' ? 'ชื่อ - นามสกุล *' : 'Full Name *'}
                                         placeholder={lang === 'th' ? 'ชื่อ - นามสกุล *' : 'Full Name *'}
                                         disabled={isVerifying}
                                     />
@@ -95,6 +106,7 @@ export function ContactSection() {
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                         className="w-full px-4 py-3.5 rounded-xl bg-white/90 dark:bg-slate-950/80 border border-white/30 text-slate-900 dark:text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all"
+                                        aria-label={lang === 'th' ? 'อีเมล *' : 'Email Address *'}
                                         placeholder={lang === 'th' ? 'อีเมล *' : 'Email Address *'}
                                         disabled={isVerifying}
                                     />
@@ -110,6 +122,7 @@ export function ContactSection() {
                                         value={formData.phone}
                                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                         className="w-full px-4 py-3.5 rounded-xl bg-white/90 dark:bg-slate-950/80 border border-white/30 text-slate-900 dark:text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all"
+                                        aria-label={lang === 'th' ? 'เบอร์โทรศัพท์ *' : 'Phone Number *'}
                                         placeholder={lang === 'th' ? 'เบอร์โทรศัพท์ *' : 'Phone Number *'}
                                         disabled={isVerifying}
                                     />
@@ -121,6 +134,7 @@ export function ContactSection() {
                                         value={formData.company}
                                         onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                                         className="w-full px-4 py-3.5 rounded-xl bg-white/90 dark:bg-slate-950/80 border border-white/30 text-slate-900 dark:text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all"
+                                        aria-label={lang === 'th' ? 'ชื่อบริษัท / องค์กร' : 'Company Name'}
                                         placeholder={lang === 'th' ? 'ชื่อบริษัท / องค์กร' : 'Company Name'}
                                         disabled={isVerifying}
                                     />
@@ -135,10 +149,13 @@ export function ContactSection() {
                                     value={formData.message}
                                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                                     className="w-full px-4 py-3.5 rounded-xl bg-white/90 dark:bg-slate-950/80 border border-white/30 text-slate-900 dark:text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all resize-none"
+                                    aria-label={lang === 'th' ? 'ข้อความ หรือรายละเอียดโครงการที่ต้องการปรึกษา...' : 'Project details or consultation message...'}
                                     placeholder={lang === 'th' ? 'ข้อความ หรือรายละเอียดโครงการที่ต้องการปรึกษา...' : 'Project details or consultation message...'}
                                     disabled={isVerifying}
                                 />
                             </div>
+
+                            {guardFields}
 
                             {/* Submit Button */}
                             <div className="text-center pt-2">

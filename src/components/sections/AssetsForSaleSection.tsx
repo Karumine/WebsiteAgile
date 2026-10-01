@@ -18,7 +18,7 @@ export function AssetsForSaleSection() {
             year: '2023',
             condition: lang === 'th' ? 'สภาพ 95% ผ่านการตรวจรับรอง' : 'Certified 95% Condition',
             price: lang === 'th' ? '฿4,850,000 (หรือผ่อนเริ่มต้น ฿75,000/ด.)' : '฿4,850,000 (or Lease ฿75k/mo)',
-            image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&q=80',
+            image: 'https://images.unsplash.com/photo-1567789884554-0b844b597180?w=800&q=80',
             features: [
                 lang === 'th' ? 'ชั่วโมงการทำงานต่ำกว่า 1,200 ชม.' : 'Under 1,200 operating hours',
                 lang === 'th' ? 'ระบบควบคุม SmoothX CNC พร้อมใช้งาน' : 'Mazatrol SmoothX CNC unit installed',
@@ -63,7 +63,7 @@ export function AssetsForSaleSection() {
             year: '2024',
             condition: lang === 'th' ? 'ของใหม่ยังไม่แกะซีล รับประกัน 10 ปี' : 'Brand New Unopened (10-Yr Warranty)',
             price: lang === 'th' ? '฿2,650,000 (หรือผ่อนเริ่มต้น ฿39,000/ด.)' : '฿2,650,000 (or Lease ฿39k/mo)',
-            image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=800&q=80',
+            image: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=800&q=80',
             features: [
                 lang === 'th' ? 'ระบบเซลล์แบตเตอรี่ LiFePO4 ปลอดภัยสูง' : 'Tier-1 LiFePO4 battery chemistry',
                 lang === 'th' ? 'รองรับ Peak-Shaving ลดค่าไฟฟ้าองค์กร' : 'Peak-shaving smart energy management',

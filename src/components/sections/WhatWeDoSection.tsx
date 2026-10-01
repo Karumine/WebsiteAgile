@@ -39,7 +39,7 @@ export function WhatWeDoSection() {
                     <ScrollReveal animation="fade-right" className="lg:col-span-6">
                         <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-white/10 group">
                             <img
-                                src="https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2021/11/about-aa-1-1024x683.jpg"
+                                src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1024&q=80"
                                 alt="Agile Assets Financing Support"
                                 className="w-full h-[360px] sm:h-[460px] object-cover object-center group-hover:scale-105 transition-transform duration-700"
                                 loading="lazy"

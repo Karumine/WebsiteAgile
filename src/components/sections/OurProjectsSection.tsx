@@ -45,12 +45,12 @@ export function OurProjectsSection() {
         },
         {
             src: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2024/10/237159_0-1-1024x768.jpg',
-            fallback: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&q=80',
+            fallback: 'https://images.unsplash.com/photo-1567789884554-0b844b597180?w=800&q=80',
             alt: 'Engineering site visit and installation team review',
         },
         {
             src: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2022/03/361722-1024x478.jpg',
-            fallback: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=800&q=80',
+            fallback: 'https://images.unsplash.com/photo-1523362628745-0c100150b504?w=800&q=80',
             alt: 'Client office gift giving and financing support meeting',
         },
         {

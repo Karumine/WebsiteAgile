@@ -134,7 +134,7 @@ export function KnowledgePage() {
             date: '22 มีนาคม 2026',
             readTimeTh: '5 นาที',
             readTimeEn: '5 min read',
-            image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=800&q=80',
+            image: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=800&q=80',
             excerptTh: 'การปรับเปลี่ยนเครื่องจักรสู่เทคโนโลยีสีเขียวและพลังงานสะอาด เพื่อลดต้นทุนค่าไฟฟ้าและสร้างความยั่งยืนตามมาตรฐาน ESG',
             excerptEn: 'How upgrading to green machinery and solar power generation lowers utility bills and fulfills ESG compliance standards.',
             contentTh: [

@@ -10,6 +10,8 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLeadSubmit } from '@/lib/useLeadSubmit';
+import { formService } from '@/services/formService';
 import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 
@@ -17,6 +19,7 @@ export function GeneratorSetPage() {
     const { lang } = useLanguage();
     const { content } = usePageContent('generator-set', DEFAULT_PAGE_CONTENTS['generator-set']);
     const [submitting, setSubmitting] = useState(false);
+    const { send, guardFields } = useLeadSubmit();
     const [submitted, setSubmitted] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -51,7 +54,7 @@ export function GeneratorSetPage() {
             titleEn: 'Construction Sites & Infrastructure',
             descTh: 'ใช้เป็นแหล่งจ่ายไฟฟ้าในพื้นที่ที่ยังไม่มีไฟฟ้า เพื่อรองรับการทำงานของเครื่องจักรและอุปกรณ์หน้างาน',
             descEn: 'Supplies heavy prime electrical power across off-grid infrastructure developments, tower cranes, and heavy field construction machinery.',
-            image: 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?w=600&q=80',
+            image: 'https://images.unsplash.com/photo-1513828583688-c52646db42da?w=600&q=80',
             badge: 'Prime Power จ่ายไฟหน้างานก่อสร้าง',
         },
         {
@@ -65,7 +68,7 @@ export function GeneratorSetPage() {
         },
     ];
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.name || !formData.phone) {
             toast.error(lang === 'th' ? 'กรุณากรอกชื่อและเบอร์โทรศัพท์' : 'Please provide your name and phone number');
@@ -73,15 +76,24 @@ export function GeneratorSetPage() {
         }
 
         setSubmitting(true);
-        setTimeout(() => {
-            setSubmitting(false);
-            setSubmitted(true);
-            toast.success(
-                lang === 'th' 
-                    ? 'ส่งข้อมูลสำเร็จ! เจ้าหน้าที่ฝ่ายสินเชื่อเครื่องกำเนิดไฟฟ้าจะติดต่อกลับภายใน 24 ชั่วโมง' 
-                    : 'Inquiry submitted successfully! Our generator set financing specialist will contact you within 24 hours.'
-            );
-        }, 800);
+        const result = await send((meta) =>
+            formService.submitInquiry({
+                source: 'generator-set',
+                name: formData.name,
+                phone: formData.phone,
+                email: formData.email,
+                company: formData.company,
+                message: formData.note,
+            }, meta)
+        );
+        setSubmitting(false);
+        if (!result) return;
+        setSubmitted(true);
+        toast.success(
+            lang === 'th' 
+                ? 'ส่งข้อมูลสำเร็จ! เจ้าหน้าที่ฝ่ายสินเชื่อเครื่องกำเนิดไฟฟ้าจะติดต่อกลับภายใน 24 ชั่วโมง' 
+                : 'Inquiry submitted successfully! Our generator set financing specialist will contact you within 24 hours.'
+        );
     };
 
     const scrollToForm = () => {
@@ -321,10 +333,10 @@ export function GeneratorSetPage() {
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="generator-set-field-1" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'ชื่อ-นามสกุล ผู้ติดต่อ *' : 'Full Name *'}
                                                 </label>
-                                                <input
+                                                <input id="generator-set-field-1"
                                                     type="text"
                                                     required
                                                     value={formData.name}
@@ -335,10 +347,10 @@ export function GeneratorSetPage() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="generator-set-field-2" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'เบอร์โทรศัพท์ติดต่อ *' : 'Phone Number *'}
                                                 </label>
-                                                <input
+                                                <input id="generator-set-field-2"
                                                     type="tel"
                                                     required
                                                     value={formData.phone}
@@ -351,10 +363,10 @@ export function GeneratorSetPage() {
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="generator-set-field-3" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'อีเมล' : 'Email Address'}
                                                 </label>
-                                                <input
+                                                <input id="generator-set-field-3"
                                                     type="email"
                                                     value={formData.email}
                                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -364,10 +376,10 @@ export function GeneratorSetPage() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="generator-set-field-4" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'ชื่อโครงการ / บริษัท' : 'Company / Project Name'}
                                                 </label>
-                                                <input
+                                                <input id="generator-set-field-4"
                                                     type="text"
                                                     value={formData.company}
                                                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
@@ -378,10 +390,10 @@ export function GeneratorSetPage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                            <label htmlFor="generator-set-field-5" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                 {lang === 'th' ? 'ข้อความ / กำลังวัตต์เครื่องกำเนิดไฟฟ้าที่ต้องการขอสินเชื่อ' : 'Message / Desired Generator Power Output (kVA/kW) & Details'}
                                             </label>
-                                            <textarea
+                                            <textarea id="generator-set-field-5"
                                                 rows={4}
                                                 value={formData.note}
                                                 onChange={(e) => setFormData({ ...formData, note: e.target.value })}
@@ -390,6 +402,7 @@ export function GeneratorSetPage() {
                                             />
                                         </div>
 
+                                        {guardFields}
                                         <div className="pt-2 text-center">
                                             <button
                                                 type="submit"

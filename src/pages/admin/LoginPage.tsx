@@ -36,14 +36,26 @@ export function LoginPage() {
         }
 
         setIsLoading(true);
+        const outcome = await login(username.trim(), password);
+        setIsLoading(false);
 
-        const success = await login(username, password);
-        if (success) {
+        if (outcome.ok) {
             navigate(from, { replace: true });
+            return;
+        }
+
+        setPassword('');
+        if (outcome.reason === 'locked') {
+            setError(lang === 'th'
+                ? `พยายามเข้าสู่ระบบผิดหลายครั้ง กรุณารอ ${outcome.retryAfterSec ?? 60} วินาทีแล้วลองใหม่`
+                : `Too many failed attempts. Please wait ${outcome.retryAfterSec ?? 60} seconds and try again.`);
+        } else if (outcome.reason === 'unavailable') {
+            setError(lang === 'th'
+                ? 'ไม่สามารถเชื่อมต่อระบบหลังบ้านได้ในขณะนี้ กรุณาลองใหม่ภายหลัง'
+                : 'The server is unavailable right now. Please try again later.');
         } else {
             setError(lang === 'th' ? 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' : 'Invalid credentials. Please try again.');
         }
-        setIsLoading(false);
     };
 
     return (
@@ -85,7 +97,7 @@ export function LoginPage() {
                 {/* Form */}
                 <div className="glass rounded-2xl p-8">
                     {error && (
-                        <div className="flex items-center gap-2 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm mb-6">
+                        <div role="alert" className="flex items-center gap-2 p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm mb-6">
                             <AlertCircle className="w-4 h-4 flex-shrink-0" />
                             {error}
                         </div>
@@ -93,9 +105,11 @@ export function LoginPage() {
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div>
-                            <label className="block text-sm font-medium text-muted-foreground mb-1.5">Username</label>
+                            <label htmlFor="login-username" className="block text-sm font-medium text-muted-foreground mb-1.5">Username</label>
                             <input
+                                id="login-username"
                                 type="text"
+                                maxLength={100}
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
                                 className="w-full px-4 py-3 rounded-xl bg-navy-light border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
@@ -105,10 +119,12 @@ export function LoginPage() {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-muted-foreground mb-1.5">Password</label>
+                            <label htmlFor="login-password" className="block text-sm font-medium text-muted-foreground mb-1.5">Password</label>
                             <div className="relative">
                                 <input
+                                    id="login-password"
                                     type={showPassword ? 'text' : 'password'}
+                                    maxLength={200}
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
                                     className="w-full px-4 py-3 pr-12 rounded-xl bg-navy-light border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
@@ -118,6 +134,7 @@ export function LoginPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
+                                    aria-label={showPassword ? (lang === 'th' ? 'ซ่อนรหัสผ่าน' : 'Hide password') : (lang === 'th' ? 'แสดงรหัสผ่าน' : 'Show password')}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                                 >
                                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}

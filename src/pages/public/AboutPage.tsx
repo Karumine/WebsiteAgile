@@ -503,7 +503,7 @@ export function AboutPage() {
                                     {/* 1. CNC & Industrial */}
                                     <div className="rounded-2xl overflow-hidden relative group aspect-[4/5] sm:aspect-auto h-full border border-sky-500/20 shadow-md">
                                         <img
-                                            src="https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=800&q=80"
+                                            src="https://images.unsplash.com/photo-1567789884554-0b844b597180?w=800&q=80"
                                             alt="Industrial Machinery"
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                         />
@@ -522,7 +522,7 @@ export function AboutPage() {
                                     {/* 2. Solar & Clean Tech */}
                                     <div className="rounded-2xl overflow-hidden relative group aspect-[4/5] sm:aspect-auto h-full border border-sky-500/20 shadow-md">
                                         <img
-                                            src="https://images.unsplash.com/photo-1509391365360-2e959784a276?w=800&q=80"
+                                            src="https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=800&q=80"
                                             alt="Solar Clean Energy"
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                         />

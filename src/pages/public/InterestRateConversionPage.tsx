@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, ArrowRightLeft, Droplets, Wheat, Factory, Flame, Sun } from 'lucide-react';
@@ -22,39 +22,35 @@ export function InterestRateConversionPage() {
     const [conversionType, setConversionType] = useState<'flatToEff' | 'effToFlat'>('flatToEff');
     const [inputRate, setInputRate] = useState<string>('7');
     const [installmentMonths, setInstallmentMonths] = useState<number>(15);
-    const [convertedRate, setConvertedRate] = useState<string>('');
 
-    // Conversion calculation
-    const calculateRate = () => {
+    // Exact conversion via the equal-installment schedule (per 1 baht of principal)
+    const convertedRate = useMemo(() => {
         const rate = parseFloat(inputRate) || 0;
-        const months = installmentMonths;
-        const years = months / 12;
-
-        if (rate <= 0 || months <= 0) {
-            setConvertedRate('');
-            return;
-        }
+        const n = installmentMonths;
+        if (rate <= 0 || n <= 0) return '';
 
         if (conversionType === 'flatToEff') {
-            // Flat Rate -> Effective Rate
-            // Formula: (2 * years * flatRate) / (years + 1)
-            const eff = (2 * years * rate) / (years + 1);
-            setConvertedRate(eff.toFixed(2));
-        } else {
-            // Effective Rate -> Flat Rate
-            // Formula: (effectiveRate * (years + 1)) / (2 * years)
-            const flat = (rate * (years + 1)) / (2 * years);
-            setConvertedRate(flat.toFixed(2));
+            const payment = (1 + (rate / 100) * (n / 12)) / n;
+            // Solve 1 = payment * (1 - (1 + r)^-n) / r for the monthly rate r (bisection)
+            let lo = 0;
+            let hi = 1;
+            for (let i = 0; i < 100; i++) {
+                const r = (lo + hi) / 2;
+                const pv = (payment * (1 - Math.pow(1 + r, -n))) / r;
+                if (pv > 1) lo = r;
+                else hi = r;
+            }
+            return (((lo + hi) / 2) * 12 * 100).toFixed(2);
         }
-    };
 
-    useEffect(() => {
-        calculateRate();
+        const r = rate / 100 / 12;
+        const payment = r / (1 - Math.pow(1 + r, -n));
+        const totalInterest = payment * n - 1;
+        return ((totalInterest / (n / 12)) * 100).toFixed(2);
     }, [conversionType, inputRate, installmentMonths]);
 
     const handleFormSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        calculateRate();
     };
 
     // 5 Industries for bottom grid

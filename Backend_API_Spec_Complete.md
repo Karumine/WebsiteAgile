@@ -1,1022 +1,877 @@
-# Backend API Specification — Agile Assets Corporate Website
-> Generated from frontend source scan: services/, types/, pages/, admin editors — ครบถ้วนตาม Frontend ปัจจุบัน
-> Base URL: `https://api.tunjai.in.th/api/v1`
-> Stack hint: ASP.NET Core · SQL Server · JWT Bearer
+# Backend API Specification — Agile Assets Corporate Website (v3)
+
+> **เอกสารฉบับนี้คือ Single Source of Truth** สำหรับทีม Backend — แทนที่ `Backend_API_Spec_AgileAssets.md` และ `Backend_API_Spec_Addendum_V2.md` ทั้งหมด
+> ทุก endpoint ในเอกสารนี้ **ถูกเรียกจริงจากโค้ด Frontend ปัจจุบัน** (อ้างอิงไฟล์ใน `src/services/*`) ยกเว้นที่ระบุว่า *Phase 2*
+>
+> Base URL: `https://api.tunjai.in.th/api/v1` · Stack: ASP.NET Core 8 · SQL Server · JWT Bearer
+> อัปเดตล่าสุด: 2026-10-01
 
 ---
 
-## Response Envelope (มาตรฐานทุก Endpoint)
+## สารบัญ
 
+0. [สรุปการเปลี่ยนแปลงจาก spec เดิม](#0-สรุปการเปลี่ยนแปลงจาก-spec-เดิม)
+1. [หลักการทั่วไป (Conventions)](#1-หลักการทั่วไป-conventions)
+2. [ข้อกำหนดด้านความปลอดภัย (บังคับ)](#2-ข้อกำหนดด้านความปลอดภัย-บังคับ)
+3. [Authentication](#3-authentication)
+4. [Public Site Bootstrap — `GET /site/public`](#4-public-site-bootstrap)
+5. [CMS Admin API (การเผยแพร่เนื้อหา)](#5-cms-admin-api)
+6. [Image Upload](#6-image-upload)
+7. [Public Forms (ลีดลูกค้า)](#7-public-forms)
+8. [Admin: จัดการลีด / ใบสมัคร (Phase 2)](#8-admin-จัดการลีด--ใบสมัคร-phase-2)
+9. [Data Models (JSON)](#9-data-models-json)
+10. [Database Schema (SQL Server DDL)](#10-database-schema-sql-server-ddl)
+11. [PDPA & การจัดการข้อมูลส่วนบุคคล](#11-pdpa--การจัดการข้อมูลส่วนบุคคล)
+12. [Performance Requirements](#12-performance-requirements)
+13. [Configuration & Deployment](#13-configuration--deployment)
+14. [Endpoint Inventory (สรุป)](#14-endpoint-inventory)
+15. [Implementation Checklist & ลำดับงาน](#15-implementation-checklist--ลำดับงาน)
+
+---
+
+## 0. สรุปการเปลี่ยนแปลงจาก spec เดิม
+
+| # | เรื่อง | ของเดิม | ฉบับนี้ | เหตุผล |
+|---|---|---|---|---|
+| 1 | รหัสผ่านสำรองฝั่งหน้าบ้าน | `marketing/123456789` ฝังใน JS | **ลบออกจาก production แล้ว** | ใครเปิด DevTools ก็เห็น — Auth ต้องมาจาก Backend เท่านั้น |
+| 2 | การโหลดเนื้อหาหน้าเว็บ | ไม่มี (หน้าบ้านอ่านจาก localStorage ของเครื่องตัวเอง) | **`GET /site/public`** request เดียวได้ทุกอย่าง | เดิมสิ่งที่แอดมินแก้ ผู้เข้าชมจริงไม่เห็นเลย |
+| 3 | การบันทึกของแอดมิน | ยิง API ทุกครั้งที่พิมพ์ (บางส่วน) | แอดมินกดปุ่ม **"เผยแพร่"** → ส่งเฉพาะส่วนที่เปลี่ยน | ลดโหลด + กันเนื้อหาครึ่งๆ กลางๆ ขึ้นเว็บ |
+| 4 | News / Assets | POST + PUT แยก, server สร้าง id | **`PUT /{id}` แบบ upsert** (id มาจาก client) | หน้าบ้านสร้าง id เองอยู่แล้ว, idempotent, retry ได้ปลอดภัย |
+| 5 | Page Contents | ตาราง 40+ คอลัมน์ + ตาราง items | **เก็บเป็น JSON document 1 คอลัมน์** | schema หน้าเว็บเพิ่มฟิลด์บ่อย ไม่ต้อง migrate ทุกครั้ง |
+| 6 | Custom Pages (หน้าที่แอดมินสร้างเอง) | ไม่มี | **`PUT /settings/custom-pages`** | ฟีเจอร์ "เพิ่มหน้า" ใน CMS ต้องบันทึกได้ |
+| 7 | ฟอร์มลูกค้า | ทุกฟอร์มเป็น `setTimeout` จำลอง (ลีดหายหมด) | ต่อ API จริง 6 endpoint + `meta` กันบอท | ลีดลูกค้าต้องถึงฝ่ายขาย |
+| 8 | กันบอท | Rate limit อย่างเดียว | Rate limit + **Cloudflare Turnstile** + time-trap + honeypot | มาตรฐานฟอร์มสาธารณะ |
+| 9 | Upload | `POST /upload/image` | **`POST /uploads/images`** + re-encode WebP | ตรงกับโค้ดหน้าบ้าน + ตัดไฟล์อันตราย |
+| 10 | Refresh token | มี | **ไม่ใช้ในเฟสนี้** (access token 8 ชม.) | หน้าบ้านไม่มี flow refresh; ลดงานที่ไม่ได้ใช้ |
+| 11 | pageId | ตารางเดิมไม่ตรงโค้ด (เช่น `solar-power-generation`) | แก้ให้ตรงโค้ดจริง (ดู §9.10) | ป้องกันบันทึกแล้วหน้าไม่เปลี่ยน |
+| 12 | Cache ของ API สาธารณะ | `no-store` ทุก endpoint | `/site/public` ใช้ ETag + cache สั้น | ลดเวลาโหลดหน้าแรก |
+
+---
+
+## 1. หลักการทั่วไป (Conventions)
+
+### 1.1 Response Envelope
+
+ทุก response ต้องห่อด้วยรูปแบบนี้ (frontend รองรับ raw object ด้วย แต่ให้ใช้ envelope เสมอ):
+
+```json
+{ "success": true, "data": { }, "message": "ข้อความ (optional)" }
+```
+
+Error:
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "VALIDATION_ERROR",
+    "message": "อีเมลไม่ถูกต้อง",
+    "details": { "email": "รูปแบบอีเมลไม่ถูกต้อง" }
+  }
+}
+```
+
+> Frontend แสดง `error.message` ให้ผู้ใช้เห็นตรงๆ เมื่อได้ **400/422** → ข้อความต้องเป็นภาษาคน และเลือกภาษาตาม `meta.lang` (ฟอร์ม) หรือ header `Accept-Language` (อย่างอื่น) — ห้ามส่ง stack trace / ข้อความ exception
+
+### 1.2 HTTP Status ที่หน้าบ้านจัดการ
+
+| Status | ความหมาย | Frontend ทำอะไร |
+|---|---|---|
+| 200 / 201 | สำเร็จ | แสดงผลสำเร็จ |
+| 400 / 422 | ข้อมูลไม่ถูกต้อง | แสดง `error.message` |
+| 401 | token หมดอายุ/ถูกเพิกถอน | **ล้าง session และเด้งไปหน้า login อัตโนมัติ** |
+| 403 | ไม่มีสิทธิ์ | แสดง error |
+| 404 | ไม่พบ | — |
+| 409 | ข้อมูลชนกัน (เช่น path ซ้ำ) | แสดง `error.message` |
+| 413 / 415 | ไฟล์ใหญ่เกิน / ชนิดไฟล์ไม่รองรับ | แสดง error |
+| 429 | ยิงถี่เกิน | แสดง "ส่งข้อมูลบ่อยเกินไป" — **ต้องส่ง header `Retry-After`** |
+| 5xx / timeout | ระบบขัดข้อง | ฟอร์ม: แจ้งให้ลองใหม่ + เบอร์โทรสำรอง (ข้อมูลยังอยู่ในฟอร์ม) |
+
+### 1.3 รูปแบบข้อมูล
+
+- JSON **camelCase** — ยกเว้นฟิลด์ legacy ที่หน้าบ้านใช้อยู่ **ต้องคงชื่อเดิม**: `title_en`, `excerpt_en`, `content_en` (News), `title_en` (UsedMachinery), `question_en`, `answer_en` (Faq) → ใช้ `[JsonPropertyName("title_en")]`
+- วันเวลา: ISO-8601 UTC (`2026-10-01T04:30:00Z`); วันที่ล้วนใช้ `YYYY-MM-DD`
+- ID ของเนื้อหา CMS (news, assets, rates, faqs, custom pages, page items): **string ที่ client สร้าง** เช่น `1730000000000-ab12cd3`, `page-m1abc-x9z1` → ตรวจด้วย regex `^[A-Za-z0-9_-]{1,100}$`
+- ID ของลีด/ใบสมัคร: server สร้าง (GUID) + เลขอ้างอิงที่คนอ่านได้ (เช่น `AA-2026-000042`)
+- Pagination (Phase 2): `?page=1&limit=20` → `{ items, total, page, limit }`, `limit` สูงสุด 100
+
+---
+
+## 2. ข้อกำหนดด้านความปลอดภัย (บังคับ)
+
+### 2.1 Transport & Headers
+- HTTPS เท่านั้น (redirect HTTP → HTTPS ที่ reverse proxy) + `Strict-Transport-Security: max-age=31536000`
+- ทุก response ของ API: `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`, `Referrer-Policy: no-referrer`
+- ปิด header ที่เปิดเผยเทคโนโลยี (`Server`, `X-Powered-By`)
+- Production: `app.UseExceptionHandler` คืน envelope ทั่วไป — **ไม่ส่ง stack trace**
+
+### 2.2 CORS
+```csharp
+policy.WithOrigins("https://agileassets.co.th", "https://www.agileassets.co.th", "http://localhost:3001")
+      .WithMethods("GET", "POST", "PUT", "PATCH", "DELETE")
+      .WithHeaders("Content-Type", "Authorization", "Accept")
+      .SetPreflightMaxAge(TimeSpan.FromMinutes(10));
+// ไม่ต้อง AllowCredentials (ใช้ Bearer token ไม่ใช่ cookie)
+```
+> หน้าบ้านส่ง `Content-Type` เฉพาะ request ที่มี body → `GET /site/public` เป็น simple request ไม่มี preflight (เร็วขึ้น 1 round-trip)
+> ถ้าเปลี่ยนโดเมน API ต้องแจ้งหน้าบ้านแก้ `connect-src` ใน CSP (`public/web.config`, `public/.htaccess`, `public/_headers`)
+
+### 2.3 Rate Limiting (ASP.NET `AddRateLimiter`, key = client IP จาก `X-Forwarded-For` ที่เชื่อถือได้)
+
+| กลุ่ม | Limit | หมายเหตุ |
+|---|---|---|
+| `POST /auth/login` | 5 / นาที / IP และ 10 ครั้งผิด / 15 นาที / username | ครบแล้วล็อก 15 นาที → 429 + `Retry-After` |
+| `POST /forms/*`, `POST /careers/apply` | 5 / 10 นาที / IP / endpoint และ 30 / วัน / IP | |
+| `GET /site/public` | 120 / นาที / IP | ส่วนใหญ่โดน cache อยู่แล้ว |
+| Admin CMS (`PUT/DELETE`) | 600 / นาที / user | **ต้องสูงพอ** — การกด "เผยแพร่" ครั้งเดียวอาจยิงหลายสิบ request พร้อมกัน (หลายหน้า + หลายข่าว) |
+| `POST /uploads/images` | 30 / นาที / user | |
+
+### 2.4 กันบอทยิงฟอร์ม (ทุก endpoint ใน §7)
+ทุก body มี object `meta`:
+```json
+"meta": { "captchaToken": "0.xxxx (optional)", "elapsedMs": 8421, "pageUrl": "https://agileassets.co.th/solar-power-generation", "lang": "th" }
+```
+1. **Cloudflare Turnstile** (เมื่อเปิดใช้ — หน้าบ้านตั้ง `VITE_TURNSTILE_SITE_KEY`): เรียก `POST https://challenges.cloudflare.com/turnstile/v0/siteverify` ด้วย `secret`, `response=meta.captchaToken`, `remoteip` → ไม่ผ่าน = 422 `CAPTCHA_FAILED`
+2. **Time-trap**: `elapsedMs < 2500` → บันทึกเป็น spam (`IsSpam = 1`) แต่ **ตอบ 201 ปกติ** (ไม่ให้บอทรู้ว่าโดนจับ) และไม่ส่งอีเมลแจ้งเตือน
+3. **Honeypot**: ตรวจที่หน้าบ้าน (ช่องซ่อน `website_url`) — บอทที่กรอกจะไม่ถูกส่งมาเลย
+4. Validate `pageUrl` ต้องขึ้นต้นด้วยโดเมนเว็บเรา (ถ้าไม่ใช่ → spam)
+5. Content filter: ข้อความมี URL > 3 ลิงก์ หรือคำ spam ที่กำหนด → spam
+
+### 2.5 Input Validation
+- ทุก field มี max length ตาม §10 (ตรวจทั้งใน DTO ด้วย `[MaxLength]`/FluentValidation และ DB)
+- Trim whitespace, ปฏิเสธ control characters
+- อีเมล: RFC 5322 แบบพื้นฐาน + max 200; เบอร์โทร: `^[0-9+\-\s]{9,20}$`
+- URL ที่แอดมินกรอก (`ctaLink`, `link`, `image`, `href`): อนุญาตเฉพาะ `https://`, `http://`, `mailto:`, `tel:`, path ที่ขึ้นต้นด้วย `/`, หรือ `#anchor` — **ปฏิเสธ `javascript:` / `data:`**
+- **HTML จาก Rich Text Editor** (`content`, `content_en`, `contentTh`, `contentEn`): sanitize ฝั่ง server ด้วย [`HtmlSanitizer` (Ganss.Xss)](https://github.com/mganss/HtmlSanitizer) — อนุญาตเฉพาะ `p, br, strong, em, u, s, h2, h3, ul, ol, li, a[href,target,rel], blockquote` (หน้าบ้านใช้ DOMPurify อีกชั้น แต่ server ต้องทำด้วยเสมอ)
+- SQL: EF Core / parameterized query เท่านั้น
+
+### 2.6 Authentication & Session
+- รหัสผ่าน: **Argon2id** (หรือ BCrypt cost ≥ 12); นโยบาย ≥ 12 ตัวอักษร
+- **บัญชีแอดมินเริ่มต้นต้องตั้งรหัสใหม่** — ห้ามใช้ `123456789` บน production (รหัสนี้หลุดอยู่ใน git history แล้ว)
+- JWT: HS256 (secret ≥ 256-bit จาก env/Key Vault) หรือ RS256, `exp` = 8 ชั่วโมง, claims: `sub`, `name`, `role`, `jti`, `tv` (token version)
+- Logout → บันทึก `jti` ลง `RevokedTokens` จนกว่าจะหมดอายุ; เปลี่ยนรหัสผ่าน → เพิ่ม `Users.TokenVersion` (token เก่าทั้งหมดใช้ไม่ได้)
+- Login ผิดตอบ 401 ข้อความเดียวกันทั้ง "ไม่มี user" และ "รหัสผิด" (กัน user enumeration)
+
+### 2.7 Audit Log
+บันทึกทุกการกระทำของแอดมิน (publish, delete, upload, ดูรายละเอียด NDA, export) ลง `AuditLogs` พร้อม user, IP, entity, entityId — **ห้ามเก็บ PII ลง log** (ชื่อ/เบอร์/เลขบัตร)
+
+---
+
+## 3. Authentication
+
+### `POST /auth/login` — Public
+Request:
+```json
+{ "username": "marketing", "password": "••••••" }
+```
+Response 200:
 ```json
 {
   "success": true,
-  "data": { ... },
-  "message": "string (optional)",
-  "error": {
-    "code": "string",
-    "message": "string",
-    "details": "any (optional)"
+  "data": {
+    "user": { "id": "2f1c…", "username": "marketing", "role": "admin", "fullName": "Marketing Admin", "email": "admin@agileassets.co.th" },
+    "accessToken": "eyJhbGciOi…",
+    "expiresIn": 28800
   }
 }
 ```
+Errors: `401 INVALID_CREDENTIALS`, `429 TOO_MANY_ATTEMPTS` (+ `Retry-After`)
 
-> Frontend ใช้ `if ('success' in data)` ตรวจจับ envelope นี้ ถ้า backend ส่ง raw object โดยไม่มี `success` field — frontend ก็รองรับอยู่แล้ว แต่แนะนำให้ wrap เสมอ
+> Frontend อ่าน `exp` จาก JWT เพื่อตั้งเวลา auto-logout — **ต้องมี claim `exp`**
+
+### `POST /auth/logout` — Admin
+เพิกถอน `jti` ปัจจุบัน → 200 `{ success: true }` (หน้าบ้านเรียกแบบ fire-and-forget)
+
+### `GET /users/me` — Admin *(Phase 2)*
+### `PUT /users/me/password` — Admin *(Phase 2)*
+```json
+{ "currentPassword": "string", "newPassword": "string (≥12)" }
+```
 
 ---
 
-## Authorization
+## 4. Public Site Bootstrap
 
-| Level | Header | หมายเหตุ |
-|---|---|---|
-| Public | ไม่ต้อง | ทุกคนเข้าได้ |
-| Admin | `Authorization: Bearer <accessToken>` | JWT ที่ได้จาก POST /auth/login |
+### `GET /site/public` — Public ⭐ (สำคัญที่สุด)
+หน้าบ้านเรียก **ครั้งเดียวตอนเปิดเว็บ** แล้วใช้ข้อมูลนี้แสดงทุกหน้า (`src/services/cmsService.ts → getPublicSite`, timeout 8 วินาที, ถ้าล้มเหลวจะใช้ข้อมูล default ในโค้ด)
 
-Frontend เก็บ token ใน `localStorage` key `agile_assets_token` และ `agile_assets_refresh_token`
-
----
-
-## 1. Authentication
-
-### POST `/auth/login`
-**Auth:** Public  
-**Request Body:**
+Response 200:
 ```json
 {
-  "username": "string",
-  "password": "string"
-}
-```
-**Response `data`:**
-```json
-{
-  "user": {
-    "id": "string | number",
-    "username": "string",
-    "role": "admin",
-    "fullName": "string (optional)",
-    "email": "string (optional)"
-  },
-  "accessToken": "string (JWT)",
-  "refreshToken": "string (optional)",
-  "expiresIn": 86400
-}
-```
-**Notes:**
-- Frontend fallback credential: `marketing` / `123456789` (ใช้เมื่อ backend down เท่านั้น)
-- Session duration ฝั่ง frontend: 24 ชั่วโมง
-- 401 เมื่อ credentials ผิด
-
----
-
-## 2. Theme Settings
-
-### GET `/settings/theme`
-**Auth:** Public (frontend โหลด theme ก่อน render)  
-**Response `data`:**
-```json
-{
-  "primaryColor": "#0284c7",
-  "gradientStart": "#0284c7",
-  "gradientEnd": "#0369a1",
-  "buttonTextColor": "#ffffff",
-  "buttonRadius": "rounded-xl",
-  "buttonStyle": "gradient",
-  "accentColor": "#38bdf8"
-}
-```
-
-### PUT `/settings/theme`
-**Auth:** Admin  
-**Request Body:** (เหมือน GET response)
-```json
-{
-  "primaryColor": "string (hex color)",
-  "gradientStart": "string (hex color)",
-  "gradientEnd": "string (hex color)",
-  "buttonTextColor": "string (hex color)",
-  "buttonRadius": "rounded-md | rounded-xl | rounded-2xl | rounded-full",
-  "buttonStyle": "gradient | solid | glow",
-  "accentColor": "string (hex color)"
-}
-```
-**Response `data`:** ThemeSettings ที่บันทึกแล้ว
-
-**Database Table: `ThemeSettings`**
-| Column | Type | Notes |
-|---|---|---|
-| Id | INT PK | |
-| PrimaryColor | NVARCHAR(20) | hex |
-| GradientStart | NVARCHAR(20) | hex |
-| GradientEnd | NVARCHAR(20) | hex |
-| ButtonTextColor | NVARCHAR(20) | hex |
-| ButtonRadius | NVARCHAR(30) | enum string |
-| ButtonStyle | NVARCHAR(20) | gradient/solid/glow |
-| AccentColor | NVARCHAR(20) | hex |
-| UpdatedAt | DATETIMEOFFSET | |
-| UpdatedBy | NVARCHAR(100) | |
-
----
-
-## 3. Banner Settings
-
-> ⚠️ BannerEditor ซิงค์กับ `/pages/home` ด้วย — เมื่อ save banner ต้องอัปเดต `PageContents` ของ `home` พร้อมกัน (หรือ frontend จัดการเอง)
-
-### GET `/settings/banner`
-**Auth:** Public  
-**Response `data`:**
-```json
-{
-  "headline": "string",
-  "subheadline": "string",
-  "ctaText": "string",
-  "ctaLink": "string"
-}
-```
-
-### PUT `/settings/banner`
-**Auth:** Admin  
-**Request Body:** เหมือน GET  
-**Response `data`:** BannerSettings ที่บันทึก
-
-**Database Table: `BannerSettings`**
-| Column | Type | Notes |
-|---|---|---|
-| Id | INT PK | |
-| Headline | NVARCHAR(500) | |
-| Subheadline | NVARCHAR(2000) | |
-| CtaText | NVARCHAR(200) | |
-| CtaLink | NVARCHAR(500) | URL หรือ anchor |
-| UpdatedAt | DATETIMEOFFSET | |
-
----
-
-## 4. Company Info & Impact Stats
-
-### GET `/settings/company`
-**Auth:** Public  
-**Response `data`:**
-```json
-{
-  "name": "string",
-  "phone": "string",
-  "email": "string",
-  "address": "string",
-  "description": "string",
-  "lineId": "string (optional)",
-  "facebook": "string (optional)",
-  "mapUrl": "string (optional)",
-  "operatingHours": "string (optional)",
-  "impactStats": {
-    "factoriesServed": "string",
-    "totalCreditValueMB": "string",
-    "totalContractsCount": "string",
-    "customerSatisfactionPct": "string (optional)"
+  "success": true,
+  "data": {
+    "themeSettings": { "…ThemeSettings" },
+    "banner": { "…BannerSettings" },
+    "companyInfo": { "…CompanyInfo" },
+    "impactStats": { "…ImpactStats" },
+    "interestRates": [ "…InterestRate (เรียงตาม sortOrder)" ],
+    "news": [ "…NewsItem (เฉพาะที่เผยแพร่, ล่าสุด 100 รายการ)" ],
+    "usedMachinery": [ "…UsedMachineryItem (เรียงตาม sortOrder)" ],
+    "faqs": [ "…FaqItem (เรียงตาม sortOrder)" ],
+    "pageContents": { "home": { "…PageCustomContent" }, "about": { }, "page-m1abc-x9z1": { } },
+    "customPages": [ "…CustomPageItem" ]
   }
 }
 ```
+- ส่งเฉพาะ section ที่มีข้อมูลใน DB — section ที่ไม่ส่ง หน้าบ้านจะใช้ค่า default ของตัวเอง
+- `customFields` **ห้ามส่ง** ใน endpoint นี้ (ข้อมูลภายใน)
+- ทุก HTML ต้องผ่าน sanitizer แล้ว (§2.5)
 
-### PUT `/settings/company`
-**Auth:** Admin  
-**Request Body:** เหมือน GET response
+Caching (ดู §12): `Cache-Control: public, max-age=60, stale-while-revalidate=600` + `ETag` (ตอบ 304 เมื่อ `If-None-Match` ตรง) + server memory cache ที่ล้างทันทีเมื่อแอดมินเผยแพร่
 
-**Database Table: `CompanyInfo`**
-| Column | Type |
-|---|---|
-| Id | INT PK |
-| Name | NVARCHAR(300) |
-| Phone | NVARCHAR(100) |
-| Email | NVARCHAR(200) |
-| Address | NVARCHAR(1000) |
-| Description | NVARCHAR(MAX) |
-| LineId | NVARCHAR(100) NULL |
-| Facebook | NVARCHAR(500) NULL |
-| MapUrl | NVARCHAR(1000) NULL |
-| OperatingHours | NVARCHAR(200) NULL |
-| FactoriesServed | NVARCHAR(50) |
-| TotalCreditValueMB | NVARCHAR(50) |
-| TotalContractsCount | NVARCHAR(50) |
-| CustomerSatisfactionPct | NVARCHAR(50) NULL |
-| UpdatedAt | DATETIMEOFFSET |
+### `GET /health` — Public
+`200 { "status": "ok", "db": "ok" }` สำหรับ uptime monitor (ไม่ต้องมี envelope, ไม่เปิดเผยรายละเอียดระบบ)
+
+> Endpoint สาธารณะแบบแยกรายการ (`GET /news`, `GET /news/{id}`, `GET /assets`, `GET /faqs`, `GET /rates`, `GET /pages/{pageId}`, `GET /settings/theme`) **หน้าบ้านปัจจุบันไม่ได้เรียก** — ทำเป็น *Phase 2* ได้ถ้าต้องการ SEO pre-render หรือ mobile app
 
 ---
 
-## 5. Interest Rates
+## 5. CMS Admin API
 
-### GET `/rates`
-**Auth:** Public  
-**Response `data`:** `InterestRate[]`
+ทุก endpoint ในหมวดนี้: **Auth = Admin** (`Authorization: Bearer`), response `Cache-Control: no-store`, ทุกครั้งที่สำเร็จต้อง **invalidate cache ของ `/site/public`** และเขียน `AuditLogs`
 
-```json
-[
-  {
-    "id": "string",
-    "product": "string",
-    "rate": 8.9,
-    "term": "string (e.g. '12–60 months')",
-    "featured": true,
-    "description": "string"
-  }
-]
-```
+แอดมินแก้ไขในหน้า CMS → เห็นพรีวิวทันที (เก็บเป็นแบบร่างในเบราว์เซอร์) → กดปุ่ม **"เผยแพร่"** ที่ header → หน้าบ้านเทียบกับเวอร์ชันที่เผยแพร่ล่าสุด แล้วยิง **เฉพาะ section ที่เปลี่ยน** พร้อมกัน (`Promise.all`) ถ้ามี request ใดล้มเหลว แบบร่างจะยังอยู่และกดเผยแพร่ซ้ำได้ → **ทุก PUT ต้อง idempotent**
 
-### PUT `/rates`
-**Auth:** Admin (replace all)  
-**Request Body:** `InterestRate[]`  
-
-### POST `/rates`
-**Auth:** Admin (add single)  
-**Request Body:** InterestRate (without id)  
-
-### DELETE `/rates/{id}`
-**Auth:** Admin  
-
-**Database Table: `InterestRates`**
-| Column | Type |
-|---|---|
-| Id | NVARCHAR(50) PK |
-| Product | NVARCHAR(300) |
-| Rate | DECIMAL(5,2) |
-| Term | NVARCHAR(100) |
-| Featured | BIT |
-| Description | NVARCHAR(1000) |
-| SortOrder | INT |
-| UpdatedAt | DATETIMEOFFSET |
-
----
-
-## 6. News & Articles
-
-### GET `/news`
-**Auth:** Public  
-**Query Params:**
-| Param | Type | Default |
+| Endpoint | Body | หมายเหตุ |
 |---|---|---|
-| page | int | 1 |
-| limit | int | 20 |
-| category | string | all |
-| pinned | bool | - |
+| `PUT /settings/theme` | `ThemeSettings` | single row |
+| `PUT /settings/banner` | `BannerSettings` | single row |
+| `PUT /settings/company` | `CompanyInfo & { impactStats: ImpactStats }` | single row (รวมสถิติ) |
+| `PUT /rates` | `InterestRate[]` | **replace all** ใน transaction, `sortOrder` = ลำดับใน array |
+| `PUT /faqs` | `FaqItem[]` | **replace all** ใน transaction |
+| `PUT /settings/custom-fields` | `CustomField[]` | replace all |
+| `GET /settings/custom-fields` | — | หน้าบ้านโหลดเมื่อแอดมิน login |
+| `PUT /settings/custom-pages` | `CustomPageItem[]` | replace all — ตรวจ `path` ไม่ซ้ำ (§9.9) |
+| `PUT /news/{id}` | `NewsItem & { sortOrder: number }` | **upsert** (ไม่มี → สร้าง, มี → แก้) |
+| `DELETE /news/{id}` | — | 404 ถ้าไม่มี = ถือว่าสำเร็จ (idempotent → ตอบ 200) |
+| `PUT /assets/{id}` | `UsedMachineryItem & { sortOrder: number }` | **upsert** |
+| `DELETE /assets/{id}` | — | idempotent |
+| `PUT /pages/{pageId}` | `PageCustomContent` | upsert JSON document (§9.10) |
+| `DELETE /pages/{pageId}` | — | "รีเซ็ตกลับค่าเริ่มต้น" = ลบ document; idempotent |
 
-**Response `data`:**
+ตัวอย่าง `PUT /news/1730000000000-ab12cd3`:
 ```json
 {
-  "items": [ NewsItem ],
-  "total": 42,
-  "page": 1,
-  "limit": 20
-}
-```
-
-**NewsItem:**
-```json
-{
-  "id": "string",
-  "title": "string",
-  "title_en": "string",
-  "excerpt": "string",
-  "excerpt_en": "string",
-  "content": "string (HTML)",
-  "content_en": "string (HTML)",
-  "date": "string (YYYY-MM-DD)",
+  "id": "1730000000000-ab12cd3",
+  "title": "Agile Assets ร่วมงาน …",
+  "title_en": "Agile Assets joins …",
+  "excerpt": "…", "excerpt_en": "…",
+  "content": "<p>…</p>", "content_en": "<p>…</p>",
+  "date": "2026-09-30",
   "pinned": false,
-  "category": "FINANCE | NEWS | Market Analysis | Company News | Education",
-  "image": "string (URL, optional)"
+  "category": "Company News",
+  "image": "https://api.tunjai.in.th/uploads/news/2026/09/3f2a….webp",
+  "sortOrder": 0
 }
 ```
-
-### GET `/news/{id}`
-**Auth:** Public  
-**Response `data`:** NewsItem
-
-### POST `/news`
-**Auth:** Admin  
-**Request Body:** NewsItem (without id)
-
-### PUT `/news/{id}`
-**Auth:** Admin  
-**Request Body:** Partial\<NewsItem\>
-
-### DELETE `/news/{id}`
-**Auth:** Admin
-
-**Database Table: `News`**
-| Column | Type |
-|---|---|
-| Id | NVARCHAR(100) PK |
-| Title | NVARCHAR(500) |
-| TitleEn | NVARCHAR(500) |
-| Excerpt | NVARCHAR(1000) |
-| ExcerptEn | NVARCHAR(1000) |
-| Content | NVARCHAR(MAX) |
-| ContentEn | NVARCHAR(MAX) |
-| Date | DATE |
-| Pinned | BIT |
-| Category | NVARCHAR(100) |
-| Image | NVARCHAR(1000) NULL |
-| CreatedAt | DATETIMEOFFSET |
-| UpdatedAt | DATETIMEOFFSET |
+- `id` ใน path กับ body ต้องตรงกัน ไม่งั้น 400
+- Response: entity ที่บันทึกแล้ว (มี `imageWidth`/`imageHeight` ถ้ารู้ขนาด)
 
 ---
 
-## 7. Used Machinery / Assets for Sale
+## 6. Image Upload
 
-### GET `/assets`
-**Auth:** Public  
-**Query Params:** `status`, `category`, `page`, `limit`
-
-**Response `data`:** `{ items: UsedMachineryItem[], total, page, limit }`
-
-**UsedMachineryItem:**
-```json
-{
-  "id": "string",
-  "title": "string",
-  "title_en": "string (optional)",
-  "category": "string",
-  "price": "string",
-  "year": "string",
-  "condition": "string",
-  "description": "string",
-  "image": "string (URL)",
-  "status": "available | reserved | sold"
-}
-```
-
-### GET `/assets/{id}`
-**Auth:** Public
-
-### POST `/assets`
-**Auth:** Admin
-
-### PUT `/assets/{id}`
-**Auth:** Admin
-
-### DELETE `/assets/{id}`
-**Auth:** Admin
-
-**Database Table: `UsedMachinery`**
-| Column | Type |
-|---|---|
-| Id | NVARCHAR(50) PK |
-| Title | NVARCHAR(500) |
-| TitleEn | NVARCHAR(500) NULL |
-| Category | NVARCHAR(200) |
-| Price | NVARCHAR(100) |
-| Year | NVARCHAR(10) |
-| Condition | NVARCHAR(200) |
-| Description | NVARCHAR(MAX) |
-| Image | NVARCHAR(1000) |
-| Status | NVARCHAR(20) | CHECK IN ('available','reserved','sold') |
-| CreatedAt | DATETIMEOFFSET |
-| UpdatedAt | DATETIMEOFFSET |
-
----
-
-## 8. FAQs
-
-### GET `/faqs`
-**Auth:** Public  
-**Query Params:** `category`
-
-**Response `data`:** `FaqItem[]`
-
-**FaqItem:**
-```json
-{
-  "id": "string",
-  "question": "string (TH)",
-  "question_en": "string (optional)",
-  "answer": "string (TH)",
-  "answer_en": "string (optional)",
-  "category": "string"
-}
-```
-
-### PUT `/faqs`
-**Auth:** Admin (replace all)
-
-### POST `/faqs`
-**Auth:** Admin
-
-### PUT `/faqs/{id}`
-**Auth:** Admin
-
-### DELETE `/faqs/{id}`
-**Auth:** Admin
-
-**Database Table: `Faqs`**
-| Column | Type |
-|---|---|
-| Id | NVARCHAR(50) PK |
-| Question | NVARCHAR(MAX) |
-| QuestionEn | NVARCHAR(MAX) NULL |
-| Answer | NVARCHAR(MAX) |
-| AnswerEn | NVARCHAR(MAX) NULL |
-| Category | NVARCHAR(200) |
-| SortOrder | INT |
-| UpdatedAt | DATETIMEOFFSET |
-
----
-
-## 9. Page Contents (Universal CMS)
-
-> ⚠️ นี่คือระบบใหญ่ที่สุด — PageContentEditor ใช้จัดการ 26+ หน้าสาธารณะ
-
-### GET `/pages`
-**Auth:** Admin  
-**Response `data`:** `string[]` (รายชื่อ pageId ที่มี custom content)
-
-```json
-["home", "about", "contact", "solar-power-generation", ...]
-```
-
-### GET `/pages/{pageId}`
-**Auth:** Public  
-**Response `data`:** `PageCustomContent`
-
-**PageCustomContent (ฟิลด์ทั้งหมดจาก types/index.ts):**
-```json
-{
-  "id": "string",
-  "pageName": "string",
-  "titleTh": "string",
-  "titleEn": "string (optional)",
-  "sectionTitleTh": "string (optional)",
-  "sectionTitleEn": "string (optional)",
-  "sectionSubtitleTh": "string (optional)",
-  "sectionSubtitleEn": "string (optional)",
-  "metaTitle": "string (optional)",
-  "metaDescription": "string (optional)",
-  "heroBadgeTh": "string (optional)",
-  "heroBadgeEn": "string (optional)",
-  "heroTitleTh": "string",
-  "heroTitleEn": "string (optional)",
-  "heroSubtitleTh": "string",
-  "heroSubtitleEn": "string (optional)",
-  "heroImage": "string URL (optional)",
-  "ctaTextTh": "string (optional)",
-  "ctaTextEn": "string (optional)",
-  "ctaLink": "string (optional)",
-  "contentTh": "string HTML (optional)",
-  "contentEn": "string HTML (optional)",
-  "items": [ "PageSectionItem[]" ],
-  "solutionsBadgeTh": "string (optional)",
-  "solutionsBadgeEn": "string (optional)",
-  "solutionsTitleTh": "string (optional)",
-  "solutionsTitleEn": "string (optional)",
-  "solutionsSubtitleTh": "string (optional)",
-  "solutionsSubtitleEn": "string (optional)",
-  "solutionsItems": [ "PageSectionItem[]" ],
-  "machineryBadgeTh": "string (optional)",
-  "machineryBadgeEn": "string (optional)",
-  "machineryTitleTh": "string (optional)",
-  "machineryTitleEn": "string (optional)",
-  "machinerySubtitleTh": "string (optional)",
-  "machinerySubtitleEn": "string (optional)",
-  "machineryItems": [ "PageSectionItem[]" ],
-  "whatWeDoBadgeTh": "string (optional)",
-  "whatWeDoBadgeEn": "string (optional)",
-  "whatWeDoTitleTh": "string (optional)",
-  "whatWeDoTitleEn": "string (optional)",
-  "whatWeDoSubtitleTh": "string (optional)",
-  "whatWeDoSubtitleEn": "string (optional)",
-  "whatWeDoImage": "string URL (optional)",
-  "whatWeDoItems": [ "PageSectionItem[]" ],
-  "lastUpdated": "string ISO datetime"
-}
-```
-
-**PageSectionItem:**
-```json
-{
-  "id": "string",
-  "title": "string",
-  "titleEn": "string (optional)",
-  "subTitle": "string (optional)",
-  "subTitleEn": "string (optional)",
-  "description": "string",
-  "descEn": "string (optional)",
-  "badge": "string (optional)",
-  "icon": "string icon name (optional)",
-  "image": "string URL (optional)",
-  "link": "string (optional)",
-  "quote": "string (optional)",
-  "quoteEn": "string (optional)",
-  "btnText": "string (optional)",
-  "btnTextEn": "string (optional)"
-}
-```
-
-### PUT `/pages/{pageId}`
-**Auth:** Admin  
-**Request Body:** `Partial<PageCustomContent>`  
-**Response `data`:** PageCustomContent ที่บันทึก
-
-### DELETE `/pages/{pageId}`
-**Auth:** Admin (reset to default)  
-**Response:** `{ success: true }`
-
-**Database Tables:**
-
-**`PageContents`**
-| Column | Type |
-|---|---|
-| Id | NVARCHAR(100) PK (= pageId) |
-| PageName | NVARCHAR(200) |
-| TitleTh | NVARCHAR(500) |
-| TitleEn | NVARCHAR(500) NULL |
-| SectionTitleTh | NVARCHAR(500) NULL |
-| SectionTitleEn | NVARCHAR(500) NULL |
-| SectionSubtitleTh | NVARCHAR(1000) NULL |
-| SectionSubtitleEn | NVARCHAR(1000) NULL |
-| MetaTitle | NVARCHAR(200) NULL |
-| MetaDescription | NVARCHAR(500) NULL |
-| HeroBadgeTh | NVARCHAR(200) NULL |
-| HeroBadgeEn | NVARCHAR(200) NULL |
-| HeroTitleTh | NVARCHAR(500) |
-| HeroTitleEn | NVARCHAR(500) NULL |
-| HeroSubtitleTh | NVARCHAR(1000) |
-| HeroSubtitleEn | NVARCHAR(1000) NULL |
-| HeroImage | NVARCHAR(1000) NULL |
-| CtaTextTh | NVARCHAR(200) NULL |
-| CtaTextEn | NVARCHAR(200) NULL |
-| CtaLink | NVARCHAR(500) NULL |
-| ContentTh | NVARCHAR(MAX) NULL |
-| ContentEn | NVARCHAR(MAX) NULL |
-| SolutionsBadgeTh | NVARCHAR(200) NULL |
-| SolutionsBadgeEn | NVARCHAR(200) NULL |
-| SolutionsTitleTh | NVARCHAR(500) NULL |
-| SolutionsTitleEn | NVARCHAR(500) NULL |
-| SolutionsSubtitleTh | NVARCHAR(1000) NULL |
-| SolutionsSubtitleEn | NVARCHAR(1000) NULL |
-| MachineryBadgeTh | NVARCHAR(200) NULL |
-| MachineryBadgeEn | NVARCHAR(200) NULL |
-| MachineryTitleTh | NVARCHAR(500) NULL |
-| MachineryTitleEn | NVARCHAR(500) NULL |
-| MachinerySubtitleTh | NVARCHAR(1000) NULL |
-| MachinerySubtitleEn | NVARCHAR(1000) NULL |
-| WhatWeDoBadgeTh | NVARCHAR(200) NULL |
-| WhatWeDoBadgeEn | NVARCHAR(200) NULL |
-| WhatWeDoTitleTh | NVARCHAR(500) NULL |
-| WhatWeDoTitleEn | NVARCHAR(500) NULL |
-| WhatWeDoSubtitleTh | NVARCHAR(1000) NULL |
-| WhatWeDoSubtitleEn | NVARCHAR(1000) NULL |
-| WhatWeDoImage | NVARCHAR(1000) NULL |
-| LastUpdated | DATETIMEOFFSET |
-
-**`PageSectionItems`**
-| Column | Type | Notes |
+### `POST /uploads/images` — Admin · `multipart/form-data`
+| Field | Type | Rule |
 |---|---|---|
-| Id | NVARCHAR(100) PK |
-| PageId | NVARCHAR(100) FK → PageContents.Id |
-| SectionType | NVARCHAR(50) | 'items' / 'solutionsItems' / 'machineryItems' / 'whatWeDoItems' |
-| SortOrder | INT | |
-| Title | NVARCHAR(500) | |
-| TitleEn | NVARCHAR(500) NULL | |
-| SubTitle | NVARCHAR(500) NULL | |
-| SubTitleEn | NVARCHAR(500) NULL | |
-| Description | NVARCHAR(MAX) | |
-| DescEn | NVARCHAR(MAX) NULL | |
-| Badge | NVARCHAR(200) NULL | |
-| Icon | NVARCHAR(100) NULL | |
-| Image | NVARCHAR(1000) NULL | |
-| Link | NVARCHAR(500) NULL | |
-| Quote | NVARCHAR(MAX) NULL | |
-| QuoteEn | NVARCHAR(MAX) NULL | |
-| BtnText | NVARCHAR(200) NULL | |
-| BtnTextEn | NVARCHAR(200) NULL | |
+| `file` | File | JPEG / PNG / WebP เท่านั้น, ≤ 5 MB |
+| `folder` | string | `news` \| `assets` \| `banner` \| `pages` |
+
+ขั้นตอนบังคับ:
+1. ตรวจ **magic bytes** (ไม่เชื่อ extension/Content-Type) — ปฏิเสธ SVG, GIF, HEIC → 415
+2. Decode + **re-encode เป็น WebP (quality 82)** ด้วย `SixLabors.ImageSharp` — ตัด EXIF/GPS และทำลาย polyglot file ไปในตัว
+3. ย่อให้กว้างไม่เกิน 1920px (คงอัตราส่วน)
+4. ชื่อไฟล์ = GUID ใหม่ (`/uploads/{folder}/{yyyy}/{MM}/{guid}.webp`) — **ห้ามใช้ชื่อไฟล์จากผู้ใช้**
+5. เก็บนอก web root ของโค้ด หรือ Blob Storage; ห้ามให้ execute ได้
+
+Response 201:
+```json
+{ "success": true, "data": { "url": "https://api.tunjai.in.th/uploads/news/2026/10/6c0e….webp", "width": 1600, "height": 900, "size": 184213 } }
+```
+> ใช้งานแล้ว: `NewsEditor` (เมื่อ login ผ่าน backend) — editor อื่นยังรับ URL ภายนอก จะเปลี่ยนมาใช้ endpoint นี้ในเฟสถัดไป
 
 ---
 
-## 10. Careers / Job Applications
+## 7. Public Forms
 
-### POST `/careers/apply`
-**Auth:** Public  
-**Request Body:**
+**Auth = Public** · Rate limit + กันบอทตาม §2.3–2.4 · ทุก request มี `meta` (§2.4)
+หลังบันทึกสำเร็จ: ส่งอีเมลแจ้งทีมขายผ่าน **background queue** (ไม่ทำให้ response ช้า) — อีเมลแจ้งเตือน **ห้ามมีเลขบัตรประชาชน/ลายเซ็น** ให้ใส่แค่เลขอ้างอิง + ลิงก์ไปหน้าแอดมิน
+
+Response มาตรฐาน (201):
 ```json
-{
-  "fullName": "string (required)",
-  "email": "string (required)",
-  "phone": "string (required)",
-  "positionId": "string (optional)",
-  "positionTitle": "string (optional)",
-  "experienceYears": "string (optional)",
-  "expectedSalary": "string (optional)",
-  "resumeUrl": "string URL (optional)",
-  "coverLetter": "string (optional)"
-}
-```
-**Response `data`:**
-```json
-{
-  "id": "string",
-  "message": "Application received"
-}
+{ "success": true, "data": { "id": "c1d2…", "referenceNumber": "INQ-2026-000123", "timestamp": "2026-10-01T04:30:00Z" } }
 ```
 
-### GET `/careers/applications`
-**Auth:** Admin  
-**Query Params:**
-| Param | Type |
+### 7.1 `POST /forms/inquiry` — ฟอร์มสอบถาม/ขอสินเชื่อรายอุตสาหกรรม
+ใช้โดย: หน้าแรก (ContactSection), 8 หน้าอุตสาหกรรม, Investor Relations, Sustainability, Asset for Sale
+```json
+{
+  "source": "solar-power-generation",
+  "name": "สมชาย ใจดี",
+  "phone": "0812345678",
+  "email": "somchai@example.com",
+  "company": "บริษัท ตัวอย่าง จำกัด",
+  "message": "สนใจติดตั้ง Solar Rooftop 250 kWp\nขอรับเอกสาร: Company Profile (PDF)",
+  "interestType": "equity",
+  "projectType": "solar_water",
+  "meta": { "elapsedMs": 9000, "pageUrl": "https://agileassets.co.th/solar-power-generation", "lang": "th" }
+}
+```
+| Field | Rule |
 |---|---|
-| status | pending / reviewing / interview / accepted / rejected |
-| positionId | string |
-| search | string (fullName, email) |
-| page | int (default 1) |
-| limit | int (default 20) |
+| `source` | required, enum: `home-contact`, `drinking-water-production`, `livestock-farm`, `food-processing`, `biogas-production`, `solar-power-generation`, `chiller`, `injection-molding`, `generator-set`, `investor-relations`, `sustainability`, `asset-for-sale` |
+| `name` | required, ≤ 200 |
+| `phone` | ≤ 20 — **ต้องมี `phone` หรือ `email` อย่างน้อย 1 อย่าง** |
+| `email` | ≤ 200, รูปแบบอีเมล |
+| `company` | ≤ 200 |
+| `message` | ≤ 5000 (อาจมีบรรทัด "ขอรับเอกสาร: …" เมื่อลูกค้ากดปุ่มขอเอกสาร PDF → ทีมขายต้องส่งไฟล์ให้ทางอีเมล) |
+| `interestType` | optional (Investor Relations) ≤ 50 |
+| `projectType` | optional (Sustainability) ≤ 50 |
 
-**Response `data`:** `{ items: JobApplication[], total, page, limit }`
+Reference: `INQ-YYYY-NNNNNN`
 
-**JobApplication:**
+### 7.2 `POST /forms/contact` — หน้า "ติดต่อเรา"
+```json
+{ "firstName": "สมชาย", "lastName": "ใจดี", "email": "a@b.com", "subject": "สอบถาม", "message": "…", "meta": { } }
+```
+`firstName` required ≤100 · `lastName` ≤100 · `email` required ≤200 · `subject` ≤300 · `message` required ≤5000 · Reference: `CT-YYYY-NNNNNN`
+
+### 7.3 `POST /forms/leasing` — ใบสมัครสินเชื่อเช่าซื้อ
 ```json
 {
-  "id": "string",
-  "fullName": "string",
-  "email": "string",
-  "phone": "string",
-  "positionId": "string (optional)",
-  "positionTitle": "string (optional)",
-  "experienceYears": "string (optional)",
-  "expectedSalary": "string (optional)",
-  "resumeUrl": "string (optional)",
-  "coverLetter": "string (optional)",
-  "status": "pending | reviewing | interview | accepted | rejected",
-  "createdAt": "ISO datetime",
-  "notes": "string (optional)"
+  "applicantType": "corporate",
+  "firstName": "สมชาย", "lastName": "ใจดี",
+  "companyName": "บริษัท ตัวอย่าง จำกัด",
+  "businessType": "โรงงานน้ำดื่ม",
+  "machineInterest": "เครื่องเป่าขวด",
+  "address1": "99/1 ถ.สุขุมวิท", "address2": "อาคาร A ชั้น 5",
+  "district": "เมือง", "province": "สมุทรปราการ", "postalCode": "10270",
+  "phone": "0812345678", "email": "a@b.com",
+  "purpose": { "new": true, "replace": false, "other": false },
+  "otherDetails": "…",
+  "acceptConsent": true,
+  "meta": { }
 }
 ```
-
-### PATCH `/careers/applications/{id}/status`
-**Auth:** Admin  
-**Request Body:**
-```json
-{
-  "status": "pending | reviewing | interview | accepted | rejected",
-  "notes": "string (optional)"
-}
-```
-
-**Database Table: `JobApplications`**
-| Column | Type |
+| Field | Rule |
 |---|---|
-| Id | UNIQUEIDENTIFIER PK DEFAULT NEWID() |
-| FullName | NVARCHAR(300) |
-| Email | NVARCHAR(300) |
-| Phone | NVARCHAR(50) |
-| PositionId | NVARCHAR(100) NULL |
-| PositionTitle | NVARCHAR(500) NULL |
-| ExperienceYears | NVARCHAR(50) NULL |
-| ExpectedSalary | NVARCHAR(100) NULL |
-| ResumeUrl | NVARCHAR(1000) NULL |
-| CoverLetter | NVARCHAR(MAX) NULL |
-| Status | NVARCHAR(20) DEFAULT 'pending' |
-| Notes | NVARCHAR(MAX) NULL |
-| CreatedAt | DATETIMEOFFSET DEFAULT GETUTCDATE() |
-| UpdatedAt | DATETIMEOFFSET |
+| `applicantType` | required, `corporate` \| `individual` |
+| `companyName` | **required เมื่อ `corporate`**, ≤ 200 |
+| `firstName`, `lastName` | required, ≤ 100 |
+| `businessType`, `machineInterest` | required, ≤ 200 / ≤ 300 |
+| `address1`, `district`, `province` | required (≤ 500 / 100 / 100) |
+| `postalCode` | required, `^\d{5}$` |
+| `phone` | required, `^[0-9+\-\s]{9,15}$` |
+| `email` | required |
+| `acceptConsent` | **ต้องเป็น `true`** (หน้าบ้านไม่ติ๊กไว้ล่วงหน้าแล้ว ตาม PDPA) — บันทึก consent version + timestamp + IP |
+
+Reference: `AA-YYYY-NNNNNN`
+
+### 7.4 `POST /forms/nc-nda` — สัญญารักษาความลับ · `multipart/form-data`
+| Part | Rule |
+|---|---|
+| `fullName` | required ≤ 200 |
+| `idCard` | required — **เลขบัตรประชาชน 13 หลัก (ตรวจ checksum)** หรือ **พาสปอร์ต `^[A-Z0-9]{6,9}$`** (หน้าบ้านส่งแบบไม่มีช่องว่าง) |
+| `email` | required |
+| `company` | optional ≤ 200 |
+| `phone` | optional ≤ 20 |
+| `agreed` | `"true"` เท่านั้น |
+| `signatureImage` | PNG จาก canvas, ≤ 500 KB, ตรวจ magic bytes |
+| `meta` | JSON string ของ `meta` |
+
+Thai ID checksum (เหมือนหน้าบ้าน):
+```csharp
+static bool IsValidThaiId(string d) {
+    if (!Regex.IsMatch(d, @"^\d{13}$")) return false;
+    var sum = 0; for (var i = 0; i < 12; i++) sum += (d[i] - '0') * (13 - i);
+    return (11 - sum % 11) % 10 == d[12] - '0';
+}
+```
+Response 201: `{ id, referenceNumber: "NDA-YYYY-NNNNNN", timestamp }` — **ห้ามส่ง idCard กลับใน response**
+การจัดเก็บ: ดู §11 (เข้ารหัส, ลายเซ็นเป็น private file)
+
+### 7.5 `POST /forms/newsletter` — ขอรับจดหมายข่าว
+```json
+{ "email": "a@b.com", "name": "(optional)", "company": "(optional)", "meta": { } }
+```
+- อีเมลซ้ำ → ตอบ 201 เหมือนเดิม (ไม่เปิดเผยว่ามีในระบบแล้ว)
+- ส่งอีเมลลิงก์ Newsletter ฉบับล่าสุด + ลิงก์ยกเลิกรับ (unsubscribe token)
+
+### 7.6 `POST /careers/apply` — สมัครงาน
+```json
+{
+  "fullName": "string ≤200 (required)", "email": "required", "phone": "required ≤20",
+  "positionId": "job-credit-bd", "positionTitle": "string ≤300",
+  "experienceYears": "2-5 ปี", "expectedSalary": "string ≤100",
+  "resumeUrl": "https://… (ต้องเป็น https:// เท่านั้น ≤1000)",
+  "coverLetter": "≤5000",
+  "meta": { }
+}
+```
+Reference: `JOB-YYYY-NNNNNN`
 
 ---
 
-## 11. Custom Fields (Campaign Tags)
+## 8. Admin: จัดการลีด / ใบสมัคร (Phase 2)
 
-> ใช้ใน admin `/management-portal/custom` — เป็น key-value สำหรับ campaign tracking
+> หน้าบ้าน **ยังไม่มี UI** สำหรับส่วนนี้ — ในเฟสแรกให้ทีมขายรับแจ้งเตือนทางอีเมล (§7) ก่อน
+> `careerService.getApplications` / `updateStatus` มีในโค้ดหน้าบ้านแล้ว
 
-### GET `/settings/custom-fields`
-**Auth:** Admin  
-**Response `data`:** `CustomField[]`
-
-**CustomField:**
-```json
-{
-  "id": "string",
-  "label": "string",
-  "type": "text | number | date | boolean | url",
-  "value": "string",
-  "campaign": "string"
-}
-```
-
-### PUT `/settings/custom-fields`
-**Auth:** Admin (replace all)  
-**Request Body:** `CustomField[]`
-
-**Database Table: `CustomFields`**
-| Column | Type |
-|---|---|
-| Id | NVARCHAR(50) PK |
-| Label | NVARCHAR(300) |
-| Type | NVARCHAR(20) |
-| Value | NVARCHAR(MAX) |
-| Campaign | NVARCHAR(200) |
-| UpdatedAt | DATETIMEOFFSET |
+| Method | Endpoint | หมายเหตุ |
+|---|---|---|
+| GET | `/admin/leads?type=inquiry\|contact\|leasing\|newsletter&status=&search=&page=&limit=` | รวมลีดทุกประเภท, `IsSpam=0` เป็นค่าเริ่มต้น |
+| PATCH | `/admin/leads/{type}/{id}` | `{ status: "new\|contacted\|qualified\|closed\|spam", note }` |
+| GET | `/admin/leads/export?type=&from=&to=` | CSV (audit log ทุกครั้ง) |
+| GET | `/admin/nda-submissions?page=&limit=&search=` | แสดง idCard แบบ mask (`•••••••••1234`) |
+| GET | `/admin/nda-submissions/{id}` | ถอดรหัส idCard + signed URL ลายเซ็น (หมดอายุ 5 นาที) — audit log |
+| GET | `/careers/applications` | `{ items, total, page, limit }` |
+| PATCH | `/careers/applications/{id}/status` | `{ status: "pending\|reviewing\|interview\|accepted\|rejected", notes }` |
 
 ---
 
-## 12. Users / Admin Account
+## 9. Data Models (JSON)
 
-### GET `/users/me`
-**Auth:** Admin  
-**Response `data`:** User object
+> ตรงกับ `src/types/index.ts` — ถ้าแก้ type ฝั่งหน้าบ้าน ต้องแก้ตารางนี้ด้วย
 
-### PUT `/users/me/password`
-**Auth:** Admin  
-**Request Body:**
-```json
-{
-  "currentPassword": "string",
-  "newPassword": "string"
-}
+### 9.1 ThemeSettings
+```ts
+{ primaryColor: "#0284c7", gradientStart: "#0284c7", gradientEnd: "#0369a1", buttonTextColor: "#ffffff",
+  buttonRadius: "rounded-md" | "rounded-xl" | "rounded-2xl" | "rounded-full",
+  buttonStyle: "gradient" | "solid" | "glow", accentColor: "#38bdf8" }
+```
+สีทุกช่อง validate `^#[0-9a-fA-F]{6}$`
+
+### 9.2 BannerSettings
+`{ headline ≤200, subheadline ≤1000, ctaText ≤100, ctaLink ≤500 (URL rule §2.5) }`
+
+### 9.3 CompanyInfo + ImpactStats
+```ts
+CompanyInfo { name ≤300, phone ≤100, email ≤200, address ≤1000, description ≤5000,
+              lineId? ≤100, facebook? ≤500, mapUrl? ≤1000, operatingHours? ≤200 }
+ImpactStats { factoriesServed ≤50, totalCreditValueMB ≤50, totalContractsCount ≤50, customerSatisfactionPct? ≤50 }
 ```
 
-**Database Table: `Users`**
-| Column | Type |
-|---|---|
-| Id | UNIQUEIDENTIFIER PK DEFAULT NEWID() |
-| Username | NVARCHAR(100) UNIQUE |
-| PasswordHash | NVARCHAR(MAX) (BCrypt/Argon2) |
-| Role | NVARCHAR(50) DEFAULT 'admin' |
-| FullName | NVARCHAR(300) NULL |
-| Email | NVARCHAR(300) NULL |
-| IsActive | BIT DEFAULT 1 |
-| CreatedAt | DATETIMEOFFSET DEFAULT GETUTCDATE() |
-| UpdatedAt | DATETIMEOFFSET |
+### 9.4 InterestRate
+`{ id, product ≤300, rate: number(0–100, 2 ตำแหน่ง), term ≤100, featured: boolean, description ≤1000 }`
 
-**Initial Seed:**
+### 9.5 NewsItem
+`{ id, title ≤500, title_en ≤500, excerpt ≤1000, excerpt_en ≤1000, content (HTML), content_en (HTML), date "YYYY-MM-DD", pinned: boolean, category ≤100, image? ≤1000 }`
+category ที่หน้าบ้านใช้: `FINANCE`, `NEWS`, `Market Analysis`, `Company News`, `Education`
+
+### 9.6 UsedMachineryItem
+`{ id, title ≤500, title_en? ≤500, category ≤200, price ≤100, year ≤10, condition ≤500, description ≤5000, image ≤1000, status: "available" | "reserved" | "sold" }`
+
+### 9.7 FaqItem
+`{ id, question ≤1000, question_en? ≤1000, answer ≤5000, answer_en? ≤5000, category ≤200 }`
+
+### 9.8 CustomField
+`{ id, label ≤300, type: "text" | "number" | "date" | "boolean" | "url", value ≤4000, campaign ≤200 }`
+
+### 9.9 CustomPageItem (หน้าที่แอดมินสร้างด้วยปุ่ม "เพิ่มหน้า")
+`{ id ("page-…"), groupId ≤100, nameTh ≤200, nameEn ≤200, path ≤200, createdAt? }`
+- `path` regex `^/[a-z0-9-]+(/[a-z0-9-]+)*$`, ห้ามซ้ำกัน, ห้ามเป็น `/` หรือขึ้นต้นด้วย `/management-portal` → 409 `PATH_CONFLICT`
+- เนื้อหาของหน้าเก็บใน `PageContents` ด้วย `pageId = id`
+
+### 9.10 PageCustomContent (เก็บเป็น JSON document)
+pageId ที่หน้าบ้านใช้จริง:
+
+| pageId | URL หลัก |
+|---|---|
+| `home` | `/` |
+| `about` | `/about` |
+| `drinking-water` | `/drinking-water-production` |
+| `livestock-farm` | `/livestock-farm` |
+| `food-processing` | `/food-processing` |
+| `biogas-production` | `/biogas-production` |
+| `solar-power` | `/solar-power-generation` |
+| `chiller` | `/chiller` |
+| `injection-molding` | `/injection-molding-machine` |
+| `generator-set` | `/generator-set` |
+| `investor-relations` | `/investor-relations` |
+| `sustainability` | `/sustainability` |
+| `projects` | `/project-activity` |
+| `contact` | `/contact` |
+| `calculator` | `/calculator` |
+| `interest-rate` | `/interest-rate-conversion` |
+| `nc-nda` | `/nc-nda` |
+| `cookie-policy` | `/cookie-policy` |
+| `work-for-us` | `/work-for-us` |
+| `page-*` | หน้าที่แอดมินสร้างเอง (path ใน CustomPages) |
+
+ฟิลด์ (ทั้งหมด optional ยกเว้นที่ระบุ — ฝั่ง server **ต้องเก็บฟิลด์ที่ไม่รู้จักไว้ด้วย** เพราะหน้าบ้านเพิ่มฟิลด์ใหม่ได้โดยไม่ต้องแก้ backend):
+```ts
+{
+  id, pageName, titleTh, titleEn?, sectionTitleTh?, sectionTitleEn?, sectionSubtitleTh?, sectionSubtitleEn?,
+  metaTitle? ≤200, metaDescription? ≤500,
+  heroBadgeTh?, heroBadgeEn?, heroTitleTh, heroTitleEn?, heroSubtitleTh, heroSubtitleEn?, heroImage?,
+  ctaTextTh?, ctaTextEn?, ctaLink?,
+  contentTh? (HTML), contentEn? (HTML),
+  items?: PageSectionItem[],
+  solutionsBadgeTh?, solutionsBadgeEn?, solutionsTitleTh?, solutionsTitleEn?, solutionsSubtitleTh?, solutionsSubtitleEn?, solutionsItems?: PageSectionItem[],
+  machineryBadgeTh?, machineryBadgeEn?, machineryTitleTh?, machineryTitleEn?, machinerySubtitleTh?, machinerySubtitleEn?, machineryItems?: PageSectionItem[],
+  whatWeDoBadgeTh?, whatWeDoBadgeEn?, whatWeDoTitleTh?, whatWeDoTitleEn?, whatWeDoSubtitleTh?, whatWeDoSubtitleEn?, whatWeDoImage?, whatWeDoItems?: PageSectionItem[],
+  lastUpdated?
+}
+PageSectionItem { id, title, titleEn?, subTitle?, subTitleEn?, description, descEn?, badge?, icon?, image?, link?, quote?, quoteEn?, btnText?, btnTextEn? }
+```
+Server-side validation ของ document: ขนาดรวม ≤ 512 KB, sanitize ทุกฟิลด์ที่ลงท้าย `Th`/`En` ของ `content*` (HTML), ตรวจ URL rule กับ `*Image`, `image`, `link`, `ctaLink`
+
+---
+
+## 10. Database Schema (SQL Server DDL)
+
 ```sql
--- Marketing admin account
-IF NOT EXISTS (SELECT 1 FROM Users WHERE Username = 'marketing')
-INSERT INTO Users (Id, Username, PasswordHash, Role, FullName, Email, IsActive, CreatedAt)
-VALUES (NEWID(), 'marketing', '$2a$12$<bcrypt_of_123456789>', 'admin', 'Marketing Admin', 'admin@agileassets.co.th', 1, GETUTCDATE());
+-- ===== Identity =====
+CREATE TABLE Users (
+    Id              UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWSEQUENTIALID(),
+    Username        NVARCHAR(100)  NOT NULL UNIQUE,
+    PasswordHash    NVARCHAR(500)  NOT NULL,           -- Argon2id
+    Role            NVARCHAR(50)   NOT NULL DEFAULT 'admin',
+    FullName        NVARCHAR(300)  NULL,
+    Email           NVARCHAR(200)  NULL,
+    IsActive        BIT            NOT NULL DEFAULT 1,
+    TokenVersion    INT            NOT NULL DEFAULT 0,
+    FailedLogins    INT            NOT NULL DEFAULT 0,
+    LockedUntil     DATETIMEOFFSET NULL,
+    MustChangePassword BIT         NOT NULL DEFAULT 1,
+    CreatedAt       DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME(),
+    UpdatedAt       DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME()
+);
+
+CREATE TABLE RevokedTokens (
+    Jti        NVARCHAR(64)   NOT NULL PRIMARY KEY,
+    ExpiresAt  DATETIMEOFFSET NOT NULL                -- job ลบแถวที่หมดอายุทุกวัน
+);
+
+-- ===== Single-row settings (Id = 1 เสมอ) =====
+CREATE TABLE SiteSettings (
+    [Key]      NVARCHAR(50)   NOT NULL PRIMARY KEY,   -- 'theme' | 'banner' | 'company' | 'customPages' | 'customFields'
+    JsonValue  NVARCHAR(MAX)  NOT NULL CHECK (ISJSON(JsonValue) = 1),
+    UpdatedAt  DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME(),
+    UpdatedBy  UNIQUEIDENTIFIER NULL REFERENCES Users(Id)
+);
+-- เหตุผล: theme/banner/company/customPages/customFields เป็น object เล็กที่ถูกแทนทั้งก้อนเสมอ
+-- (ถ้าทีมต้องการ typed table ก็ได้ แต่ JSON ทำให้เพิ่มฟิลด์ได้โดยไม่ migrate)
+
+-- ===== Collections =====
+CREATE TABLE InterestRates (
+    Id          NVARCHAR(100) NOT NULL PRIMARY KEY,
+    Product     NVARCHAR(300) NOT NULL,
+    Rate        DECIMAL(5,2)  NOT NULL CHECK (Rate BETWEEN 0 AND 100),
+    Term        NVARCHAR(100) NOT NULL,
+    Featured    BIT           NOT NULL DEFAULT 0,
+    Description NVARCHAR(1000) NOT NULL DEFAULT '',
+    SortOrder   INT           NOT NULL DEFAULT 0,
+    UpdatedAt   DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME()
+);
+
+CREATE TABLE News (
+    Id          NVARCHAR(100) NOT NULL PRIMARY KEY,
+    Title       NVARCHAR(500) NOT NULL,
+    TitleEn     NVARCHAR(500) NOT NULL DEFAULT '',
+    Excerpt     NVARCHAR(1000) NOT NULL DEFAULT '',
+    ExcerptEn   NVARCHAR(1000) NOT NULL DEFAULT '',
+    Content     NVARCHAR(MAX) NOT NULL DEFAULT '',     -- sanitized HTML
+    ContentEn   NVARCHAR(MAX) NOT NULL DEFAULT '',
+    [Date]      DATE          NOT NULL,
+    Pinned      BIT           NOT NULL DEFAULT 0,
+    Category    NVARCHAR(100) NOT NULL,
+    Image       NVARCHAR(1000) NULL,
+    ImageWidth  INT NULL, ImageHeight INT NULL,
+    SortOrder   INT           NOT NULL DEFAULT 0,
+    CreatedAt   DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME(),
+    UpdatedAt   DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME()
+);
+CREATE INDEX IX_News_Pinned_Date ON News (Pinned DESC, [Date] DESC);
+
+CREATE TABLE UsedMachinery (
+    Id          NVARCHAR(100) NOT NULL PRIMARY KEY,
+    Title       NVARCHAR(500) NOT NULL,
+    TitleEn     NVARCHAR(500) NULL,
+    Category    NVARCHAR(200) NOT NULL,
+    Price       NVARCHAR(100) NOT NULL,
+    [Year]      NVARCHAR(10)  NOT NULL,
+    Condition   NVARCHAR(500) NOT NULL,
+    Description NVARCHAR(MAX) NOT NULL,
+    Image       NVARCHAR(1000) NOT NULL,
+    ImageWidth  INT NULL, ImageHeight INT NULL,
+    Status      NVARCHAR(20)  NOT NULL CHECK (Status IN ('available','reserved','sold')),
+    SortOrder   INT           NOT NULL DEFAULT 0,
+    CreatedAt   DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME(),
+    UpdatedAt   DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME()
+);
+CREATE INDEX IX_UsedMachinery_Sort ON UsedMachinery (SortOrder);
+
+CREATE TABLE Faqs (
+    Id          NVARCHAR(100) NOT NULL PRIMARY KEY,
+    Question    NVARCHAR(1000) NOT NULL,
+    QuestionEn  NVARCHAR(1000) NULL,
+    Answer      NVARCHAR(MAX) NOT NULL,
+    AnswerEn    NVARCHAR(MAX) NULL,
+    Category    NVARCHAR(200) NOT NULL,
+    SortOrder   INT           NOT NULL DEFAULT 0,
+    UpdatedAt   DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME()
+);
+
+CREATE TABLE PageContents (
+    PageId     NVARCHAR(100)  NOT NULL PRIMARY KEY,
+    Document   NVARCHAR(MAX)  NOT NULL CHECK (ISJSON(Document) = 1),   -- PageCustomContent ทั้งก้อน
+    UpdatedAt  DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME(),
+    UpdatedBy  UNIQUEIDENTIFIER NULL REFERENCES Users(Id)
+);
+
+CREATE TABLE Uploads (
+    Id          UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWSEQUENTIALID(),
+    Folder      NVARCHAR(20)  NOT NULL,
+    StoragePath NVARCHAR(500) NOT NULL,
+    PublicUrl   NVARCHAR(1000) NOT NULL,
+    Width INT NOT NULL, Height INT NOT NULL, SizeBytes INT NOT NULL,
+    UploadedBy  UNIQUEIDENTIFIER NOT NULL REFERENCES Users(Id),
+    CreatedAt   DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME()
+);
+
+-- ===== Leads (คอลัมน์ร่วม: ReferenceNumber, Status, IsSpam, ข้อมูลบริบท) =====
+CREATE TABLE Inquiries (
+    Id              UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWSEQUENTIALID(),
+    ReferenceNumber NVARCHAR(30)  NOT NULL UNIQUE,
+    Source          NVARCHAR(50)  NOT NULL,
+    Name            NVARCHAR(200) NOT NULL,
+    Phone           NVARCHAR(20)  NULL,
+    Email           NVARCHAR(200) NULL,
+    Company         NVARCHAR(200) NULL,
+    Message         NVARCHAR(MAX) NULL,
+    InterestType    NVARCHAR(50)  NULL,
+    ProjectType     NVARCHAR(50)  NULL,
+    Status          NVARCHAR(20)  NOT NULL DEFAULT 'new',
+    AdminNote       NVARCHAR(2000) NULL,
+    IsSpam          BIT           NOT NULL DEFAULT 0,
+    PageUrl         NVARCHAR(500) NULL,
+    Lang            NVARCHAR(2)   NULL,
+    ElapsedMs       INT           NULL,
+    IpAddress       VARBINARY(16) NULL,                 -- เก็บแบบ binary; ลบหลัง 90 วัน
+    UserAgent       NVARCHAR(500) NULL,
+    CreatedAt       DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME(),
+    CONSTRAINT CK_Inquiries_Contact CHECK (Phone IS NOT NULL OR Email IS NOT NULL)
+);
+CREATE INDEX IX_Inquiries_Created ON Inquiries (IsSpam, CreatedAt DESC);
+
+CREATE TABLE ContactSubmissions (
+    Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWSEQUENTIALID(),
+    ReferenceNumber NVARCHAR(30) NOT NULL UNIQUE,
+    FirstName NVARCHAR(100) NOT NULL, LastName NVARCHAR(100) NULL,
+    Email NVARCHAR(200) NOT NULL, Subject NVARCHAR(300) NULL, Message NVARCHAR(MAX) NOT NULL,
+    Status NVARCHAR(20) NOT NULL DEFAULT 'new', AdminNote NVARCHAR(2000) NULL, IsSpam BIT NOT NULL DEFAULT 0,
+    PageUrl NVARCHAR(500) NULL, Lang NVARCHAR(2) NULL, ElapsedMs INT NULL, IpAddress VARBINARY(16) NULL, UserAgent NVARCHAR(500) NULL,
+    CreatedAt DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME()
+);
+
+CREATE TABLE LeasingApplications (
+    Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWSEQUENTIALID(),
+    ReferenceNumber NVARCHAR(30) NOT NULL UNIQUE,         -- AA-2026-000042
+    ApplicantType NVARCHAR(20) NOT NULL CHECK (ApplicantType IN ('corporate','individual')),
+    FirstName NVARCHAR(100) NOT NULL, LastName NVARCHAR(100) NOT NULL,
+    CompanyName NVARCHAR(200) NULL, BusinessType NVARCHAR(200) NOT NULL, MachineInterest NVARCHAR(300) NOT NULL,
+    Address1 NVARCHAR(500) NOT NULL, Address2 NVARCHAR(500) NULL,
+    District NVARCHAR(100) NOT NULL, Province NVARCHAR(100) NOT NULL, PostalCode CHAR(5) NOT NULL,
+    Phone NVARCHAR(20) NOT NULL, Email NVARCHAR(200) NOT NULL,
+    PurposeNew BIT NOT NULL, PurposeReplace BIT NOT NULL, PurposeOther BIT NOT NULL, OtherDetails NVARCHAR(1000) NULL,
+    ConsentVersion NVARCHAR(20) NOT NULL, ConsentAt DATETIMEOFFSET NOT NULL,
+    Status NVARCHAR(20) NOT NULL DEFAULT 'pending', AdminNote NVARCHAR(2000) NULL, IsSpam BIT NOT NULL DEFAULT 0,
+    PageUrl NVARCHAR(500) NULL, Lang NVARCHAR(2) NULL, ElapsedMs INT NULL, IpAddress VARBINARY(16) NULL, UserAgent NVARCHAR(500) NULL,
+    CreatedAt DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME(), UpdatedAt DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME()
+);
+
+CREATE TABLE NdaSubmissions (
+    Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWSEQUENTIALID(),
+    ReferenceNumber NVARCHAR(30) NOT NULL UNIQUE,         -- NDA-2026-000123
+    FullName NVARCHAR(200) NOT NULL,
+    IdentityType NVARCHAR(10) NOT NULL CHECK (IdentityType IN ('thai_id','passport')),
+    IdentityEncrypted VARBINARY(256) NOT NULL,            -- AES-256-GCM (nonce+ciphertext+tag)
+    IdentityHash BINARY(32) NOT NULL,                     -- HMAC-SHA256 สำหรับค้นหา
+    IdentityLast4 NCHAR(4) NOT NULL,
+    Email NVARCHAR(200) NOT NULL, Company NVARCHAR(200) NULL, Phone NVARCHAR(20) NULL,
+    SignatureBlobPath NVARCHAR(500) NOT NULL,             -- private storage, ไม่มี public URL
+    AgreementVersion NVARCHAR(20) NOT NULL, AgreedAt DATETIMEOFFSET NOT NULL,
+    IsSpam BIT NOT NULL DEFAULT 0, IpAddress VARBINARY(16) NULL, UserAgent NVARCHAR(500) NULL,
+    CreatedAt DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME()
+);
+CREATE INDEX IX_Nda_IdentityHash ON NdaSubmissions (IdentityHash);
+
+CREATE TABLE NewsletterSubscribers (
+    Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWSEQUENTIALID(),
+    Email NVARCHAR(200) NOT NULL UNIQUE, Name NVARCHAR(200) NULL, Company NVARCHAR(200) NULL,
+    UnsubscribeToken CHAR(43) NOT NULL UNIQUE, UnsubscribedAt DATETIMEOFFSET NULL,
+    ConsentAt DATETIMEOFFSET NOT NULL, CreatedAt DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME()
+);
+
+CREATE TABLE JobApplications (
+    Id UNIQUEIDENTIFIER NOT NULL PRIMARY KEY DEFAULT NEWSEQUENTIALID(),
+    ReferenceNumber NVARCHAR(30) NOT NULL UNIQUE,
+    FullName NVARCHAR(200) NOT NULL, Email NVARCHAR(200) NOT NULL, Phone NVARCHAR(20) NOT NULL,
+    PositionId NVARCHAR(100) NULL, PositionTitle NVARCHAR(300) NULL,
+    ExperienceYears NVARCHAR(50) NULL, ExpectedSalary NVARCHAR(100) NULL,
+    ResumeUrl NVARCHAR(1000) NULL, CoverLetter NVARCHAR(MAX) NULL,
+    Status NVARCHAR(20) NOT NULL DEFAULT 'pending'
+        CHECK (Status IN ('pending','reviewing','interview','accepted','rejected')),
+    Notes NVARCHAR(MAX) NULL, IsSpam BIT NOT NULL DEFAULT 0,
+    IpAddress VARBINARY(16) NULL, CreatedAt DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME(),
+    UpdatedAt DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME()
+);
+
+-- ===== Audit =====
+CREATE TABLE AuditLogs (
+    Id BIGINT IDENTITY PRIMARY KEY,
+    UserId UNIQUEIDENTIFIER NULL REFERENCES Users(Id),
+    Action NVARCHAR(50) NOT NULL,          -- PUBLISH | DELETE | UPLOAD | VIEW_NDA | EXPORT | LOGIN | LOGIN_FAILED
+    Entity NVARCHAR(50) NOT NULL,
+    EntityId NVARCHAR(100) NULL,
+    IpAddress VARBINARY(16) NULL,
+    CreatedAt DATETIMEOFFSET NOT NULL DEFAULT SYSUTCDATETIME()
+);
+CREATE INDEX IX_Audit_Created ON AuditLogs (CreatedAt DESC);
+```
+
+Seed แอดมิน (รหัสชั่วคราว **สุ่มใหม่ตอน deploy** และ `MustChangePassword = 1`):
+```sql
+INSERT INTO Users (Username, PasswordHash, Role, FullName, Email, MustChangePassword)
+VALUES (N'marketing', N'<argon2id-hash-of-random-temp-password>', N'admin', N'Marketing Admin', N'admin@agileassets.co.th', 1);
 ```
 
 ---
 
-## Summary: API Endpoint Inventory
+## 11. PDPA & การจัดการข้อมูลส่วนบุคคล
 
-| # | Method | Endpoint | Auth | Frontend ใช้งานจาก |
-|---|---|---|---|---|
-| 1 | POST | `/auth/login` | Public | AuthContext.tsx |
-| 2 | GET | `/settings/theme` | Public | SiteSettingsContext.tsx |
-| 3 | PUT | `/settings/theme` | Admin | themeService.ts |
-| 4 | GET | `/settings/banner` | Public | BannerEditor.tsx |
-| 5 | PUT | `/settings/banner` | Admin | BannerEditor.tsx |
-| 6 | GET | `/settings/company` | Public | CompanyInfoEditor.tsx |
-| 7 | PUT | `/settings/company` | Admin | CompanyInfoEditor.tsx |
-| 8 | GET | `/settings/custom-fields` | Admin | CustomFieldsEditor.tsx |
-| 9 | PUT | `/settings/custom-fields` | Admin | CustomFieldsEditor.tsx |
-| 10 | GET | `/rates` | Public | RatesEditor.tsx |
-| 11 | PUT | `/rates` | Admin | RatesEditor.tsx |
-| 12 | POST | `/rates` | Admin | RatesEditor.tsx |
-| 13 | DELETE | `/rates/{id}` | Admin | RatesEditor.tsx |
-| 14 | GET | `/news` | Public | DashboardPage, NewsUpdatePage |
-| 15 | GET | `/news/{id}` | Public | NewsUpdatePage |
-| 16 | POST | `/news` | Admin | NewsEditor.tsx |
-| 17 | PUT | `/news/{id}` | Admin | NewsEditor.tsx |
-| 18 | DELETE | `/news/{id}` | Admin | NewsEditor.tsx |
-| 19 | GET | `/assets` | Public | AssetForSalePage |
-| 20 | GET | `/assets/{id}` | Public | AssetForSalePage |
-| 21 | POST | `/assets` | Admin | AssetsEditor.tsx |
-| 22 | PUT | `/assets/{id}` | Admin | AssetsEditor.tsx |
-| 23 | DELETE | `/assets/{id}` | Admin | AssetsEditor.tsx |
-| 24 | GET | `/faqs` | Public | FaqPage |
-| 25 | PUT | `/faqs` | Admin | FaqEditor.tsx |
-| 26 | POST | `/faqs` | Admin | FaqEditor.tsx |
-| 27 | DELETE | `/faqs/{id}` | Admin | FaqEditor.tsx |
-| 28 | GET | `/pages` | Admin | PageContentEditor.tsx |
-| 29 | GET | `/pages/{pageId}` | Public | Every public page via usePageContent() |
-| 30 | PUT | `/pages/{pageId}` | Admin | pageContentService.ts |
-| 31 | DELETE | `/pages/{pageId}` | Admin | pageContentService.ts |
-| 32 | POST | `/careers/apply` | Public | WorkForUsPage.tsx |
-| 33 | GET | `/careers/applications` | Admin | (Admin panel - planned) |
-| 34 | PATCH | `/careers/applications/{id}/status` | Admin | careerService.ts |
-| 35 | GET | `/users/me` | Admin | (planned) |
-| 36 | PUT | `/users/me/password` | Admin | (planned) |
-
----
-
-## Frontend Fallback Strategy
-
-> Frontend ออกแบบมาให้ทำงานได้แม้ backend ยังไม่พร้อม:
-
-| ข้อมูล | Fallback |
-|---|---|
-| Theme | `DEFAULT_THEME_SETTINGS` ใน SiteSettingsContext |
-| Page Contents | `DEFAULT_PAGE_CONTENTS` ใน `src/data/defaultPageContents.ts` |
-| News/Rates/FAQ/Assets | `defaultSettings.json` |
-| Auth | `ADMIN_CREDENTIALS` constant (`marketing` / `123456789`) |
-
-**หมายเหตุ:** Frontend บันทึกทุกอย่างใน `localStorage` key `agile_assets_settings` — ดังนั้นถ้า backend ยัง mock อยู่ user จะไม่เห็นความต่างในการทดสอบ local
-
----
-
-## Public Pages ที่ใช้ `usePageContent(pageId)`
-
-รายการ pageId ทั้งหมดที่ PageContentEditor จัดการ:
-
-| pageId | URL | Page Component |
+| ข้อมูล | ระดับ | การจัดการ |
 |---|---|---|
-| `home` | `/` | HomePage |
-| `about` | `/about` | AboutPage |
-| `drinking-water-production` | `/drinking-water-production` | DrinkingWaterPage |
-| `livestock-farm` | `/livestock-farm` | LivestockFarmPage |
-| `food-processing` | `/food-processing` | FoodProcessingPage |
-| `biogas-production` | `/biogas-production` | BiogasProductionPage |
-| `solar-power-generation` | `/solar-power-generation` | SolarPowerPage |
-| `chiller` | `/chiller` | ChillerPage |
-| `injection-molding` | `/injection-molding-machine` | InjectionMoldingPage |
-| `generator-set` | `/generator-set` | GeneratorSetPage |
-| `investor-relations` | `/investor-relations` | InvestorRelationsPage |
-| `sustainability` | `/sustainability` | SustainabilityPage |
-| `project-activity` | `/project-activity` | ProjectActivityPage |
-| `newsletter` | `/newsletter` | NewsletterPage |
-| `knowledge` | `/knowledge` | KnowledgePage |
-| `news-update` | `/news` | NewsUpdatePage |
-| `calculator` | `/calculator` | CalculatorPage |
-| `interest-rate-conversion` | `/interest-rate-conversion` | InterestRateConversionPage |
-| `faq` | `/faq` | FaqPage |
-| `contact` | `/contact` | ContactPage |
-| `work-for-us` | `/work-for-us` | WorkForUsPage |
-| `nc-nda` | `/nc-nda` | NcNdaPage |
-| `leasing-application` | `/leasing-application` | LeasingApplicationPage |
-| `asset-for-sale` | `/asset-for-sale` | AssetForSalePage |
-| `cookie-policy` | `/cookie-policy` | CookiePolicyPage |
+| เลขบัตรประชาชน / พาสปอร์ต (NDA) | **อ่อนไหวสูง** | เข้ารหัส AES-256-GCM ระดับแอป (key ใน Key Vault, แยกจาก DB) + HMAC สำหรับค้นหา + แสดงผลแบบ mask; ถอดรหัสได้เฉพาะหน้า detail ของแอดมิน + audit log ทุกครั้ง |
+| ลายเซ็น (NDA) | อ่อนไหวสูง | private blob container, เข้าถึงผ่าน signed URL อายุ 5 นาทีเท่านั้น |
+| ชื่อ เบอร์ อีเมล ที่อยู่ (ลีด) | ส่วนบุคคล | เข้าถึงได้เฉพาะ role admin; export ต้อง audit |
+| IP / User-Agent | ส่วนบุคคล | ใช้กันสแปมเท่านั้น, **ลบอัตโนมัติหลัง 90 วัน** |
+
+- **Consent**: ใบสมัครสินเชื่อ/NDA/Newsletter เก็บ `ConsentVersion`/`AgreementVersion` + เวลา — เมื่อแก้ข้อความนโยบายให้เปลี่ยน version
+- **Retention** (เสนอ — ให้ฝ่ายกฎหมายยืนยัน): ลีดที่ไม่เป็นลูกค้า 2 ปี; NDA ตามอายุสัญญา + 5 ปี; สแปม 30 วัน; ใบสมัครงานที่ไม่ผ่าน 1 ปี → scheduled job ลบ/anonymize
+- **สิทธิเจ้าของข้อมูล**: ต้องมีขั้นตอน (อย่างน้อยแบบ manual ผ่านแอดมิน) สำหรับขอดู/แก้/ลบข้อมูลภายใน 30 วัน
+- อีเมลแจ้งเตือนภายใน **ห้ามแนบข้อมูลอ่อนไหว**
+- Backup ของ DB ต้องเข้ารหัสเช่นกัน
 
 ---
 
-## Performance Requirements (Backend)
+## 12. Performance Requirements
 
-> ส่วนนี้เพิ่มเพื่อรองรับการปรับปรุง Performance ฝั่ง Frontend — Backend ต้องทำตามนี้เพื่อให้คะแนน Lighthouse ดีขึ้น
+### 12.1 `/site/public` (หน้าแรกรอ endpoint นี้)
+- Server memory cache (`IMemoryCache`) ของ response ที่ serialize แล้ว → ล้างเมื่อมี PUT/DELETE ใน §5
+- `ETag` = hash ของ payload; รองรับ `If-None-Match` → 304
+- `Cache-Control: public, max-age=60, stale-while-revalidate=600` (ถ้ามี CDN หน้า API ใช้ `s-maxage=60`)
+- เป้าหมาย: TTFB < 150 ms (cache hit), payload หลังบีบอัด < 80 KB
+- `news` ส่งล่าสุดไม่เกิน 100 รายการ
 
----
-
-### P1. Image Upload — แปลงเป็น WebP อัตโนมัติ
-
-**ทุก Endpoint ที่รับ image upload ต้องทำ:**
-- รับไฟล์รูปทุกฟอร์แมต (JPEG, PNG, AVIF, WebP)
-- **แปลงเป็น WebP** ด้วย `SixLabors.ImageSharp` ก่อนบันทึก
-- ตั้งค่า quality ที่ **85** (balance ระหว่าง quality และขนาดไฟล์)
-- ส่ง URL กลับที่ชี้ไปไฟล์ `.webp` เสมอ
-
-**Endpoints ที่เกี่ยวข้อง:** PUT `/settings/banner`, POST/PUT `/news`, POST/PUT `/assets`, POST/PUT `/faqs`, PUT `/pages/{pageId}` (ทุก field ที่รับ imageUrl)
-
-**ตัวอย่าง ASP.NET Core:**
+### 12.2 Compression
 ```csharp
-// ติดตั้ง: dotnet add package SixLabors.ImageSharp
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Webp;
-
-public async Task<string> ConvertAndSaveAsWebp(IFormFile file, string outputPath)
-{
-    using var image = await Image.LoadAsync(file.OpenReadStream());
-    var webpPath = Path.ChangeExtension(outputPath, ".webp");
-    await image.SaveAsWebpAsync(webpPath, new WebpEncoder { Quality = 85 });
-    return webpPath;
-}
+builder.Services.AddResponseCompression(o => {
+    o.EnableForHttps = true;
+    o.Providers.Add<BrotliCompressionProvider>();
+    o.Providers.Add<GzipCompressionProvider>();
+});
+builder.Services.Configure<BrotliCompressionProviderOptions>(o => o.Level = CompressionLevel.Fastest);
+app.UseResponseCompression();   // ก่อน UseRouting
 ```
 
+### 12.3 Cache-Control
+| Resource | Header |
+|---|---|
+| `GET /site/public` | `public, max-age=60, stale-while-revalidate=600` + ETag |
+| Admin endpoints / forms | `no-store` |
+| `/uploads/**` (ชื่อไฟล์เป็น GUID ไม่ซ้ำ) | `public, max-age=31536000, immutable` |
+
+### 12.4 อื่นๆ
+- รูปที่อัปโหลดคืน `width/height` → หน้าบ้านใส่ใน `<img>` กัน layout shift
+- งานส่งอีเมล/ประมวลผลรูปหนักๆ ใช้ background queue (`Channel<T>` + `BackgroundService` หรือ Hangfire)
+- Connection pooling + `AsNoTracking()` สำหรับ query อ่านอย่างเดียว
+- Timeout ฝั่งหน้าบ้าน: ปกติ 15 วินาที, `/site/public` 8 วินาที, upload 60 วินาที, NDA 30 วินาที
+
 ---
 
-### P2. Image Dimensions — ส่ง imageWidth / imageHeight ใน Response
-
-**ทุก Object ที่มี image field ต้องเพิ่ม:**
+## 13. Configuration & Deployment
 
 ```json
 {
-  "image": "https://cdn.example.com/img/machine.webp",
-  "imageWidth": 1920,
-  "imageHeight": 1080
+  "ConnectionStrings": { "Default": "<from env / Key Vault>" },
+  "Jwt": { "Issuer": "AgileAssetsAPI", "Audience": "AgileAssetsWeb", "Secret": "<≥32 bytes random, env only>", "AccessTokenHours": 8 },
+  "Turnstile": { "SecretKey": "<env only>", "Enabled": true },
+  "Encryption": { "PiiKey": "<Key Vault>", "PiiHmacKey": "<Key Vault>" },
+  "Uploads": { "Root": "/var/agileassets/uploads", "PublicBaseUrl": "https://api.tunjai.in.th/uploads", "MaxBytes": 5242880 },
+  "Email": { "SmtpHost": "...", "From": "noreply@agileassets.co.th", "SalesRecipients": ["sales@agileassets.co.th"], "HrRecipients": ["hr@agileassets.co.th"] },
+  "Cors": { "AllowedOrigins": ["https://agileassets.co.th", "https://www.agileassets.co.th", "http://localhost:3001"] }
 }
 ```
+- **ห้าม commit secret ใดๆ** ลง repo — ใช้ environment variables / User Secrets / Key Vault
+- Forwarded headers: `app.UseForwardedHeaders` + กำหนด `KnownProxies` (ไม่งั้น rate limit จะนับ IP ของ proxy)
 
-**Entities ที่ต้องเพิ่ม field:**
-
-| Entity | Fields เพิ่ม |
-|---|---|
-| News / Article | `imageWidth`, `imageHeight` |
-| Asset / Used Machinery | `imageWidth`, `imageHeight` |
-| FAQ (ถ้ามีรูป) | `imageWidth`, `imageHeight` |
-| PageContent (heroImage) | `heroImageWidth`, `heroImageHeight` |
-| Banner | `imageWidth`, `imageHeight` |
-
-**DB Schema — เพิ่ม columns:**
-```sql
--- ตัวอย่างสำหรับ news table
-ALTER TABLE news ADD image_width INT NULL;
-ALTER TABLE news ADD image_height INT NULL;
-
--- ตัวอย่างสำหรับ assets table
-ALTER TABLE assets ADD image_width INT NULL;
-ALTER TABLE assets ADD image_height INT NULL;
+ฝั่งหน้าบ้าน (`.env.production`):
 ```
-
-> Frontend จะใช้ค่านี้ใส่ใน `width` และ `height` attribute ของ `<img>` เพื่อป้องกัน Layout Shift (CLS) และเพิ่มคะแนน Lighthouse
+VITE_API_URL=https://api.tunjai.in.th/api/v1
+VITE_TURNSTILE_SITE_KEY=<site key จาก Cloudflare>   # เว้นว่าง = ปิด captcha
+```
 
 ---
 
-### P3. HTTP Response Headers — Cache-Control
+## 14. Endpoint Inventory
 
-**Backend API (ASP.NET Core) ต้องส่ง headers เหล่านี้:**
-
-```csharp
-// Program.cs
-// Static files (รูปที่ upload แล้วเก็บใน wwwroot/uploads)
-app.UseStaticFiles(new StaticFileOptions
-{
-    OnPrepareResponse = ctx =>
-    {
-        // Cache รูปภาพ 30 วัน (ไม่ใช่ immutable เพราะ URL อาจซ้ำแต่ไฟล์เปลี่ยน)
-        ctx.Context.Response.Headers["Cache-Control"] = "public, max-age=2592000";
-    }
-});
-
-// API responses: no-store (ข้อมูล dynamic ไม่ควร cache)
-app.Use(async (context, next) =>
-{
-    if (context.Request.Path.StartsWithSegments("/api"))
-    {
-        context.Response.Headers["Cache-Control"] = "no-store";
-    }
-    await next();
-});
-```
-
-**สรุป Cache Policy:**
-
-| Resource | Cache-Control | หมายเหตุ |
-|---|---|---|
-| API Response (dynamic data) | `no-store` | ข้อมูล real-time ไม่ cache |
-| Uploaded Images (`/uploads/...`) | `public, max-age=2592000` | 30 วัน |
-| API Health Check | `no-store` | - |
-
-> **หมายเหตุ:** Frontend static files (JS/CSS/รูป) ถูก cache โดย `web.config` แล้ว (1 ปี, immutable)
+| # | Method | Endpoint | Auth | เรียกจาก (frontend) | Phase |
+|---|---|---|---|---|---|
+| 1 | POST | `/auth/login` | Public | `authService.login` | 1 |
+| 2 | POST | `/auth/logout` | Admin | `authService.logout` | 1 |
+| 3 | GET | `/site/public` | Public | `cmsService.getPublicSite` | 1 |
+| 4 | GET | `/health` | Public | monitoring | 1 |
+| 5 | PUT | `/settings/theme` | Admin | `cmsService.publishChanges` | 1 |
+| 6 | PUT | `/settings/banner` | Admin | 〃 | 1 |
+| 7 | PUT | `/settings/company` | Admin | 〃 | 1 |
+| 8 | PUT | `/rates` | Admin | 〃 | 1 |
+| 9 | PUT | `/faqs` | Admin | 〃 | 1 |
+| 10 | GET | `/settings/custom-fields` | Admin | `cmsService.getCustomFields` | 1 |
+| 11 | PUT | `/settings/custom-fields` | Admin | `cmsService.publishChanges` | 1 |
+| 12 | PUT | `/settings/custom-pages` | Admin | 〃 | 1 |
+| 13 | PUT | `/news/{id}` | Admin | 〃 (upsert) | 1 |
+| 14 | DELETE | `/news/{id}` | Admin | 〃 | 1 |
+| 15 | PUT | `/assets/{id}` | Admin | 〃 (upsert) | 1 |
+| 16 | DELETE | `/assets/{id}` | Admin | 〃 | 1 |
+| 17 | PUT | `/pages/{pageId}` | Admin | 〃 | 1 |
+| 18 | DELETE | `/pages/{pageId}` | Admin | 〃 | 1 |
+| 19 | POST | `/uploads/images` | Admin | `cmsService.uploadImage` | 1 |
+| 20 | POST | `/forms/inquiry` | Public | `formService.submitInquiry` | 1 |
+| 21 | POST | `/forms/contact` | Public | `formService.submitContact` | 1 |
+| 22 | POST | `/forms/leasing` | Public | `formService.submitLeasing` | 1 |
+| 23 | POST | `/forms/nc-nda` | Public | `formService.submitNda` | 1 |
+| 24 | POST | `/forms/newsletter` | Public | `formService.subscribeNewsletter` | 1 |
+| 25 | POST | `/careers/apply` | Public | `careerService.applyJob` | 1 |
+| 26 | GET | `/careers/applications` | Admin | `careerService.getApplications` | 2 |
+| 27 | PATCH | `/careers/applications/{id}/status` | Admin | `careerService.updateStatus` | 2 |
+| 28 | GET/PATCH | `/admin/leads…`, `/admin/nda-submissions…` | Admin | (ยังไม่มี UI) | 2 |
+| 29 | GET/PUT | `/users/me`, `/users/me/password` | Admin | (ยังไม่มี UI) | 2 |
 
 ---
 
-### P4. Gzip / Brotli Compression
+## 15. Implementation Checklist & ลำดับงาน
 
-**Backend (ASP.NET Core) เปิด compression:**
+**Sprint 1 — ให้เว็บจริงใช้งานได้ (ลีดไม่หาย + CMS เผยแพร่ได้)**
+- [ ] โครงโปรเจค, EF Core migrations ตาม §10, error envelope, security headers, CORS, forwarded headers
+- [ ] `POST /auth/login`, `/auth/logout`, JWT (`exp`, `jti`, `tv`), Argon2id, lockout, seed แอดมินด้วยรหัสสุ่ม
+- [ ] Forms ทั้ง 6 endpoint (§7) + rate limit + Turnstile + time-trap + อีเมลแจ้งทีมขาย ← **สำคัญที่สุด**
+- [ ] `GET /site/public` + memory cache + ETag + compression
 
-```csharp
-// Program.cs
-builder.Services.AddResponseCompression(options =>
-{
-    options.EnableForHttps = true;
-    options.Providers.Add<BrotliCompressionProvider>();
-    options.Providers.Add<GzipCompressionProvider>();
-    options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[]
-    {
-        "application/json",
-        "image/svg+xml",
-    });
-});
+**Sprint 2 — CMS เต็มรูปแบบ**
+- [ ] Admin PUT/DELETE ทั้งหมดใน §5 (upsert, replace-all ใน transaction, invalidate cache, audit log)
+- [ ] HtmlSanitizer + URL validation
+- [ ] `POST /uploads/images` (magic bytes, re-encode WebP, GUID name, immutable cache)
+- [ ] PDPA: เข้ารหัส NDA, signed URL ลายเซ็น, retention jobs
 
-builder.Services.Configure<BrotliCompressionProviderOptions>(options =>
-{
-    options.Level = System.IO.Compression.CompressionLevel.Fastest;
-});
+**Sprint 3 — งานหลังบ้านสำหรับทีมขาย (Phase 2)**
+- [ ] `/admin/leads`, NDA viewer, careers list/status, CSV export, เปลี่ยนรหัสผ่าน
+- [ ] (หน้าบ้านจะทำ UI ให้หลัง endpoint พร้อม)
 
-// ต้องเรียกก่อน UseRouting
-app.UseResponseCompression();
-```
-
-> ลด payload ขนาด JSON response ลง **60–80%** โดยเฉพาะ endpoint ที่ส่งข้อมูลเยอะ เช่น GET /pages/{pageId}, GET /assets
-
----
-
-### P5. CORS Headers — รองรับ CDN และ cross-origin image
-
-**ถ้าใช้ CDN หรือ S3 เป็น image host:**
-
-```csharp
-// Program.cs
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend", policy =>
-    {
-        policy
-            .WithOrigins(
-                "https://www.agileassets.co.th",
-                "https://agileassets.co.th",
-                "http://localhost:3001"  // dev
-            )
-            .AllowAnyMethod()
-            .AllowAnyHeader()
-            .WithExposedHeaders("Content-Disposition");
-    });
-});
-
-app.UseCors("AllowFrontend");
-```
-
-> Frontend ใช้ `fetchPriority="high"` บน Hero Image — ถ้า CORS ไม่ถูกต้อง browser จะ downgrade priority และ LCP จะช้าลง
-
----
-
-### Backend Performance Checklist (เพิ่มเติม)
-
-- [ ] ติดตั้ง `SixLabors.ImageSharp` และแปลง upload เป็น WebP (quality 85)
-- [ ] เพิ่ม `imageWidth` + `imageHeight` columns ใน `news`, `assets` tables
-- [ ] เพิ่ม `imageWidth` + `imageHeight` ใน API response ทุก entity ที่มีรูป
-- [ ] เปิด `UseResponseCompression` (Brotli + Gzip) ใน ASP.NET Core
-- [ ] ตั้ง `Cache-Control: no-store` สำหรับ API endpoints
-- [ ] ตั้ง `Cache-Control: public, max-age=2592000` สำหรับ uploaded static files
-- [ ] ตรวจสอบ CORS config ให้รองรับ production domain
-- [ ] (Optional) ย้าย image storage ไป Azure Blob Storage หรือ AWS S3 + CloudFront CDN
+**ก่อนขึ้น production (ทั้งสองฝั่ง)**
+- [ ] เปลี่ยนรหัสแอดมิน (`123456789` หลุดใน git history แล้ว ถือว่าใช้ไม่ได้)
+- [ ] ตั้ง Cloudflare Turnstile (site key → หน้าบ้าน, secret → หลังบ้าน)
+- [ ] ย้ายรูปจาก `agileassets.co.th/wp-content/...` (~90 รูปที่หน้าบ้านยังลิงก์อยู่) มาเก็บที่ `/uploads` **ก่อนปิดเว็บ WordPress เดิม** ไม่งั้นรูปเสียทั้งเว็บ
+- [ ] ทดสอบ CORS จากโดเมนจริง + ตรวจ CSP `connect-src` ตรงกับโดเมน API
+- [ ] Penetration test เบื้องต้น (OWASP ZAP baseline) กับทั้ง API และเว็บ

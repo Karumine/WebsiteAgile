@@ -14,6 +14,20 @@ import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
+import { useLeadSubmit } from '@/lib/useLeadSubmit';
+import { formService } from '@/services/formService';
+
+function isValidThaiId(digits: string): boolean {
+    if (!/^\d{13}$/.test(digits)) return false;
+    let sum = 0;
+    for (let i = 0; i < 12; i++) sum += Number(digits[i]) * (13 - i);
+    return (11 - (sum % 11)) % 10 === Number(digits[12]);
+}
+
+function maskIdentity(value: string): string {
+    const compact = value.replace(/\s/g, '');
+    return compact.length <= 4 ? compact : '•'.repeat(compact.length - 4) + compact.slice(-4);
+}
 
 export function NcNdaPage() {
     const { lang } = useLanguage();
@@ -28,6 +42,7 @@ export function NcNdaPage() {
     const [agreed, setAgreed] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccessModalOpen, setIsSuccessModalOpen] = useState(false);
+    const { send, guardFields } = useLeadSubmit();
     const [submissionData, setSubmissionData] = useState<{
         refId: string;
         timestamp: string;
@@ -42,8 +57,12 @@ export function NcNdaPage() {
     const [hasSignature, setHasSignature] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    // Format ID card input to: X XXXX XXXXX XX X
+    // Thai ID is formatted as X XXXX XXXXX XX X; passports are kept as uppercase alphanumerics
     const handleIdCardChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (/[a-z]/i.test(e.target.value)) {
+            setIdCard(e.target.value.replace(/[^a-z0-9]/gi, '').toUpperCase().slice(0, 9));
+            return;
+        }
         const raw = e.target.value.replace(/\D/g, '').slice(0, 13);
         let formatted = '';
         if (raw.length > 0) formatted += raw.substring(0, 1);
@@ -133,7 +152,7 @@ export function NcNdaPage() {
         window.print();
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!fullName.trim()) {
@@ -141,13 +160,20 @@ export function NcNdaPage() {
             return;
         }
 
-        if (!idCard.trim() || idCard.replace(/\s/g, '').length < 13) {
-            toast.error(lang === 'th' ? 'กรุณากรอกเลขบัตรประชาชนให้ครบ 13 หลัก' : 'Please enter a valid 13-digit ID number');
+        const identity = idCard.replace(/\s/g, '');
+        const isPassport = /[A-Z]/.test(identity);
+        if (isPassport ? !/^[A-Z0-9]{6,9}$/.test(identity) : !isValidThaiId(identity)) {
+            toast.error(lang === 'th' ? 'เลขบัตรประชาชน (13 หลัก) หรือเลขพาสปอร์ตไม่ถูกต้อง' : 'Please enter a valid 13-digit Thai ID or passport number');
             return;
         }
 
-        if (!email.trim() || !email.includes('@')) {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
             toast.error(lang === 'th' ? 'กรุณากรอกอีเมลให้ถูกต้อง' : 'Please enter a valid email address');
+            return;
+        }
+
+        if (!hasSignature || !canvasRef.current) {
+            toast.error(lang === 'th' ? 'กรุณาลงลายมือชื่อในช่องลายเซ็น' : 'Please sign in the signature box');
             return;
         }
 
@@ -156,31 +182,44 @@ export function NcNdaPage() {
             return;
         }
 
+        const canvas = canvasRef.current;
+        const signature = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'));
+        if (!signature) {
+            toast.error(lang === 'th' ? 'ไม่สามารถอ่านลายเซ็นได้ กรุณาเซ็นใหม่อีกครั้ง' : 'Could not read the signature. Please sign again.');
+            return;
+        }
+
         setIsSubmitting(true);
-
-        setTimeout(() => {
-            const refNumber = `NDA-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
-            const dateStr = new Date().toLocaleString(lang === 'th' ? 'th-TH' : 'en-US', {
-                dateStyle: 'medium',
-                timeStyle: 'short',
-            });
-
-            setSubmissionData({
-                refId: refNumber,
-                timestamp: dateStr,
+        const result = await send((meta) =>
+            formService.submitNda({
                 fullName: fullName.trim(),
-                idCard: idCard.trim(),
+                idCard: identity,
                 email: email.trim(),
-            });
+                company: company.trim() || undefined,
+                phone: phone.trim() || undefined,
+                agreed,
+                signature,
+            }, meta)
+        );
+        setIsSubmitting(false);
+        if (!result) return;
 
-            setIsSubmitting(false);
-            setIsSuccessModalOpen(true);
-            toast.success(
-                lang === 'th'
-                    ? 'บันทึกและส่งข้อมูลสัญญารักษาความลับเรียบร้อยแล้ว'
-                    : 'NC-NDA Agreement successfully submitted!'
-            );
-        }, 1200);
+        const receipt = result.data;
+        const submittedAt = receipt?.timestamp ? new Date(receipt.timestamp) : new Date();
+        setSubmissionData({
+            refId: receipt?.referenceNumber || '-',
+            timestamp: submittedAt.toLocaleString(lang === 'th' ? 'th-TH' : 'en-US', { dateStyle: 'medium', timeStyle: 'short' }),
+            fullName: fullName.trim(),
+            idCard: maskIdentity(identity),
+            email: email.trim(),
+        });
+        setIdCard('');
+        setIsSuccessModalOpen(true);
+        toast.success(
+            lang === 'th'
+                ? 'บันทึกและส่งข้อมูลสัญญารักษาความลับเรียบร้อยแล้ว'
+                : 'NC-NDA Agreement successfully submitted!'
+        );
     };
 
     const pageTitle = lang === 'th'
@@ -578,12 +617,12 @@ export function NcNdaPage() {
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                             {/* Full Name */}
                                             <div className="space-y-2">
-                                                <label className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5">
+                                                <label htmlFor="nc-nda-field-1" className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5">
                                                     <User className="w-3.5 h-3.5 text-sky-500" />
                                                     <span>{lang === 'th' ? 'ชื่อ-สกุล' : 'Full Name / Representative'}</span>
                                                     <span className="text-rose-500">*</span>
                                                 </label>
-                                                <input
+                                                <input id="nc-nda-field-1"
                                                     type="text"
                                                     required
                                                     value={fullName}
@@ -595,30 +634,31 @@ export function NcNdaPage() {
 
                                             {/* ID Card / Passport */}
                                             <div className="space-y-2">
-                                                <label className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5">
+                                                <label htmlFor="nc-nda-field-2" className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5">
                                                     <CreditCard className="w-3.5 h-3.5 text-sky-500" />
                                                     <span>{lang === 'th' ? 'เลขบัตรประชาชน / Passport' : 'National ID / Passport No.'}</span>
                                                     <span className="text-rose-500">*</span>
                                                 </label>
-                                                <input
+                                                <input id="nc-nda-field-2"
                                                     type="text"
                                                     required
                                                     value={idCard}
                                                     onChange={handleIdCardChange}
                                                     placeholder="X XXXX XXXXX XX X"
                                                     maxLength={17}
+                                                    autoComplete="off"
                                                     className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 text-xs sm:text-sm text-foreground font-mono outline-none transition-all tracking-wider"
                                                 />
                                             </div>
 
                                             {/* Email */}
                                             <div className="space-y-2 sm:col-span-2">
-                                                <label className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5">
+                                                <label htmlFor="nc-nda-field-3" className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5">
                                                     <Mail className="w-3.5 h-3.5 text-sky-500" />
                                                     <span>{lang === 'th' ? 'อีเมล' : 'Email Address'}</span>
                                                     <span className="text-rose-500">*</span>
                                                 </label>
-                                                <input
+                                                <input id="nc-nda-field-3"
                                                     type="email"
                                                     required
                                                     value={email}
@@ -630,11 +670,11 @@ export function NcNdaPage() {
 
                                             {/* Company Name (Optional) */}
                                             <div className="space-y-2">
-                                                <label className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5">
+                                                <label htmlFor="nc-nda-field-4" className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5">
                                                     <Building2 className="w-3.5 h-3.5 text-sky-500" />
                                                     <span>{lang === 'th' ? 'ชื่อบริษัท / นิติบุคคล (ถ้ามี)' : 'Company Name (Optional)'}</span>
                                                 </label>
-                                                <input
+                                                <input id="nc-nda-field-4"
                                                     type="text"
                                                     value={company}
                                                     onChange={(e) => setCompany(e.target.value)}
@@ -645,10 +685,10 @@ export function NcNdaPage() {
 
                                             {/* Phone (Optional) */}
                                             <div className="space-y-2">
-                                                <label className="text-xs sm:text-sm font-semibold text-foreground">
+                                                <label htmlFor="nc-nda-field-5" className="text-xs sm:text-sm font-semibold text-foreground">
                                                     <span>{lang === 'th' ? 'เบอร์โทรศัพท์ (ถ้ามี)' : 'Phone Number (Optional)'}</span>
                                                 </label>
-                                                <input
+                                                <input id="nc-nda-field-5"
                                                     type="tel"
                                                     value={phone}
                                                     onChange={(e) => setPhone(e.target.value)}
@@ -721,6 +761,8 @@ export function NcNdaPage() {
                                                 </span>
                                             </label>
                                         </div>
+
+                                        {guardFields}
 
                                         {/* Submit Button */}
                                         <div className="pt-3">

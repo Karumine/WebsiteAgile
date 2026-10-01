@@ -232,7 +232,7 @@ export function ServicesRangeSection() {
                                         <button
                                             onClick={() => {
                                                 if (item.href?.startsWith('http')) {
-                                                    window.open(item.href, '_blank');
+                                                    window.open(item.href, '_blank', 'noopener,noreferrer');
                                                 } else {
                                                     navigate(item.href);
                                                     window.scrollTo({ top: 0, behavior: 'smooth' });

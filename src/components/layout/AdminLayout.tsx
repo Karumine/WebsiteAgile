@@ -14,17 +14,47 @@ import {
     ExternalLink,
     Palette,
     FileEdit,
+    CloudOff,
+    UploadCloud,
+    CheckCircle2,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { useSiteSettings, type PublishableSection } from '@/contexts/SiteSettingsContext';
+
+const SECTION_LABELS: Record<PublishableSection, { th: string; en: string }> = {
+    banner: { th: 'แบนเนอร์', en: 'Banner' },
+    interestRates: { th: 'อัตราดอกเบี้ย', en: 'Interest rates' },
+    news: { th: 'ข่าวสาร', en: 'News' },
+    companyInfo: { th: 'ข้อมูลบริษัท', en: 'Company info' },
+    impactStats: { th: 'สถิติ', en: 'Stats' },
+    usedMachinery: { th: 'เครื่องจักรมือสอง', en: 'Assets for sale' },
+    faqs: { th: 'FAQ', en: 'FAQ' },
+    themeSettings: { th: 'ธีม', en: 'Theme' },
+    pageContents: { th: 'เนื้อหาหน้าเว็บ', en: 'Page content' },
+    customPages: { th: 'หน้าที่สร้างเอง', en: 'Custom pages' },
+    customFields: { th: 'ฟิลด์แคมเปญ', en: 'Custom fields' },
+};
 
 import logoCmyk from '@/assets/Logo_Agile Assets_CMYK.png';
 
 export function AdminLayout() {
-    const { user, logout } = useAuth();
+    const { user, logout, isServerSession } = useAuth();
     const { lang, setLang } = useLanguage();
     const navigate = useNavigate();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const { pendingSections, isPublishing, publish } = useSiteSettings();
+    const hasPending = pendingSections.length > 0;
+    const pendingLabel = pendingSections.map((key) => SECTION_LABELS[key][lang === 'th' ? 'th' : 'en']).join(', ');
+
+    useEffect(() => {
+        if (!hasPending) return;
+        const warn = (e: BeforeUnloadEvent) => {
+            e.preventDefault();
+        };
+        window.addEventListener('beforeunload', warn);
+        return () => window.removeEventListener('beforeunload', warn);
+    }, [hasPending]);
 
     const sidebarLinks = [
         { to: '/management-portal/dashboard', icon: LayoutDashboard, labelEn: 'Dashboard', labelTh: 'แผงควบคุม' },
@@ -37,6 +67,11 @@ export function AdminLayout() {
     ];
 
     const handleLogout = () => {
+        if (hasPending && !window.confirm(lang === 'th'
+            ? 'ยังมีการแก้ไขที่ยังไม่ได้เผยแพร่ ต้องการออกจากระบบหรือไม่?'
+            : 'You have unpublished changes. Sign out anyway?')) {
+            return;
+        }
         logout();
         navigate('/management-portal');
     };
@@ -73,6 +108,7 @@ export function AdminLayout() {
                         </a>
                         <button
                             onClick={() => setSidebarOpen(false)}
+                            aria-label={lang === 'th' ? 'ปิดเมนู' : 'Close menu'}
                             className="lg:hidden text-muted-foreground hover:text-foreground p-1"
                         >
                             <X className="w-5 h-5" />
@@ -138,6 +174,7 @@ export function AdminLayout() {
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setSidebarOpen(true)}
+                            aria-label={lang === 'th' ? 'เปิดเมนู' : 'Open menu'}
                             className="lg:hidden text-muted-foreground hover:text-foreground"
                         >
                             <Menu className="w-5 h-5" />
@@ -147,8 +184,35 @@ export function AdminLayout() {
                         </h1>
                     </div>
 
-                    {/* Right Tools: Theme & Language Switcher */}
+                    {/* Right Tools: Publish, Theme & Language Switcher */}
                     <div className="flex items-center gap-2.5 sm:gap-3">
+                        {isServerSession && (
+                            <button
+                                type="button"
+                                onClick={() => void publish()}
+                                disabled={!hasPending || isPublishing}
+                                title={hasPending ? `${lang === 'th' ? 'ยังไม่เผยแพร่' : 'Unpublished'}: ${pendingLabel}` : undefined}
+                                className={cn(
+                                    'relative inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all',
+                                    hasPending
+                                        ? 'bg-emerald-500 hover:bg-emerald-600 text-white shadow-md shadow-emerald-500/25'
+                                        : 'bg-muted text-muted-foreground cursor-default'
+                                )}
+                            >
+                                {isPublishing ? (
+                                    <span className="w-3.5 h-3.5 rounded-full border-2 border-white/40 border-t-white animate-spin" />
+                                ) : hasPending ? (
+                                    <UploadCloud className="w-3.5 h-3.5" />
+                                ) : (
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                )}
+                                <span className="hidden sm:inline">
+                                    {hasPending
+                                        ? (lang === 'th' ? `เผยแพร่ (${pendingSections.length})` : `Publish (${pendingSections.length})`)
+                                        : (lang === 'th' ? 'เผยแพร่แล้ว' : 'Published')}
+                                </span>
+                            </button>
+                        )}
                         <a
                             href="/"
                             target="_blank"
@@ -188,6 +252,17 @@ export function AdminLayout() {
                         </div>
                     </div>
                 </header>
+
+                {!isServerSession && (
+                    <div role="status" className="flex items-start gap-2.5 px-4 sm:px-6 py-2.5 bg-amber-500/10 border-b border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs sm:text-sm">
+                        <CloudOff className="w-4 h-4 mt-0.5 shrink-0" />
+                        <span>
+                            {lang === 'th'
+                                ? 'โหมดออฟไลน์ (สำหรับนักพัฒนา): ระบบหลังบ้านยังไม่พร้อม การแก้ไขจะถูกบันทึกและเห็นได้เฉพาะในเบราว์เซอร์นี้เท่านั้น ยังไม่เผยแพร่ขึ้นเว็บไซต์จริง'
+                                : 'Offline developer mode: the backend is unavailable. Changes are saved in this browser only and are NOT published to the live website.'}
+                        </span>
+                    </div>
+                )}
 
                 {/* Page Content */}
                 <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">

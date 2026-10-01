@@ -12,6 +12,8 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLeadSubmit } from '@/lib/useLeadSubmit';
+import { formService } from '@/services/formService';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
@@ -80,6 +82,7 @@ export function InvestorRelationsPage() {
     const { settings } = useSiteSettings();
     const { content } = usePageContent('investor-relations', DEFAULT_PAGE_CONTENTS['investor-relations']);
     const [submitting, setSubmitting] = useState(false);
+    const { send, guardFields } = useLeadSubmit();
     const [submitted, setSubmitted] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -265,7 +268,7 @@ export function InvestorRelationsPage() {
         },
     ];
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.name || !formData.phone) {
             toast.error(lang === 'th' ? 'กรุณากรอกชื่อและเบอร์โทรศัพท์' : 'Please provide your name and phone number');
@@ -273,15 +276,25 @@ export function InvestorRelationsPage() {
         }
 
         setSubmitting(true);
-        setTimeout(() => {
-            setSubmitting(false);
-            setSubmitted(true);
-            toast.success(
-                lang === 'th' 
-                    ? 'ส่งข้อมูลสำเร็จ! เจ้าหน้าที่ฝ่ายนักลงทุนสัมพันธ์จะติดต่อกลับโดยเร็วที่สุด' 
-                    : 'Inquiry submitted successfully! Our Investor Relations team will contact you shortly.'
-            );
-        }, 800);
+        const result = await send((meta) =>
+            formService.submitInquiry({
+                source: 'investor-relations',
+                name: formData.name,
+                phone: formData.phone,
+                email: formData.email,
+                company: formData.company,
+                message: formData.note,
+                interestType: formData.interestType,
+            }, meta)
+        );
+        setSubmitting(false);
+        if (!result) return;
+        setSubmitted(true);
+        toast.success(
+            lang === 'th' 
+                ? 'ส่งข้อมูลสำเร็จ! เจ้าหน้าที่ฝ่ายนักลงทุนสัมพันธ์จะติดต่อกลับโดยเร็วที่สุด' 
+                : 'Inquiry submitted successfully! Our Investor Relations team will contact you shortly.'
+        );
     };
 
     const scrollToForm = () => {
@@ -832,7 +845,7 @@ export function InvestorRelationsPage() {
                             <div className="relative rounded-3xl overflow-hidden border border-sky-500/30 bg-slate-950 p-8 sm:p-12 text-center text-white shadow-2xl">
                                 <div className="absolute inset-0 z-0 opacity-40">
                                     <img 
-                                        src="https://images.unsplash.com/photo-1509391365360-2e959784a276?w=1600&q=80" 
+                                        src="https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=1600&q=80" 
                                         alt="Sustainability Campaign" 
                                         className="w-full h-full object-cover"
                                     />
@@ -922,10 +935,10 @@ export function InvestorRelationsPage() {
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                                                <label htmlFor="investor-relations-field-1" className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
                                                     {lang === 'th' ? 'ชื่อ-นามสกุล ผู้ติดต่อ *' : 'Full Name *'}
                                                 </label>
-                                                <input
+                                                <input id="investor-relations-field-1"
                                                     type="text"
                                                     required
                                                     value={formData.name}
@@ -936,10 +949,10 @@ export function InvestorRelationsPage() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                                                <label htmlFor="investor-relations-field-2" className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
                                                     {lang === 'th' ? 'เบอร์โทรศัพท์ติดต่อ *' : 'Phone Number *'}
                                                 </label>
-                                                <input
+                                                <input id="investor-relations-field-2"
                                                     type="tel"
                                                     required
                                                     value={formData.phone}
@@ -952,10 +965,10 @@ export function InvestorRelationsPage() {
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                                                <label htmlFor="investor-relations-field-3" className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
                                                     {lang === 'th' ? 'อีเมล' : 'Email Address'}
                                                 </label>
-                                                <input
+                                                <input id="investor-relations-field-3"
                                                     type="email"
                                                     value={formData.email}
                                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -965,10 +978,10 @@ export function InvestorRelationsPage() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                                                <label htmlFor="investor-relations-field-4" className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
                                                     {lang === 'th' ? 'องค์กร / บริษัท / กองทุน' : 'Organization / Fund / Company'}
                                                 </label>
-                                                <input
+                                                <input id="investor-relations-field-4"
                                                     type="text"
                                                     value={formData.company}
                                                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
@@ -979,10 +992,10 @@ export function InvestorRelationsPage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                                            <label htmlFor="investor-relations-field-5" className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
                                                 {lang === 'th' ? 'ความสนใจในการลงทุน' : 'Primary Investment Interest'}
                                             </label>
-                                            <select
+                                            <select id="investor-relations-field-5"
                                                 value={formData.interestType}
                                                 onChange={(e) => setFormData({ ...formData, interestType: e.target.value })}
                                                 className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all"
@@ -995,10 +1008,10 @@ export function InvestorRelationsPage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                                            <label htmlFor="investor-relations-field-6" className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
                                                 {lang === 'th' ? 'ข้อความเพิ่มเติม' : 'Additional Message / Inquiries'}
                                             </label>
-                                            <textarea
+                                            <textarea id="investor-relations-field-6"
                                                 rows={4}
                                                 value={formData.note}
                                                 onChange={(e) => setFormData({ ...formData, note: e.target.value })}
@@ -1007,6 +1020,7 @@ export function InvestorRelationsPage() {
                                             />
                                         </div>
 
+                                        {guardFields}
                                         <div className="pt-2 text-center">
                                             <button
                                                 type="submit"

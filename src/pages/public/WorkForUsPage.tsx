@@ -16,6 +16,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { careerService } from '@/services/careerService';
+import { useLeadSubmit } from '@/lib/useLeadSubmit';
 
 interface JobPosition {
     id: string;
@@ -158,6 +159,7 @@ export function WorkForUsPage() {
     const [resumeUrl, setResumeUrl] = useState('');
     const [coverLetter, setCoverLetter] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { send, guardFields } = useLeadSubmit();
 
     // FAQ Accordion state
     const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -174,27 +176,28 @@ export function WorkForUsPage() {
             return;
         }
 
+        const trimmedResumeUrl = resumeUrl.trim();
+        if (trimmedResumeUrl && !/^https:\/\//i.test(trimmedResumeUrl)) {
+            toast.error(lang === 'th' ? 'ลิงก์ Resume ต้องขึ้นต้นด้วย https://' : 'Resume link must start with https://');
+            return;
+        }
+
         setIsSubmitting(true);
-        try {
-            const res = await careerService.applyJob({
+        const result = await send((meta) =>
+            careerService.applyJob({
                 fullName: fullName.trim(),
                 email: email.trim(),
                 phone: phone.trim(),
                 positionId: appliedPosition,
                 positionTitle: JOBS.find((j) => j.id === appliedPosition)?.titleTh || appliedPosition,
+                experienceYears,
                 expectedSalary: expectedSalary.trim(),
-                resumeUrl: resumeUrl.trim(),
+                resumeUrl: trimmedResumeUrl,
                 coverLetter: coverLetter.trim(),
-            });
-
-            if (!res.success) {
-                console.warn('API returned non-success response:', res.error);
-            }
-        } catch (err) {
-            console.warn('Network error while sending application to backend:', err);
-        } finally {
-            setIsSubmitting(false);
-        }
+            }, meta)
+        );
+        setIsSubmitting(false);
+        if (!result) return;
 
         toast.success(
             lang === 'th'
@@ -534,7 +537,7 @@ export function WorkForUsPage() {
                                 <button
                                     key={tab.id}
                                     type="button"
-                                    onClick={() => setSelectedDept(tab.id as any)}
+                                    onClick={() => setSelectedDept(tab.id as typeof selectedDept)}
                                     className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                                         selectedDept === tab.id
                                             ? 'bg-primary text-white shadow-md shadow-primary/25 scale-105'
@@ -621,10 +624,10 @@ export function WorkForUsPage() {
                             <form onSubmit={handleFormSubmit} className="space-y-6">
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     <div>
-                                        <label className="block text-xs font-bold text-foreground mb-2">
+                                        <label htmlFor="work-for-us-field-1" className="block text-xs font-bold text-foreground mb-2">
                                             {lang === 'th' ? 'ชื่อ - นามสกุล *' : 'Full Name *'}
                                         </label>
-                                        <input
+                                        <input id="work-for-us-field-1"
                                             type="text"
                                             required
                                             value={fullName}
@@ -635,10 +638,10 @@ export function WorkForUsPage() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-bold text-foreground mb-2">
+                                        <label htmlFor="work-for-us-field-2" className="block text-xs font-bold text-foreground mb-2">
                                             {lang === 'th' ? 'เบอร์โทรศัพท์ติดต่อ *' : 'Phone Number *'}
                                         </label>
-                                        <input
+                                        <input id="work-for-us-field-2"
                                             type="tel"
                                             required
                                             value={phone}
@@ -651,10 +654,10 @@ export function WorkForUsPage() {
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     <div>
-                                        <label className="block text-xs font-bold text-foreground mb-2">
+                                        <label htmlFor="work-for-us-field-3" className="block text-xs font-bold text-foreground mb-2">
                                             {lang === 'th' ? 'อีเมลสำหรับติดต่อ *' : 'Email Address *'}
                                         </label>
-                                        <input
+                                        <input id="work-for-us-field-3"
                                             type="email"
                                             required
                                             value={email}
@@ -665,10 +668,10 @@ export function WorkForUsPage() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-bold text-foreground mb-2">
+                                        <label htmlFor="work-for-us-field-4" className="block text-xs font-bold text-foreground mb-2">
                                             {lang === 'th' ? 'ตำแหน่งที่สนใจสมัคร *' : 'Position Applied For *'}
                                         </label>
-                                        <select
+                                        <select id="work-for-us-field-4"
                                             value={appliedPosition}
                                             onChange={(e) => setAppliedPosition(e.target.value)}
                                             className="w-full px-4 py-3 rounded-xl bg-navy-light border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -687,10 +690,10 @@ export function WorkForUsPage() {
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                     <div>
-                                        <label className="block text-xs font-bold text-foreground mb-2">
+                                        <label htmlFor="work-for-us-field-5" className="block text-xs font-bold text-foreground mb-2">
                                             {lang === 'th' ? 'ประสบการณ์ทำงานโดยประมาณ' : 'Years of Experience'}
                                         </label>
-                                        <select
+                                        <select id="work-for-us-field-5"
                                             value={experienceYears}
                                             onChange={(e) => setExperienceYears(e.target.value)}
                                             className="w-full px-4 py-3 rounded-xl bg-navy-light border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -703,10 +706,10 @@ export function WorkForUsPage() {
                                     </div>
 
                                     <div>
-                                        <label className="block text-xs font-bold text-foreground mb-2">
+                                        <label htmlFor="work-for-us-field-6" className="block text-xs font-bold text-foreground mb-2">
                                             {lang === 'th' ? 'เงินเดือนที่คาดหวัง (บาท/เดือน)' : 'Expected Salary (THB/Month)'}
                                         </label>
-                                        <input
+                                        <input id="work-for-us-field-6"
                                             type="text"
                                             value={expectedSalary}
                                             onChange={(e) => setExpectedSalary(e.target.value)}
@@ -717,10 +720,10 @@ export function WorkForUsPage() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-foreground mb-2">
+                                    <label htmlFor="work-for-us-field-7" className="block text-xs font-bold text-foreground mb-2">
                                         {lang === 'th' ? 'ลิงก์ Resume / CV / LinkedIn / Portfolio' : 'Resume / Portfolio / LinkedIn URL'}
                                     </label>
-                                    <input
+                                    <input id="work-for-us-field-7"
                                         type="url"
                                         value={resumeUrl}
                                         onChange={(e) => setResumeUrl(e.target.value)}
@@ -735,10 +738,10 @@ export function WorkForUsPage() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-bold text-foreground mb-2">
+                                    <label htmlFor="work-for-us-field-8" className="block text-xs font-bold text-foreground mb-2">
                                         {lang === 'th' ? 'แนะนำตัวเองเบื้องต้น หรือเหตุผลที่อยากร่วมงานกับเรา' : 'Short Cover Letter / Introduction'}
                                     </label>
-                                    <textarea
+                                    <textarea id="work-for-us-field-8"
                                         rows={4}
                                         value={coverLetter}
                                         onChange={(e) => setCoverLetter(e.target.value)}
@@ -746,6 +749,8 @@ export function WorkForUsPage() {
                                         className="w-full px-4 py-3 rounded-xl bg-navy-light border border-border text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 leading-relaxed"
                                     />
                                 </div>
+
+                                {guardFields}
 
                                 <button
                                     type="submit"

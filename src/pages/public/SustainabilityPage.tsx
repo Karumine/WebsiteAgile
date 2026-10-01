@@ -12,6 +12,8 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLeadSubmit } from '@/lib/useLeadSubmit';
+import { formService } from '@/services/formService';
 import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 
@@ -115,6 +117,7 @@ export function SustainabilityPage() {
     const { lang } = useLanguage();
     const { content } = usePageContent('sustainability', DEFAULT_PAGE_CONTENTS['sustainability']);
     const [submitting, setSubmitting] = useState(false);
+    const { send, guardFields } = useLeadSubmit();
     const [submitted, setSubmitted] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -132,7 +135,7 @@ export function SustainabilityPage() {
             titleEn: 'Rural Clean Water Scarcity',
             descTh: 'แหล่งน้ำธรรมชาติปนเปื้อน ไม่ปลอดภัยในการบริโภคประจำวัน',
             descEn: 'Contaminated natural water sources unsafe for daily consumption',
-            image: 'https://images.unsplash.com/photo-1541888946425-d0fbb18f15f6?w=400&q=80',
+            image: 'https://images.unsplash.com/photo-1538300342682-cf57afb97285?w=400&q=80',
         },
         {
             titleTh: 'สารปนเปื้อนในน้ำ',
@@ -146,7 +149,7 @@ export function SustainabilityPage() {
             titleEn: 'Substandard Tap Water Quality',
             descTh: 'ค่าความเค็ม ตะกอน และความกระด้างเกินเกณฑ์มาตรฐานในหลายพื้นที่',
             descEn: 'High salinity, turbidity and hardness exceeding certified safety limits',
-            image: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=400&q=80',
+            image: 'https://images.unsplash.com/photo-1523362628745-0c100150b504?w=400&q=80',
         },
         {
             titleTh: 'ผลกระทบต่อสุขภาพ',
@@ -171,9 +174,9 @@ export function SustainabilityPage() {
                 { th: '📉 ลดการปล่อยก๊าซเรือนกระจก (CO2) กว่า 120 ตันต่อปี', en: '📉 120+ Tons/year CO2 greenhouse emissions avoided' },
             ],
             images: [
-                'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=700&q=80',
-                'https://images.unsplash.com/photo-1508873696983-2df5293cb32b?w=700&q=80',
-                'https://images.unsplash.com/photo-1545209179-a5dc700fe0d6?w=700&q=80',
+                'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=700&q=80',
+                'https://images.unsplash.com/photo-1497440001374-f26997328c1b?w=700&q=80',
+                'https://images.unsplash.com/photo-1559302504-64aae6ca6b6d?w=700&q=80',
                 'https://images.unsplash.com/photo-1466611653911-95081537e5b7?w=700&q=80',
             ],
         },
@@ -215,7 +218,7 @@ export function SustainabilityPage() {
         },
     ];
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.name || !formData.phone) {
             toast.error(lang === 'th' ? 'กรุณากรอกชื่อและเบอร์โทรศัพท์' : 'Please provide your name and phone number');
@@ -223,15 +226,25 @@ export function SustainabilityPage() {
         }
 
         setSubmitting(true);
-        setTimeout(() => {
-            setSubmitting(false);
-            setSubmitted(true);
-            toast.success(
-                lang === 'th' 
-                    ? 'ส่งข้อมูลสำเร็จ! เจ้าหน้าที่ฝ่ายความยั่งยืนจะติดต่อกลับโดยเร็วที่สุด' 
-                    : 'Inquiry submitted successfully! Our Sustainability team will contact you shortly.'
-            );
-        }, 800);
+        const result = await send((meta) =>
+            formService.submitInquiry({
+                source: 'sustainability',
+                name: formData.name,
+                phone: formData.phone,
+                email: formData.email,
+                company: formData.company,
+                message: formData.note,
+                projectType: formData.projectType,
+            }, meta)
+        );
+        setSubmitting(false);
+        if (!result) return;
+        setSubmitted(true);
+        toast.success(
+            lang === 'th' 
+                ? 'ส่งข้อมูลสำเร็จ! เจ้าหน้าที่ฝ่ายความยั่งยืนจะติดต่อกลับโดยเร็วที่สุด' 
+                : 'Inquiry submitted successfully! Our Sustainability team will contact you shortly.'
+        );
     };
 
     const scrollToProjects = () => {
@@ -600,7 +613,7 @@ export function SustainabilityPage() {
                 <section id="sustainability-form" className="py-20 lg:py-28 relative overflow-hidden bg-slate-950">
                     <div className="absolute inset-0 z-0">
                         <img 
-                            src="https://images.unsplash.com/photo-1509391365360-2e959784a276?w=1600&q=80" 
+                            src="https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=1600&q=80" 
                             alt="Sustainability Partnership Form" 
                             className="w-full h-full object-cover"
                         />
@@ -651,10 +664,10 @@ export function SustainabilityPage() {
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                                                <label htmlFor="sustainability-field-1" className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
                                                     {lang === 'th' ? 'ชื่อ-นามสกุล ผู้ติดต่อ *' : 'Full Name *'}
                                                 </label>
-                                                <input
+                                                <input id="sustainability-field-1"
                                                     type="text"
                                                     required
                                                     value={formData.name}
@@ -665,10 +678,10 @@ export function SustainabilityPage() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                                                <label htmlFor="sustainability-field-2" className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
                                                     {lang === 'th' ? 'เบอร์โทรศัพท์ติดต่อ *' : 'Phone Number *'}
                                                 </label>
-                                                <input
+                                                <input id="sustainability-field-2"
                                                     type="tel"
                                                     required
                                                     value={formData.phone}
@@ -681,10 +694,10 @@ export function SustainabilityPage() {
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                                                <label htmlFor="sustainability-field-3" className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
                                                     {lang === 'th' ? 'อีเมล' : 'Email Address'}
                                                 </label>
-                                                <input
+                                                <input id="sustainability-field-3"
                                                     type="email"
                                                     value={formData.email}
                                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -694,10 +707,10 @@ export function SustainabilityPage() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                                                <label htmlFor="sustainability-field-4" className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
                                                     {lang === 'th' ? 'องค์กร / บริษัท / โรงงาน' : 'Organization / Company / Factory'}
                                                 </label>
-                                                <input
+                                                <input id="sustainability-field-4"
                                                     type="text"
                                                     value={formData.company}
                                                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
@@ -708,10 +721,10 @@ export function SustainabilityPage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                                            <label htmlFor="sustainability-field-5" className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
                                                 {lang === 'th' ? 'ประเภทโครงการความยั่งยืนที่สนใจ' : 'Sustainability Project Category'}
                                             </label>
-                                            <select
+                                            <select id="sustainability-field-5"
                                                 value={formData.projectType}
                                                 onChange={(e) => setFormData({ ...formData, projectType: e.target.value })}
                                                 className="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white text-xs focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition-all"
@@ -724,10 +737,10 @@ export function SustainabilityPage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
+                                            <label htmlFor="sustainability-field-6" className="block text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">
                                                 {lang === 'th' ? 'ข้อความเพิ่มเติม' : 'Additional Project Details'}
                                             </label>
-                                            <textarea
+                                            <textarea id="sustainability-field-6"
                                                 rows={4}
                                                 value={formData.note}
                                                 onChange={(e) => setFormData({ ...formData, note: e.target.value })}
@@ -736,6 +749,7 @@ export function SustainabilityPage() {
                                             />
                                         </div>
 
+                                        {guardFields}
                                         <div className="pt-2 text-center">
                                             <button
                                                 type="submit"

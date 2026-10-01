@@ -196,10 +196,6 @@ export function ProjectActivityPage() {
         {
             title: lang === 'th' ? 'บริษัท น้ำดื่มขอนแก่น จำกัด' : 'Khon Kaen Drinking Water Co., Ltd.',
             images: [
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897e0b899e0b989e0b8b3e0b894e0b8b7e0b988e0b8a1e0b882e0b8ade0b899e0b981e0b881e0b899e0b888e0b8b3/11896.jpg?t=1760429064',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897e0b899e0b989e0b8b3e0b894e0b8b7e0b988e0b8a1e0b882e0b8ade0b899e0b981e0b881e0b899e0b888e0b8b3/313793.jpg?t=1760429064',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897e0b899e0b989e0b8b3e0b894e0b8b7e0b988e0b8a1e0b882e0b8ade0b899e0b981e0b881e0b899e0b888e0b8b3/313775.jpg?t=1760429064',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897e0b899e0b989e0b8b3e0b894e0b8b7e0b988e0b8a1e0b882e0b8ade0b899e0b981e0b881e0b899e0b888e0b8b3/313789.jpg?t=1760429064',
             ],
         },
     ];

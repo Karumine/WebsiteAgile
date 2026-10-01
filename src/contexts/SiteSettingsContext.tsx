@@ -1,7 +1,10 @@
-import { createContext, useContext, useState, useEffect, useCallback, useMemo, type ReactNode } from 'react';
+/* eslint-disable react-refresh/only-export-components */
+import { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef, type ReactNode } from 'react';
+import toast from 'react-hot-toast';
 import type { SiteSettings, ThemeSettings } from '@/types';
 import defaultSettingsData from '@/data/defaultSettings.json';
-import { themeService } from '@/services/themeService';
+import { cmsService, type PublicSiteData } from '@/services/cmsService';
+import { useAuth } from '@/contexts/AuthContext';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 
 import { generateThemePalette } from '@/utils/themeColors';
@@ -84,10 +87,17 @@ export function applyThemeToDom(theme?: ThemeSettings) {
     }
 }
 
+export type PublishableSection = (typeof PUBLISHABLE_KEYS)[number];
+
 interface SiteSettingsContextType {
     settings: SiteSettings;
+    /** Updates the local draft + live preview. Nothing reaches the live site until `publish()`. */
     updateSettings: (newSettings: Partial<SiteSettings>) => void;
     resetSettings: () => void;
+    /** Sections edited since the last publish (only tracked for backend sessions). */
+    pendingSections: PublishableSection[];
+    isPublishing: boolean;
+    publish: () => Promise<boolean>;
 }
 
 const SiteSettingsContext = createContext<SiteSettingsContextType | undefined>(undefined);
@@ -118,6 +128,11 @@ function loadSettings(): SiteSettings {
             // Ensure themeSettings and pageContents are defined
             parsed.themeSettings = parsed.themeSettings || DEFAULT_THEME_SETTINGS;
             parsed.pageContents = parsed.pageContents || {};
+
+            // Unhashed /assets/* paths never exist after a Vite build (older defaults stored one).
+            Object.values(parsed.pageContents).forEach((page) => {
+                if (page?.heroImage?.startsWith('/assets/')) page.heroImage = '';
+            });
             parsed.impactStats = parsed.impactStats || (defaultSettingsData as unknown as SiteSettings).impactStats;
             parsed.companyInfo = parsed.companyInfo || (defaultSettingsData as unknown as SiteSettings).companyInfo;
 
@@ -176,60 +191,136 @@ function loadSettings(): SiteSettings {
     return fresh;
 }
 
-export function SiteSettingsProvider({ children }: { children: ReactNode }) {
-    const [settings, setSettings] = useState<SiteSettings>(loadSettings);
+const SYNC_CHANNEL = 'agile_assets_settings_sync';
 
-    // Apply theme changes dynamically whenever themeSettings updates
+const PUBLIC_KEYS = [
+    'banner', 'interestRates', 'news', 'companyInfo', 'impactStats',
+    'usedMachinery', 'faqs', 'themeSettings', 'pageContents', 'customPages',
+] as const;
+
+const PUBLISHABLE_KEYS = [...PUBLIC_KEYS, 'customFields'] as const;
+
+function changedSections(current: SiteSettings, baseline: SiteSettings): PublishableSection[] {
+    return PUBLISHABLE_KEYS.filter((key) => JSON.stringify(current[key]) !== JSON.stringify(baseline[key]));
+}
+
+/** Keeps only known, well-shaped sections from an API payload. */
+function pickPublicSections(data: PublicSiteData): Partial<SiteSettings> {
+    const picked: Record<string, unknown> = {};
+    PUBLIC_KEYS.forEach((key) => {
+        const value = data[key];
+        if (value === undefined || value === null) return;
+        const expectsArray = ['interestRates', 'news', 'usedMachinery', 'faqs', 'customPages'].includes(key);
+        if (expectsArray ? Array.isArray(value) : typeof value === 'object' && !Array.isArray(value)) {
+            picked[key] = value;
+        }
+    });
+    return picked as Partial<SiteSettings>;
+}
+
+const DRAFT_KEY = 'agile_assets_cms_draft';
+
+function hasDraft(): boolean {
+    return localStorage.getItem(DRAFT_KEY) === '1';
+}
+
+function setDraftFlag(dirty: boolean) {
+    if (dirty) localStorage.setItem(DRAFT_KEY, '1');
+    else localStorage.removeItem(DRAFT_KEY);
+}
+
+function persistAndBroadcast(next: SiteSettings) {
+    try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+    } catch (err) {
+        console.error('Failed to write settings to localStorage:', err);
+    }
+    try {
+        const ch = new BroadcastChannel(SYNC_CHANNEL);
+        ch.postMessage(next);
+        ch.close();
+    } catch {
+        // BroadcastChannel unsupported: other tabs still receive the storage event
+    }
+}
+
+export function SiteSettingsProvider({ children }: { children: ReactNode }) {
+    const { isServerSession } = useAuth();
+    const [settings, setSettings] = useState<SiteSettings>(loadSettings);
+    const settingsRef = useRef(settings);
+    const [baseline, setBaseline] = useState<SiteSettings>(settings);
+    const baselineRef = useRef(baseline);
+    const isServerSessionRef = useRef(isServerSession);
+    const [isPublishing, setIsPublishing] = useState(false);
+
+    useEffect(() => {
+        isServerSessionRef.current = isServerSession;
+    }, [isServerSession]);
+
+    const commit = useCallback((next: SiteSettings) => {
+        settingsRef.current = next;
+        setSettings(next);
+    }, []);
+
+    const commitBaseline = useCallback((next: SiteSettings) => {
+        baselineRef.current = next;
+        setBaseline(next);
+    }, []);
+
     useEffect(() => {
         applyThemeToDom(settings.themeSettings);
     }, [settings.themeSettings]);
 
-    // Initial fetch from backend API with fallback
+    // Server content is the source of truth; localStorage only gives an instant first paint.
+    // An admin's unpublished draft (shared with the preview iframe) is never overwritten.
     useEffect(() => {
-        let isMounted = true;
-        themeService.getTheme().then((res) => {
-            if (isMounted && res.success && res.data) {
-                setSettings((prev) => ({
-                    ...prev,
-                    themeSettings: res.data,
-                }));
+        let cancelled = false;
+        cmsService.getPublicSite().then((res) => {
+            if (cancelled || !res.success || !res.data || typeof res.data !== 'object') return;
+            const remote = pickPublicSections(res.data);
+            if (Object.keys(remote).length === 0) return;
+            const published = { ...settingsRef.current, ...remote };
+            commitBaseline({ ...baselineRef.current, ...remote });
+            if (hasDraft()) return;
+            commit(published);
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(published));
+            } catch {
+                // Storage full or blocked: the in-memory copy is still current
             }
-        }).catch((err) => {
-            console.warn('Backend theme fetch unavailable, using local theme:', err);
         });
         return () => {
-            isMounted = false;
+            cancelled = true;
         };
-    }, []);
+    }, [commit, commitBaseline]);
 
-    // Cross-tab real-time sync with BroadcastChannel and storage events
+    useEffect(() => {
+        if (!isServerSession) return;
+        cmsService.getCustomFields().then((res) => {
+            if (!res.success || !Array.isArray(res.data)) return;
+            commitBaseline({ ...baselineRef.current, customFields: res.data });
+            if (!hasDraft()) commit({ ...settingsRef.current, customFields: res.data });
+        });
+    }, [isServerSession, commit, commitBaseline]);
+
+    // Cross-tab sync (e.g. admin editor tab -> live preview tab)
     useEffect(() => {
         let channel: BroadcastChannel | null = null;
         try {
-            channel = new BroadcastChannel('agile_assets_settings_sync');
+            channel = new BroadcastChannel(SYNC_CHANNEL);
             channel.onmessage = (event) => {
-                if (event.data && typeof event.data === 'object') {
-                    setSettings(event.data);
-                    if (event.data.themeSettings) {
-                        applyThemeToDom(event.data.themeSettings);
-                    }
-                }
+                if (event.data && typeof event.data === 'object') commit(event.data);
             };
         } catch {
             // BroadcastChannel not supported in older browsers
         }
 
         const handleStorage = (e: StorageEvent) => {
-            if (e.key === STORAGE_KEY && e.newValue) {
-                try {
-                    const parsed = JSON.parse(e.newValue);
-                    setSettings(parsed);
-                    if (parsed.themeSettings) {
-                        applyThemeToDom(parsed.themeSettings);
-                    }
-                } catch (err) {
-                    console.error('Error syncing settings from storage event:', err);
-                }
+            if (e.key !== STORAGE_KEY || !e.newValue) return;
+            try {
+                commit(JSON.parse(e.newValue));
+            } catch (err) {
+                console.error('Error syncing settings from storage event:', err);
             }
         };
 
@@ -238,40 +329,57 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
             window.removeEventListener('storage', handleStorage);
             channel?.close();
         };
-    }, []);
+    }, [commit]);
 
     const updateSettings = useCallback((newSettings: Partial<SiteSettings>) => {
-        setSettings((prev) => {
-            const updated = {
-                ...prev,
-                ...newSettings,
-                lastUpdated: new Date().toISOString(),
-            };
+        const prev = settingsRef.current;
+        const updated: SiteSettings = {
+            ...prev,
+            ...newSettings,
+            lastUpdated: new Date().toISOString(),
+        };
+        if (isServerSessionRef.current) setDraftFlag(true);
+        commit(updated);
+        persistAndBroadcast(updated);
+    }, [commit]);
 
-            // Immediate synchronous write to localStorage for zero-lag persistence
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-                // Broadcast to other tabs & windows immediately
-                try {
-                    const ch = new BroadcastChannel('agile_assets_settings_sync');
-                    ch.postMessage(updated);
-                    ch.close();
-                } catch {
-                    // Fallback storage event
-                }
-            } catch (err) {
-                console.error('Failed to write settings to localStorage:', err);
-            }
+    const pendingSections = useMemo(
+        () => (isServerSession ? changedSections(settings, baseline) : []),
+        [isServerSession, settings, baseline]
+    );
 
-            return updated;
+    const publish = useCallback(async (): Promise<boolean> => {
+        const current = settingsRef.current;
+        const base = baselineRef.current;
+        const sections = changedSections(current, base);
+        if (sections.length === 0) {
+            setDraftFlag(false);
+            return true;
+        }
+
+        const changes: Partial<SiteSettings> = {};
+        sections.forEach((key) => {
+            (changes as Record<string, unknown>)[key] = current[key];
         });
 
-        if (newSettings.themeSettings) {
-            themeService.updateTheme(newSettings.themeSettings).catch((err) => {
-                console.warn('Could not sync theme to backend API:', err);
+        setIsPublishing(true);
+        const failures = await cmsService.publishChanges(base, changes);
+        setIsPublishing(false);
+
+        if (failures.length > 0) {
+            const detail = failures[0].message || failures[0].error || '';
+            toast.error(`เผยแพร่ไม่สำเร็จ ${failures.length} รายการ กรุณาลองอีกครั้ง ${detail}`.trim(), {
+                id: 'cms-publish',
+                duration: 8000,
             });
+            return false;
         }
-    }, []); // functional setState — no external deps needed
+
+        commitBaseline(current);
+        setDraftFlag(false);
+        toast.success('เผยแพร่ขึ้นเว็บไซต์เรียบร้อยแล้ว', { id: 'cms-publish' });
+        return true;
+    }, [commitBaseline]);
 
     const resetSettings = useCallback(() => {
         const defaults = {
@@ -280,21 +388,18 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
             pageContents: {},
             _version: DATA_VERSION
         };
-        setSettings(defaults);
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(defaults));
-            const ch = new BroadcastChannel('agile_assets_settings_sync');
-            ch.postMessage(defaults);
-            ch.close();
-        } catch {}
-        applyThemeToDom(defaults.themeSettings);
-    }, []);
+        commit(defaults);
+        persistAndBroadcast(defaults);
+    }, [commit]);
 
     const contextValue = useMemo(() => ({
         settings,
         updateSettings,
         resetSettings,
-    }), [settings, updateSettings, resetSettings]);
+        pendingSections,
+        isPublishing,
+        publish,
+    }), [settings, updateSettings, resetSettings, pendingSections, isPublishing, publish]);
 
     return (
         <SiteSettingsContext.Provider value={contextValue}>

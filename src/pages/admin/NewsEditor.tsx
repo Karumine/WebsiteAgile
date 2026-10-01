@@ -1,6 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { cmsService } from '@/services/cmsService';
 import { SplitPreviewContainer } from '@/components/admin/SplitPreviewContainer';
 import { LatestNewsSection } from '@/components/sections/LatestNewsSection';
 import { CustomDatePicker } from '@/components/ui/CustomDatePicker';
@@ -75,6 +77,7 @@ type ArticleLang = 'th' | 'en';
 export function NewsEditor() {
     const { settings, updateSettings } = useSiteSettings();
     const { lang } = useLanguage();
+    const { isServerSession } = useAuth();
     const [articles, setArticles] = useState<NewsItem[]>([...settings.news]);
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [articleLangs, setArticleLangs] = useState<Record<string, ArticleLang>>({});
@@ -120,16 +123,27 @@ export function NewsEditor() {
     };
 
     const handleImageUpload = useCallback(async (articleId: string, file: File) => {
+        if (!/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 5 * 1024 * 1024) {
+            toast.error(lang === 'th' ? 'รองรับเฉพาะไฟล์ JPG, PNG, WebP ขนาดไม่เกิน 5MB' : 'Only JPG, PNG or WebP up to 5MB are supported.');
+            return;
+        }
         setUploadingId(articleId);
         try {
-            const base64 = await compressImage(file);
+            let imageUrl: string;
+            if (isServerSession) {
+                const res = await cmsService.uploadImage(file, 'news');
+                if (!res.success || !res.data?.url) throw new Error(res.error || 'Upload failed');
+                imageUrl = res.data.url;
+            } else {
+                imageUrl = await compressImage(file);
+            }
             // Use functional updater to avoid stale closure issue
-            setArticles(prev => prev.map(a => a.id === articleId ? { ...a, image: base64 } : a));
+            setArticles(prev => prev.map(a => a.id === articleId ? { ...a, image: imageUrl } : a));
         } catch {
-            toast.error('Failed to process image. Please try another file.');
+            toast.error(lang === 'th' ? 'อัปโหลดรูปไม่สำเร็จ กรุณาลองไฟล์อื่น' : 'Failed to upload image. Please try another file.');
         }
         setUploadingId(null);
-    }, []);
+    }, [isServerSession, lang]);
 
     const triggerFileInput = (articleId: string) => {
         setUploadingId(articleId);

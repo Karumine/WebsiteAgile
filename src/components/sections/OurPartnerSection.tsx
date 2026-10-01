@@ -10,7 +10,6 @@ export function OurPartnerSection() {
         {
             name: 'PHOOWANUS PANICH',
             tag: 'Limited Partnership',
-            logoUrl: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_300/https://agileassets.co.th/wp-content/uploads/2021/11/logo-phoowanus-1.png',
             type: 'image',
             bgColor: '#0f172a',
             textColor: '#38bdf8',
@@ -19,7 +18,6 @@ export function OurPartnerSection() {
         {
             name: 'GRD Machine',
             tag: 'Industrial Systems',
-            logoUrl: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_300/https://agileassets.co.th/wp-content/uploads/2021/11/logo-grd.png',
             type: 'image',
             bgColor: '#ffffff',
             textColor: '#16a34a',
@@ -28,7 +26,6 @@ export function OurPartnerSection() {
         {
             name: 'MITSUBISHI MOTORS',
             tag: 'Heavy Industries',
-            logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/Mitsubishi_logo.svg/320px-Mitsubishi_logo.svg.png',
             type: 'image',
             bgColor: '#ffffff',
             textColor: '#dc2626',
@@ -37,7 +34,6 @@ export function OurPartnerSection() {
         {
             name: 'FANUC',
             tag: 'Robotics & CNC',
-            logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Fanuc_logo.svg/320px-Fanuc_logo.svg.png',
             type: 'image',
             bgColor: '#ffffff',
             textColor: '#eab308',
@@ -46,7 +42,6 @@ export function OurPartnerSection() {
         {
             name: 'HAITIAN',
             tag: 'Plastics Machinery',
-            logoUrl: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_300/https://agileassets.co.th/wp-content/uploads/2021/11/logo-haitian.png',
             type: 'image',
             bgColor: '#ffffff',
             textColor: '#0284c7',
@@ -55,7 +50,6 @@ export function OurPartnerSection() {
         {
             name: 'DAIKIN',
             tag: 'Industrial Chillers',
-            logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f0/Daikin_logo.svg/320px-Daikin_logo.svg.png',
             type: 'image',
             bgColor: '#ffffff',
             textColor: '#0ea5e9',

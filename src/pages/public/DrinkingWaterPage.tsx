@@ -11,6 +11,8 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLeadSubmit } from '@/lib/useLeadSubmit';
+import { formService } from '@/services/formService';
 import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 
@@ -19,6 +21,7 @@ export function DrinkingWaterPage() {
     const { content } = usePageContent('drinking-water', DEFAULT_PAGE_CONTENTS['drinking-water']);
 
     const [submitting, setSubmitting] = useState(false);
+    const { send, guardFields } = useLeadSubmit();
     const [submitted, setSubmitted] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -35,7 +38,7 @@ export function DrinkingWaterPage() {
             titleEn: 'PET Bottle Blow Molding Machine',
             descTh: 'ใช้ในการขึ้นรูปขวดพลาสติกจาก Preform เพื่อให้ได้ขวดที่ได้มาตรฐาน รองรับการผลิตปริมาณสูง',
             descEn: 'High-speed automated PET bottle blow molding system from preforms for consistent, food-grade bottle production.',
-            image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=600&q=80',
+            image: 'https://images.unsplash.com/photo-1567789884554-0b844b597180?w=600&q=80',
             badge: 'ความเร็วสูง / High Speed',
         },
         {
@@ -62,7 +65,7 @@ export function DrinkingWaterPage() {
             titleEn: 'Cap Sealing & Shrink Tunnel',
             descTh: 'ใช้ในการซีลฝาและหุ้มฟิล์มสินค้า เพื่อป้องกันการรั่วซึมและเพิ่มความปลอดภัยของผลิตภัณฑ์',
             descEn: 'Steam/electric heat shrink tunnel for tamper-evident cap sealing and bundle wrap packaging.',
-            image: 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?w=600&q=80',
+            image: 'https://images.unsplash.com/photo-1513828583688-c52646db42da?w=600&q=80',
             badge: 'ซีลสุญญากาศมาตรฐาน อย.',
         },
         {
@@ -89,7 +92,7 @@ export function DrinkingWaterPage() {
             titleEn: 'RO Water Purification System',
             descTh: 'ใช้ในการกรองและปรับคุณภาพน้ำ เพื่อให้ได้น้ำที่สะอาด ปลอดภัย และได้มาตรฐาน',
             descEn: 'Multi-stage Reverse Osmosis & UV sterilization system guaranteeing ultra-pure drinking water.',
-            image: 'https://images.unsplash.com/photo-1581093458791-9f3c3900df4b?w=600&q=80',
+            image: 'https://images.unsplash.com/photo-1513828583688-c52646db42da?w=600&q=80',
             badge: 'มาตรฐานสากล GMP / อย.',
         },
         {
@@ -134,7 +137,7 @@ export function DrinkingWaterPage() {
         },
     ];
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.name || !formData.phone) {
             toast.error(lang === 'th' ? 'กรุณากรอกชื่อและเบอร์โทรศัพท์' : 'Please provide your name and phone number');
@@ -142,20 +145,36 @@ export function DrinkingWaterPage() {
         }
 
         setSubmitting(true);
-        setTimeout(() => {
-            setSubmitting(false);
-            setSubmitted(true);
-            toast.success(
-                lang === 'th' 
-                    ? 'ส่งข้อมูลสำเร็จ! เจ้าหน้าที่ฝ่ายสินเชื่อจะติดต่อกลับภายใน 24 ชั่วโมง' 
-                    : 'Inquiry submitted successfully! Our financing specialist will contact you within 24 hours.'
-            );
-        }, 800);
+        const result = await send((meta) =>
+            formService.submitInquiry({
+                source: 'drinking-water-production',
+                name: formData.name,
+                phone: formData.phone,
+                email: formData.email,
+                company: formData.company,
+                message: formData.note,
+            }, meta)
+        );
+        setSubmitting(false);
+        if (!result) return;
+        setSubmitted(true);
+        toast.success(
+            lang === 'th' 
+                ? 'ส่งข้อมูลสำเร็จ! เจ้าหน้าที่ฝ่ายสินเชื่อจะติดต่อกลับภายใน 24 ชั่วโมง' 
+                : 'Inquiry submitted successfully! Our financing specialist will contact you within 24 hours.'
+        );
     };
 
     const scrollToForm = () => {
         const el = document.querySelector('#inquiry-form');
         el?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    const requestDocument = (docName: string) => {
+        const note = lang === 'th' ? `ขอรับเอกสาร: ${docName}` : `Requesting document: ${docName}`;
+        setFormData((prev) => ({ ...prev, note: prev.note ? `${prev.note}\n${note}` : note }));
+        toast(lang === 'th' ? 'กรอกชื่อและเบอร์โทร แล้วเจ้าหน้าที่จะส่งเอกสารให้ทางอีเมล' : 'Leave your name and phone and we will email you the document.');
+        scrollToForm();
     };
 
     const title = lang === 'th' 
@@ -183,7 +202,7 @@ export function DrinkingWaterPage() {
                     {/* Unique Drinking Water Bottling Plant Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img 
-                            src={content.heroImage || "https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=1920&q=85"} 
+                            src={content.heroImage || "https://images.unsplash.com/photo-1523362628745-0c100150b504?w=1920&q=85"} 
                             alt="Drinking Water Production Line" 
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
@@ -275,7 +294,7 @@ export function DrinkingWaterPage() {
                                     titleEn: item.titleEn || item.title,
                                     descTh: item.description,
                                     descEn: item.descEn || item.description,
-                                    image: item.image || 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=600&q=80',
+                                    image: item.image || 'https://images.unsplash.com/photo-1567789884554-0b844b597180?w=600&q=80',
                                     badge: item.badge || 'เครื่องจักรมาตรฐาน',
                                 }))
                                 : machines
@@ -371,24 +390,24 @@ export function DrinkingWaterPage() {
                         {/* Download Catalogues Bar */}
                         <div className="flex flex-wrap items-center justify-center gap-3 pt-4">
                             <a
-                                href="#"
-                                onClick={(e) => { e.preventDefault(); toast.success('Company Profile PDF Downloaded'); }}
+                                href="#inquiry-form"
+                                onClick={(e) => { e.preventDefault(); requestDocument('Company Profile (PDF)'); }}
                                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl glass border border-border/80 hover:border-sky-400 text-xs font-semibold text-foreground hover:text-sky-400 transition-all"
                             >
                                 <Download className="w-3.5 h-3.5 text-sky-400" />
                                 <span>Company Profile (PDF)</span>
                             </a>
                             <a
-                                href="#"
-                                onClick={(e) => { e.preventDefault(); toast.success('Drinking Water Catalogue Downloaded'); }}
+                                href="#inquiry-form"
+                                onClick={(e) => { e.preventDefault(); requestDocument('Drinking Water Catalogue (PDF)'); }}
                                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl glass border border-border/80 hover:border-sky-400 text-xs font-semibold text-foreground hover:text-sky-400 transition-all"
                             >
                                 <FileText className="w-3.5 h-3.5 text-sky-400" />
                                 <span>Drinking Water Catalogue (PDF)</span>
                             </a>
                             <a
-                                href="#"
-                                onClick={(e) => { e.preventDefault(); toast.success('Machinery Leasing Guide Downloaded'); }}
+                                href="#inquiry-form"
+                                onClick={(e) => { e.preventDefault(); requestDocument('Machinery Leasing Guide (PDF)'); }}
                                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl glass border border-border/80 hover:border-sky-400 text-xs font-semibold text-foreground hover:text-sky-400 transition-all"
                             >
                                 <ShieldCheck className="w-3.5 h-3.5 text-sky-400" />
@@ -455,10 +474,10 @@ export function DrinkingWaterPage() {
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="drinking-water-field-1" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'ชื่อ-นามสกุล ผู้ติดต่อ *' : 'Full Name *'}
                                                 </label>
-                                                <input
+                                                <input id="drinking-water-field-1"
                                                     type="text"
                                                     required
                                                     value={formData.name}
@@ -469,10 +488,10 @@ export function DrinkingWaterPage() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="drinking-water-field-2" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'เบอร์โทรศัพท์ติดต่อ *' : 'Phone Number *'}
                                                 </label>
-                                                <input
+                                                <input id="drinking-water-field-2"
                                                     type="tel"
                                                     required
                                                     value={formData.phone}
@@ -485,10 +504,10 @@ export function DrinkingWaterPage() {
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="drinking-water-field-3" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'อีเมล' : 'Email Address'}
                                                 </label>
-                                                <input
+                                                <input id="drinking-water-field-3"
                                                     type="email"
                                                     value={formData.email}
                                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -498,10 +517,10 @@ export function DrinkingWaterPage() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="drinking-water-field-4" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'ชื่อบริษัท / โรงงาน' : 'Company / Factory Name'}
                                                 </label>
-                                                <input
+                                                <input id="drinking-water-field-4"
                                                     type="text"
                                                     value={formData.company}
                                                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
@@ -512,10 +531,10 @@ export function DrinkingWaterPage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                            <label htmlFor="drinking-water-field-5" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                 {lang === 'th' ? 'ข้อความ / เครื่องจักรที่ต้องการขอสินเชื่อ' : 'Message / Desired Machinery & Financing Details'}
                                             </label>
-                                            <textarea
+                                            <textarea id="drinking-water-field-5"
                                                 rows={4}
                                                 value={formData.note}
                                                 onChange={(e) => setFormData({ ...formData, note: e.target.value })}
@@ -524,6 +543,7 @@ export function DrinkingWaterPage() {
                                             />
                                         </div>
 
+                                        {guardFields}
                                         <div className="pt-2 text-center">
                                             <button
                                                 type="submit"

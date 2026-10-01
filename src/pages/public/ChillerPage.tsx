@@ -10,6 +10,8 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLeadSubmit } from '@/lib/useLeadSubmit';
+import { formService } from '@/services/formService';
 import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 
@@ -17,6 +19,7 @@ export function ChillerPage() {
     const { lang } = useLanguage();
     const { content } = usePageContent('chiller', DEFAULT_PAGE_CONTENTS['chiller']);
     const [submitting, setSubmitting] = useState(false);
+    const { send, guardFields } = useLeadSubmit();
     const [submitted, setSubmitted] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -33,7 +36,7 @@ export function ChillerPage() {
             titleEn: 'Food Processing Plants',
             descTh: 'ใช้ในกระบวนการควบคุมอุณหภูมิ (Cooling/Freezing) เพื่อรักษาคุณภาพสินค้า ยืดอายุการเก็บรักษา และคงมาตรฐานความปลอดภัยอาหาร',
             descEn: 'Applied in temperature-critical cooling, rapid chilling, and flash-freezing processes to preserve product freshness and ensure food-safety compliance.',
-            image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=600&q=80',
+            image: 'https://images.unsplash.com/photo-1567789884554-0b844b597180?w=600&q=80',
             badge: 'Process Cooling / Freezing',
         },
         {
@@ -65,7 +68,7 @@ export function ChillerPage() {
         },
     ];
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.name || !formData.phone) {
             toast.error(lang === 'th' ? 'กรุณากรอกชื่อและเบอร์โทรศัพท์' : 'Please provide your name and phone number');
@@ -73,15 +76,24 @@ export function ChillerPage() {
         }
 
         setSubmitting(true);
-        setTimeout(() => {
-            setSubmitting(false);
-            setSubmitted(true);
-            toast.success(
-                lang === 'th' 
-                    ? 'ส่งข้อมูลสำเร็จ! เจ้าหน้าที่ฝ่ายสินเชื่อเครื่องทำความเย็น Chiller จะติดต่อกลับภายใน 24 ชั่วโมง' 
-                    : 'Inquiry submitted successfully! Our chiller financing specialist will contact you within 24 hours.'
-            );
-        }, 800);
+        const result = await send((meta) =>
+            formService.submitInquiry({
+                source: 'chiller',
+                name: formData.name,
+                phone: formData.phone,
+                email: formData.email,
+                company: formData.company,
+                message: formData.note,
+            }, meta)
+        );
+        setSubmitting(false);
+        if (!result) return;
+        setSubmitted(true);
+        toast.success(
+            lang === 'th' 
+                ? 'ส่งข้อมูลสำเร็จ! เจ้าหน้าที่ฝ่ายสินเชื่อเครื่องทำความเย็น Chiller จะติดต่อกลับภายใน 24 ชั่วโมง' 
+                : 'Inquiry submitted successfully! Our chiller financing specialist will contact you within 24 hours.'
+        );
     };
 
     const scrollToForm = () => {
@@ -114,7 +126,7 @@ export function ChillerPage() {
                     {/* Unique Industrial Chiller & Cooling Towers Rooftop Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img 
-                            src={content.heroImage || "https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?w=1920&q=85"} 
+                            src={content.heroImage || "https://images.unsplash.com/photo-1513828583688-c52646db42da?w=1920&q=85"} 
                             alt="Industrial Chiller & Cooling Towers System" 
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
@@ -213,7 +225,7 @@ export function ChillerPage() {
                                     titleEn: item.titleEn || item.title,
                                     descTh: item.description,
                                     descEn: item.descEn || item.description,
-                                    image: item.image || 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=600&q=80',
+                                    image: item.image || 'https://images.unsplash.com/photo-1567789884554-0b844b597180?w=600&q=80',
                                     badge: item.badge || 'Process Cooling / Freezing',
                                 }))
                                 : relatedIndustries
@@ -321,10 +333,10 @@ export function ChillerPage() {
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="chiller-field-1" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'ชื่อ-นามสกุล ผู้ติดต่อ *' : 'Full Name *'}
                                                 </label>
-                                                <input
+                                                <input id="chiller-field-1"
                                                     type="text"
                                                     required
                                                     value={formData.name}
@@ -335,10 +347,10 @@ export function ChillerPage() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="chiller-field-2" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'เบอร์โทรศัพท์ติดต่อ *' : 'Phone Number *'}
                                                 </label>
-                                                <input
+                                                <input id="chiller-field-2"
                                                     type="tel"
                                                     required
                                                     value={formData.phone}
@@ -351,10 +363,10 @@ export function ChillerPage() {
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="chiller-field-3" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'อีเมล' : 'Email Address'}
                                                 </label>
-                                                <input
+                                                <input id="chiller-field-3"
                                                     type="email"
                                                     value={formData.email}
                                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -364,10 +376,10 @@ export function ChillerPage() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="chiller-field-4" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'ชื่อโครงการ / บริษัท' : 'Company / Facility Name'}
                                                 </label>
-                                                <input
+                                                <input id="chiller-field-4"
                                                     type="text"
                                                     value={formData.company}
                                                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
@@ -378,10 +390,10 @@ export function ChillerPage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                            <label htmlFor="chiller-field-5" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                 {lang === 'th' ? 'ข้อความ / ขนาดเครื่องทำความเย็น Chiller ที่ต้องการขอสินเชื่อ' : 'Message / Desired Chiller Tonnage & Cooling Specs'}
                                             </label>
-                                            <textarea
+                                            <textarea id="chiller-field-5"
                                                 rows={4}
                                                 value={formData.note}
                                                 onChange={(e) => setFormData({ ...formData, note: e.target.value })}
@@ -390,6 +402,7 @@ export function ChillerPage() {
                                             />
                                         </div>
 
+                                        {guardFields}
                                         <div className="pt-2 text-center">
                                             <button
                                                 type="submit"

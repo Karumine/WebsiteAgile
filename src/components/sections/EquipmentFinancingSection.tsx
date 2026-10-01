@@ -31,7 +31,7 @@ export function EquipmentFinancingSection() {
                 lang === 'th' ? 'อนุมัติวงเงินเบื้องต้นรวดเร็วภายใน 24-48 ชั่วโมง' : 'Fast preliminary credit pre-approval within 24-48 hours',
                 lang === 'th' ? 'หักค่าใช้จ่ายทางภาษีตามสิทธิประโยชน์สัญญาเช่าซื้อ' : 'Tax deductible leasing expense benefits for corporate tax',
             ],
-            image: 'https://images.unsplash.com/photo-1548839140-29a749e1bc4e?w=900&q=80',
+            image: 'https://images.unsplash.com/photo-1523362628745-0c100150b504?w=900&q=80',
         },
         {
             id: 'livestock-farm',
@@ -107,7 +107,7 @@ export function EquipmentFinancingSection() {
                 lang === 'th' ? 'รับประกันผลงานและประสิทธิภาพแผงโซลาร์ยาวนาน 25-30 ปี' : '25 to 30 years linear solar panel power output performance warranty',
                 lang === 'th' ? 'ฟรีการสำรวจหน้างานและวิเคราะห์ผลตอบแทนการลงทุน (ROI)' : 'Complimentary engineering rooftop survey and financial ROI feasibility report',
             ],
-            image: 'https://images.unsplash.com/photo-1509391365360-2e959784a276?w=900&q=80',
+            image: 'https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=900&q=80',
         },
 
         // ─── Category 2: Industrial Equipment ───
@@ -147,7 +147,7 @@ export function EquipmentFinancingSection() {
                 lang === 'th' ? 'อนุมัติเบื้องต้นไว ภายใน 24-48 ชั่วโมง ช่วยรับงานด่วนได้ทันท่วงที' : 'Fast credit approval in 24-48 hours to secure rapid production orders',
                 lang === 'th' ? 'ดาวน์เริ่มต้นเพียง 0 - 10% พร้อมโครงสร้างผ่อนชำระยืดหยุ่น' : 'Down payments starting as low as 0 - 10% with flexible structuring',
             ],
-            image: 'https://images.unsplash.com/photo-1504917599217-d4dc5ebe6122?w=900&q=80',
+            image: 'https://images.unsplash.com/photo-1513828583688-c52646db42da?w=900&q=80',
         },
         {
             id: 'generator-set',

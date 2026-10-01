@@ -6,6 +6,8 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import { useLeadSubmit } from '@/lib/useLeadSubmit';
+import { formService } from '@/services/formService';
 import storyOriginImg from '@/assets/story_origin_engineers.png';
 import storyMachineryImg from '@/assets/story_machinery_finance.png';
 import storyGrowthImg from '@/assets/story_growth_team.png';
@@ -19,6 +21,9 @@ export function OurStorySection() {
 
     const [activeModal, setActiveModal] = useState<'newsletter' | null>(null);
     const [downloadSuccess, setDownloadSuccess] = useState(false);
+    const [newsletterEmail, setNewsletterEmail] = useState('');
+    const [isSubscribing, setIsSubscribing] = useState(false);
+    const { send, guardFields } = useLeadSubmit();
 
     const isEn = lang === 'en';
 
@@ -37,13 +42,21 @@ export function OurStorySection() {
         ? (content.sectionSubtitleEn || content.sectionSubtitleTh || t('story.subtitle'))
         : (content.sectionSubtitleTh || content.sectionSubtitleEn || t('story.subtitle'));
 
-    const handleDownloadNewsletter = (e: React.FormEvent) => {
+    const closeNewsletterModal = () => {
+        setActiveModal(null);
+        setDownloadSuccess(false);
+    };
+
+    const handleDownloadNewsletter = async (e: React.FormEvent) => {
         e.preventDefault();
+        setIsSubscribing(true);
+        const result = await send((meta) =>
+            formService.subscribeNewsletter({ email: newsletterEmail.trim() }, meta)
+        );
+        setIsSubscribing(false);
+        if (!result) return;
+        setNewsletterEmail('');
         setDownloadSuccess(true);
-        setTimeout(() => {
-            setDownloadSuccess(false);
-            setActiveModal(null);
-        }, 2200);
     };
 
     const defaultIcons = [BookOpen, Download, TrendingUp];
@@ -70,7 +83,7 @@ export function OurStorySection() {
             if (item.link === '#newsletter' || item.id === 'story-2') {
                 setActiveModal('newsletter');
             } else if (item.link?.startsWith('http')) {
-                window.open(item.link, '_blank');
+                window.open(item.link, '_blank', 'noopener,noreferrer');
             } else if (item.link) {
                 navigate(item.link);
             } else if (defaultActions[idx]) {
@@ -235,10 +248,15 @@ export function OurStorySection() {
 
             {/* --- Interactive Newsletter Download Modal --- */}
             {activeModal === 'newsletter' && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in">
-                    <div className="relative w-full max-w-md rounded-3xl p-6 sm:p-8 bg-card border border-border shadow-2xl overflow-hidden animate-slide-up">
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fade-in"
+                    onClick={(e) => e.target === e.currentTarget && closeNewsletterModal()}
+                    onKeyDown={(e) => e.key === 'Escape' && closeNewsletterModal()}
+                >
+                    <div role="dialog" aria-modal="true" aria-labelledby="newsletter-modal-title" className="relative w-full max-w-md rounded-3xl p-6 sm:p-8 bg-card border border-border shadow-2xl overflow-hidden animate-slide-up">
                         <button
-                            onClick={() => setActiveModal(null)}
+                            onClick={closeNewsletterModal}
+                            aria-label={lang === 'th' ? 'ปิด' : 'Close'}
                             className="absolute top-5 right-5 p-2 rounded-full glass hover:bg-muted text-foreground transition-colors"
                         >
                             <X className="w-5 h-5" />
@@ -248,7 +266,7 @@ export function OurStorySection() {
                             <Download className="w-6 h-6" />
                         </div>
 
-                        <h3 className="text-xl font-extrabold text-foreground mb-2 font-sans">
+                        <h3 id="newsletter-modal-title" className="text-xl font-extrabold text-foreground mb-2 font-sans">
                             {lang === 'th' ? 'ดาวน์โหลด Agile Assets Newsletter' : 'Download Agile Assets Newsletter'}
                         </h3>
                         <p className="text-xs text-muted-foreground mb-6">
@@ -258,26 +276,43 @@ export function OurStorySection() {
                         </p>
 
                         {downloadSuccess ? (
-                            <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-sm flex items-center gap-3 animate-fade-in">
-                                <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-                                <span>{lang === 'th' ? 'กำลังดาวน์โหลด Newsletter ให้ท่าน...' : 'Downloading Newsletter now...'}</span>
+                            <div className="space-y-4 animate-fade-in">
+                                <div role="status" className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-sm flex items-center gap-3">
+                                    <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
+                                    <span>{lang === 'th' ? 'ลงทะเบียนเรียบร้อย เราจะส่ง Newsletter ไปที่อีเมลของคุณ' : "You're subscribed. We'll email the newsletter to you."}</span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => { closeNewsletterModal(); navigate('/newsletter'); }}
+                                    className="w-full inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl border border-border text-foreground font-bold text-xs hover:bg-muted transition-all"
+                                >
+                                    <BookOpen className="w-4 h-4" />
+                                    <span>{lang === 'th' ? 'อ่าน Newsletter ทุกฉบับ' : 'Read all newsletters'}</span>
+                                </button>
                             </div>
                         ) : (
                             <form onSubmit={handleDownloadNewsletter} className="space-y-4">
                                 <div>
-                                    <label className="block text-xs font-semibold text-muted-foreground mb-1.5">
+                                    <label htmlFor="our-story-field-1" className="block text-xs font-semibold text-muted-foreground mb-1.5">
                                         {lang === 'th' ? 'อีเมลสำหรับรับเอกสาร' : 'Your Business Email'}
                                     </label>
-                                    <input
+                                    <input id="our-story-field-1"
                                         type="email"
                                         required
+                                        maxLength={200}
+                                        autoComplete="email"
+                                        value={newsletterEmail}
+                                        onChange={(e) => setNewsletterEmail(e.target.value)}
+                                        aria-label={lang === 'th' ? 'อีเมลสำหรับรับเอกสาร' : 'Your Business Email'}
                                         placeholder="company@domain.com"
                                         className="w-full px-4 py-3 rounded-xl bg-background border border-border text-foreground text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all"
                                     />
                                 </div>
+                                {guardFields}
                                 <button
                                     type="submit"
-                                    className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-300 hover:to-sky-400 text-white font-bold text-xs tracking-wide shadow-lg shadow-sky-500/25 transition-all"
+                                    disabled={isSubscribing}
+                                    className="w-full disabled:opacity-50 inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-300 hover:to-sky-400 text-white font-bold text-xs tracking-wide shadow-lg shadow-sky-500/25 transition-all"
                                 >
                                     <Download className="w-4 h-4" />
                                     <span>{lang === 'th' ? 'ยืนยันและดาวน์โหลด (PDF)' : 'Confirm & Download (PDF)'}</span>

@@ -11,6 +11,8 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLeadSubmit } from '@/lib/useLeadSubmit';
+import { formService } from '@/services/formService';
 import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 
@@ -18,6 +20,7 @@ export function BiogasProductionPage() {
     const { lang } = useLanguage();
     const { content } = usePageContent('biogas-production', DEFAULT_PAGE_CONTENTS['biogas-production']);
     const [submitting, setSubmitting] = useState(false);
+    const { send, guardFields } = useLeadSubmit();
     const [submitted, setSubmitted] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -66,7 +69,7 @@ export function BiogasProductionPage() {
         },
     ];
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.name || !formData.phone) {
             toast.error(lang === 'th' ? 'กรุณากรอกชื่อและเบอร์โทรศัพท์' : 'Please provide your name and phone number');
@@ -74,20 +77,36 @@ export function BiogasProductionPage() {
         }
 
         setSubmitting(true);
-        setTimeout(() => {
-            setSubmitting(false);
-            setSubmitted(true);
-            toast.success(
-                lang === 'th' 
-                    ? 'ส่งข้อมูลสำเร็จ! เจ้าหน้าที่ฝ่ายสินเชื่อจะติดต่อกลับภายใน 24 ชั่วโมง' 
-                    : 'Inquiry submitted successfully! Our financing specialist will contact you within 24 hours.'
-            );
-        }, 800);
+        const result = await send((meta) =>
+            formService.submitInquiry({
+                source: 'biogas-production',
+                name: formData.name,
+                phone: formData.phone,
+                email: formData.email,
+                company: formData.company,
+                message: formData.note,
+            }, meta)
+        );
+        setSubmitting(false);
+        if (!result) return;
+        setSubmitted(true);
+        toast.success(
+            lang === 'th' 
+                ? 'ส่งข้อมูลสำเร็จ! เจ้าหน้าที่ฝ่ายสินเชื่อจะติดต่อกลับภายใน 24 ชั่วโมง' 
+                : 'Inquiry submitted successfully! Our financing specialist will contact you within 24 hours.'
+        );
     };
 
     const scrollToForm = () => {
         const el = document.querySelector('#inquiry-form');
         el?.scrollIntoView({ behavior: 'smooth' });
+    };
+
+    const requestDocument = (docName: string) => {
+        const note = lang === 'th' ? `ขอรับเอกสาร: ${docName}` : `Requesting document: ${docName}`;
+        setFormData((prev) => ({ ...prev, note: prev.note ? `${prev.note}\n${note}` : note }));
+        toast(lang === 'th' ? 'กรอกชื่อและเบอร์โทร แล้วเจ้าหน้าที่จะส่งเอกสารให้ทางอีเมล' : 'Leave your name and phone and we will email you the document.');
+        scrollToForm();
     };
 
     const title = lang === 'th' 
@@ -265,24 +284,24 @@ export function BiogasProductionPage() {
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                         <div className="flex flex-wrap items-center justify-center gap-3">
                             <a
-                                href="#"
-                                onClick={(e) => { e.preventDefault(); toast.success('Company Profile PDF Downloaded'); }}
+                                href="#inquiry-form"
+                                onClick={(e) => { e.preventDefault(); requestDocument('Company Profile (PDF)'); }}
                                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl glass border border-border/80 hover:border-sky-400 text-xs font-semibold text-foreground hover:text-sky-400 transition-all"
                             >
                                 <Download className="w-3.5 h-3.5 text-sky-400" />
                                 <span>Company Profile (PDF)</span>
                             </a>
                             <a
-                                href="#"
-                                onClick={(e) => { e.preventDefault(); toast.success('Construction Catalogue Downloaded'); }}
+                                href="#inquiry-form"
+                                onClick={(e) => { e.preventDefault(); requestDocument('Construction Catalogue (PDF)'); }}
                                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl glass border border-border/80 hover:border-sky-400 text-xs font-semibold text-foreground hover:text-sky-400 transition-all"
                             >
                                 <FileText className="w-3.5 h-3.5 text-sky-400" />
                                 <span>Construction Catalogue (PDF)</span>
                             </a>
                             <a
-                                href="#"
-                                onClick={(e) => { e.preventDefault(); toast.success('Building Catalogue Downloaded'); }}
+                                href="#inquiry-form"
+                                onClick={(e) => { e.preventDefault(); requestDocument('Building Catalogue (PDF)'); }}
                                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl glass border border-border/80 hover:border-sky-400 text-xs font-semibold text-foreground hover:text-sky-400 transition-all"
                             >
                                 <Building2 className="w-3.5 h-3.5 text-sky-400" />
@@ -348,10 +367,10 @@ export function BiogasProductionPage() {
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="biogas-production-field-1" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'ชื่อ-นามสกุล ผู้ติดต่อ *' : 'Full Name *'}
                                                 </label>
-                                                <input
+                                                <input id="biogas-production-field-1"
                                                     type="text"
                                                     required
                                                     value={formData.name}
@@ -362,10 +381,10 @@ export function BiogasProductionPage() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="biogas-production-field-2" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'เบอร์โทรศัพท์ติดต่อ *' : 'Phone Number *'}
                                                 </label>
-                                                <input
+                                                <input id="biogas-production-field-2"
                                                     type="tel"
                                                     required
                                                     value={formData.phone}
@@ -378,10 +397,10 @@ export function BiogasProductionPage() {
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="biogas-production-field-3" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'อีเมล' : 'Email Address'}
                                                 </label>
-                                                <input
+                                                <input id="biogas-production-field-3"
                                                     type="email"
                                                     value={formData.email}
                                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -391,10 +410,10 @@ export function BiogasProductionPage() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="biogas-production-field-4" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'ชื่อโครงการ / บริษัท' : 'Project / Company Name'}
                                                 </label>
-                                                <input
+                                                <input id="biogas-production-field-4"
                                                     type="text"
                                                     value={formData.company}
                                                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
@@ -405,10 +424,10 @@ export function BiogasProductionPage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                            <label htmlFor="biogas-production-field-5" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                 {lang === 'th' ? 'ข้อความ / ระบบก๊าซชีวภาพที่ต้องการขอสินเชื่อ' : 'Message / Desired Biogas Machinery & Details'}
                                             </label>
-                                            <textarea
+                                            <textarea id="biogas-production-field-5"
                                                 rows={4}
                                                 value={formData.note}
                                                 onChange={(e) => setFormData({ ...formData, note: e.target.value })}
@@ -417,6 +436,7 @@ export function BiogasProductionPage() {
                                             />
                                         </div>
 
+                                        {guardFields}
                                         <div className="pt-2 text-center">
                                             <button
                                                 type="submit"

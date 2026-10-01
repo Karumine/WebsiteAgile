@@ -10,6 +10,8 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useLeadSubmit } from '@/lib/useLeadSubmit';
+import { formService } from '@/services/formService';
 import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 
@@ -17,6 +19,7 @@ export function InjectionMoldingPage() {
     const { lang } = useLanguage();
     const { content } = usePageContent('injection-molding', DEFAULT_PAGE_CONTENTS['injection-molding']);
     const [submitting, setSubmitting] = useState(false);
+    const { send, guardFields } = useLeadSubmit();
     const [submitted, setSubmitted] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
@@ -33,7 +36,7 @@ export function InjectionMoldingPage() {
             titleEn: 'Drinking Water & Beverage Packaging',
             descTh: 'ใช้ในการขึ้นรูป Preform และบรรจุภัณฑ์พลาสติก เพื่อให้ได้ชิ้นงานที่ได้มาตรฐานและรองรับการผลิตปริมาณสูง',
             descEn: 'Used for high-speed PET preform injection and beverage closure molding, ensuring strict dimensional tolerance and mass-production yield.',
-            image: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=600&q=80',
+            image: 'https://images.unsplash.com/photo-1567789884554-0b844b597180?w=600&q=80',
             badge: 'ขึ้นรูป Preform & ฝาขวดความเร็วสูง',
         },
         {
@@ -65,7 +68,7 @@ export function InjectionMoldingPage() {
         },
     ];
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!formData.name || !formData.phone) {
             toast.error(lang === 'th' ? 'กรุณากรอกชื่อและเบอร์โทรศัพท์' : 'Please provide your name and phone number');
@@ -73,15 +76,24 @@ export function InjectionMoldingPage() {
         }
 
         setSubmitting(true);
-        setTimeout(() => {
-            setSubmitting(false);
-            setSubmitted(true);
-            toast.success(
-                lang === 'th' 
-                    ? 'ส่งข้อมูลสำเร็จ! เจ้าหน้าที่ฝ่ายสินเชื่อเครื่องฉีดพลาสติกจะติดต่อกลับภายใน 24 ชั่วโมง' 
-                    : 'Inquiry submitted successfully! Our injection molding financing specialist will contact you within 24 hours.'
-            );
-        }, 800);
+        const result = await send((meta) =>
+            formService.submitInquiry({
+                source: 'injection-molding',
+                name: formData.name,
+                phone: formData.phone,
+                email: formData.email,
+                company: formData.company,
+                message: formData.note,
+            }, meta)
+        );
+        setSubmitting(false);
+        if (!result) return;
+        setSubmitted(true);
+        toast.success(
+            lang === 'th' 
+                ? 'ส่งข้อมูลสำเร็จ! เจ้าหน้าที่ฝ่ายสินเชื่อเครื่องฉีดพลาสติกจะติดต่อกลับภายใน 24 ชั่วโมง' 
+                : 'Inquiry submitted successfully! Our injection molding financing specialist will contact you within 24 hours.'
+        );
     };
 
     const scrollToForm = () => {
@@ -114,7 +126,7 @@ export function InjectionMoldingPage() {
                     {/* Unique Injection Molding & Preforms Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img 
-                            src={content.heroImage || "https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=1920&q=85"} 
+                            src={content.heroImage || "https://images.unsplash.com/photo-1567789884554-0b844b597180?w=1920&q=85"} 
                             alt="Plastic Injection Molding System" 
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
@@ -213,7 +225,7 @@ export function InjectionMoldingPage() {
                                     titleEn: item.titleEn || item.title,
                                     descTh: item.description,
                                     descEn: item.descEn || item.description,
-                                    image: item.image || 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=600&q=80',
+                                    image: item.image || 'https://images.unsplash.com/photo-1567789884554-0b844b597180?w=600&q=80',
                                     badge: item.badge || 'ขึ้นรูปความเร็วสูง',
                                 }))
                                 : relatedIndustries
@@ -321,10 +333,10 @@ export function InjectionMoldingPage() {
                                     <form onSubmit={handleSubmit} className="space-y-4">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="injection-molding-field-1" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'ชื่อ-นามสกุล ผู้ติดต่อ *' : 'Full Name *'}
                                                 </label>
-                                                <input
+                                                <input id="injection-molding-field-1"
                                                     type="text"
                                                     required
                                                     value={formData.name}
@@ -335,10 +347,10 @@ export function InjectionMoldingPage() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="injection-molding-field-2" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'เบอร์โทรศัพท์ติดต่อ *' : 'Phone Number *'}
                                                 </label>
-                                                <input
+                                                <input id="injection-molding-field-2"
                                                     type="tel"
                                                     required
                                                     value={formData.phone}
@@ -351,10 +363,10 @@ export function InjectionMoldingPage() {
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="injection-molding-field-3" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'อีเมล' : 'Email Address'}
                                                 </label>
-                                                <input
+                                                <input id="injection-molding-field-3"
                                                     type="email"
                                                     value={formData.email}
                                                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -364,10 +376,10 @@ export function InjectionMoldingPage() {
                                             </div>
 
                                             <div>
-                                                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                                <label htmlFor="injection-molding-field-4" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                     {lang === 'th' ? 'ชื่อโรงงาน / บริษัท' : 'Company / Factory Name'}
                                                 </label>
-                                                <input
+                                                <input id="injection-molding-field-4"
                                                     type="text"
                                                     value={formData.company}
                                                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
@@ -378,10 +390,10 @@ export function InjectionMoldingPage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                                            <label htmlFor="injection-molding-field-5" className="block text-xs font-semibold text-slate-300 mb-1.5">
                                                 {lang === 'th' ? 'ข้อความ / ขนาดเครื่องฉีดพลาสติกที่ต้องการขอสินเชื่อ' : 'Message / Desired Clamping Force (Tonnage) & Machine Details'}
                                             </label>
-                                            <textarea
+                                            <textarea id="injection-molding-field-5"
                                                 rows={4}
                                                 value={formData.note}
                                                 onChange={(e) => setFormData({ ...formData, note: e.target.value })}
@@ -390,6 +402,7 @@ export function InjectionMoldingPage() {
                                             />
                                         </div>
 
+                                        {guardFields}
                                         <div className="pt-2 text-center">
                                             <button
                                                 type="submit"

@@ -5,16 +5,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { formatDate } from '@/lib/utils';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import type { NewsItem } from '@/types';
+import { sanitizeHtml } from '@/lib/sanitize';
 
-// ─── XSS Sanitization ───
-function sanitizeHtml(html: string): string {
-    let clean = html.replace(/<\s*(script|iframe|object|embed|form|style)\b[^>]*>[\s\S]*?<\/\s*\1\s*>/gi, '');
-    clean = clean.replace(/<\s*(script|iframe|object|embed|form)\b[^>]*\/?>/gi, '');
-    clean = clean.replace(/\s+on\w+\s*=\s*["'][^"']*["']/gi, '');
-    clean = clean.replace(/\s+on\w+\s*=\s*[^\s>]+/gi, '');
-    clean = clean.replace(/href\s*=\s*["']\s*javascript:[^"']*["']/gi, 'href="#"');
-    return clean;
-}
 
 export function NewsFeed() {
     const { settings } = useSiteSettings();
