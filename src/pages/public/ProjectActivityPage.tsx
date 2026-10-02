@@ -11,6 +11,8 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
+import { useSections } from '@/lib/pageSections';
+import { projectsSections } from '@/data/pageSections/projects';
 
 // Interactive Slideshow Card for Company Projects
 function CompanySlideshowCard({
@@ -124,140 +126,17 @@ export function ProjectActivityPage() {
     const { lang } = useLanguage();
     const navigate = useNavigate();
     const { content } = usePageContent('projects', DEFAULT_PAGE_CONTENTS['projects']);
+    const section = useSections(content, projectsSections);
+    const companies = section('companies');
+    const collage = section('collage');
+    const actions = section('actions');
 
-    // 8 Featured Company Project Slideshows (Exact matching reference screenshot)
-    const companyProjects = [
-        {
-            title: lang === 'th' ? 'บริษัท ชัยพร โฮลดิ้ง จำกัด' : 'Chaiyaporn Holding Co., Ltd.',
-            images: [
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b888e0b881-e0b88ae0b8b1e0b8a2e0b89ee0b8a3e0b982e0b8aee0b8a5e0b894e0b8b4e0b989e0b887/237159_0-1.jpg?t=1728555014',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b888e0b881-e0b88ae0b8b1e0b8a2e0b89ee0b8a3e0b982e0b8aee0b8a5e0b894e0b8b4e0b989e0b887/237153_0.jpg?t=1728554825',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b888e0b881-e0b88ae0b8b1e0b8a2e0b89ee0b8a3e0b982e0b8aee0b8a5e0b894e0b8b4e0b989e0b887/237161_0.jpg?t=1728557031',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b888e0b881-e0b88ae0b8b1e0b8a2e0b89ee0b8a3e0b982e0b8aee0b8a5e0b894e0b8b4e0b989e0b887/237158_0.jpg?t=1728557031',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b888e0b881-e0b88ae0b8b1e0b8a2e0b89ee0b8a3e0b982e0b8aee0b8a5e0b894e0b8b4e0b989e0b887/237156_0.jpg?t=1728557031',
-            ],
-        },
-        {
-            title: lang === 'th' ? 'หจก.ไลฟ์ รีพับลิก' : 'Life Republic Ltd., Part.',
-            images: [
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b8abe0b888e0b881-e0b984e0b8a5e0b89fe0b98c-e0b8a3e0b8b5e0b89ee0b8b1e0b89ae0b8a5e0b8b4e0b881/20240910_142452.jpg?t=1728555279',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b8abe0b888e0b881-e0b984e0b8a5e0b89fe0b98c-e0b8a3e0b8b5e0b89ee0b8b1e0b89ae0b8a5e0b8b4e0b881/20240910_135826.jpg?t=1728555319',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b8abe0b888e0b881-e0b984e0b8a5e0b89fe0b98c-e0b8a3e0b8b5e0b89ee0b8b1e0b89ae0b8a5e0b8b4e0b881/Seaming_0.jpg?t=1728555320',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b8abe0b888e0b881-e0b984e0b8a5e0b89fe0b98c-e0b8a3e0b8b5e0b89ee0b8b1e0b89ae0b8a5e0b8b4e0b881/Weighing_0.jpg?t=1728556692',
-            ],
-        },
-        {
-            title: lang === 'th' ? 'บริษัท ชุมพรเอกฟ้า จำกัด' : 'Chumphon Aek Fah Co., Ltd.',
-            images: [
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b888e0b881-e0b88ae0b8b8e0b8a1e0b89ee0b8a3e0b980e0b8ade0b881e0b89fe0b989e0b8b2/338336402_2.jpg?t=1728556109',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b888e0b881-e0b88ae0b8b8e0b8a1e0b89ee0b8a3e0b980e0b8ade0b881e0b89fe0b989e0b8b2/338209033_1.jpg?t=1728555902',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b888e0b881-e0b88ae0b8b8e0b8a1e0b89ee0b8a3e0b980e0b8ade0b881e0b89fe0b989e0b8b2/%E0%B8%99%E0%B9%89%E0%B8%B3%E0%B8%95%E0%B8%B2%E0%B8%A5%E0%B8%AA%E0%B8%94%E0%B8%8A%E0%B8%B8%E0%B8%A1%E0%B8%9E%E0%B8%A3%E0%B9%80%E0%B8%AD%E0%B8%81%E0%B8%9F%E0%B9%89%E0%B8%B2_001.jpg?t=1728555759',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b888e0b881-e0b88ae0b8b8e0b8a1e0b89ee0b8a3e0b980e0b8ade0b881e0b89fe0b989e0b8b2/939C07D3-25EC-484F-95B5-E228DE296B1F.jpg?t=1728555759',
-            ],
-        },
-        {
-            title: lang === 'th' ? 'บริษัท น้ำดื่มวินวิน จำกัด' : 'Win Win Drinking Water Co., Ltd.',
-            images: [
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897e0b899e0b989e0b8b3e0b894e0b8b7e0b988e0b8a1-e0b8a7e0b8b4e0b899e0b8a7e0b8b4e0b899-e0b8ade0b8b4e0b899/S__30580756.jpg?t=1759907825',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897e0b899e0b989e0b8b3e0b894e0b8b7e0b988e0b8a1-e0b8a7e0b8b4e0b899e0b8a7e0b8b4e0b899-e0b8ade0b8b4e0b899/S__30580760.jpg?t=1759907825',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897e0b899e0b989e0b8b3e0b894e0b8b7e0b988e0b8a1-e0b8a7e0b8b4e0b899e0b8a7e0b8b4e0b899-e0b8ade0b8b4e0b899/S__30580772.jpg?t=1759907825',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897e0b899e0b989e0b8b3e0b894e0b8b7e0b988e0b8a1-e0b8a7e0b8b4e0b899e0b8a7e0b8b4e0b899-e0b8ade0b8b4e0b899/S__30580767.jpg?t=1759907825',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897e0b899e0b989e0b8b3e0b894e0b8b7e0b988e0b8a1-e0b8a7e0b8b4e0b899e0b8a7e0b8b4e0b899-e0b8ade0b8b4e0b899/S__30580771.jpg?t=1759907825',
-            ],
-        },
-        {
-            title: lang === 'th' ? 'บริษัท มิลเลี่ยน แม็กไพส์ จำกัด' : 'Million Magpies Co., Ltd.',
-            images: [
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897-e0b8a1e0b8b4e0b8a5e0b980e0b8a5e0b8b5e0b988e0b8a2e0b899-e0b981e0b8a1e0b987e0b881e0b984e0b89ee0b8aa/LINE_ALBUM_240725-%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%82%E0%B8%A3%E0%B8%87-2-New-Line_250819_2.jpg?t=1759908530',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897-e0b8a1e0b8b4e0b8a5e0b980e0b8a5e0b8b5e0b988e0b8a2e0b899-e0b981e0b8a1e0b987e0b881e0b984e0b89ee0b8aa/LINE_ALBUM_240725-%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%82%E0%B8%A3%E0%B8%87-2-New-Line_250819_1.jpg?t=1759908530',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897-e0b8a1e0b8b4e0b8a5e0b980e0b8a5e0b8b5e0b988e0b8a2e0b899-e0b981e0b8a1e0b987e0b881e0b984e0b89ee0b8aa/LINE_ALBUM_240725-%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%82%E0%B8%A3%E0%B8%87-2-New-Line_250819_3.jpg?t=1759908530',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897-e0b8a1e0b8b4e0b8a5e0b980e0b8a5e0b8b5e0b988e0b8a2e0b899-e0b981e0b8a1e0b987e0b881e0b984e0b89ee0b8aa/LINE_ALBUM_240725-%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%82%E0%B8%A3%E0%B8%87-2-New-Line_250819_4.jpg?t=1759908530',
-            ],
-        },
-        {
-            title: lang === 'th' ? 'อุดมทรัพย์ฟาร์ม' : 'Udomsap Farm',
-            images: [
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b8ade0b8b8e0b894e0b8a1e0b897e0b8a3e0b8b1e0b89ee0b8a2e0b98ce0b89fe0b8b2e0b8a3e0b98ce0b8a1/237098_0.jpg?t=1728554560',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b8ade0b8b8e0b894e0b8a1e0b897e0b8a3e0b8b1e0b89ee0b8a2e0b98ce0b89fe0b8b2e0b8a3e0b98ce0b8a1/237096_0.jpg?t=1728554560',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b8ade0b8b8e0b894e0b8a1e0b897e0b8a3e0b8b1e0b89ee0b8a2e0b98ce0b89fe0b8b2e0b8a3e0b98ce0b8a1/237116_0.jpg?t=1728554560',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b8ade0b8b8e0b894e0b8a1e0b897e0b8a3e0b8b1e0b89ee0b8a2e0b98ce0b89fe0b8b2e0b8a3e0b98ce0b8a1/237099_0.jpg?t=1728554560',
-            ],
-        },
-        {
-            title: lang === 'th' ? 'บริษัท นันทวรรณ กรีนดริ้งค์ จำกัด' : 'Nanthawan GreenDrink Co., Ltd.',
-            images: [
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897-e0b899e0b8b1e0b899e0b897e0b8a7e0b8a3e0b8a3e0b893-e0b881e0b8a3e0b8b5e0b899e0b894e0b8a3e0b8b4e0b989/286157.jpg?t=1759908780',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897-e0b899e0b8b1e0b899e0b897e0b8a7e0b8a3e0b8a3e0b893-e0b881e0b8a3e0b8b5e0b899e0b894e0b8a3e0b8b4e0b989/286165.jpg?t=1759908781',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897-e0b899e0b8b1e0b899e0b897e0b8a7e0b8a3e0b8a3e0b893-e0b881e0b8a3e0b8b5e0b899e0b894e0b8a3e0b8b4e0b989/S__1933336.jpg?t=1759908781',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897-e0b899e0b8b1e0b899e0b897e0b8a7e0b8a3e0b8a3e0b893-e0b881e0b8a3e0b8b5e0b899e0b894e0b8a3e0b8b4e0b989/S__1933331.jpg?t=1759908781',
-                'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,h_280/https://agileassets.co.th/wp-content/gallery/e0b89ae0b8a3e0b8b4e0b8a9e0b8b1e0b897-e0b899e0b8b1e0b899e0b897e0b8a7e0b8a3e0b8a3e0b893-e0b881e0b8a3e0b8b5e0b899e0b894e0b8a3e0b8b4e0b989/S__1933334.jpg?t=1759908781',
-            ],
-        },
-        {
-            title: lang === 'th' ? 'บริษัท น้ำดื่มขอนแก่น จำกัด' : 'Khon Kaen Drinking Water Co., Ltd.',
-            images: [
-            ],
-        },
-    ];
-
-    // 12 Photographic Activity Collage Items (4x3 Grid)
-    const collagePhotos = [
-        {
-            src: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2025/10/307397-1024x1024.jpg',
-            alt: 'Executive visit and client partnership handshake',
-        },
-        {
-            src: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2025/10/S__1933333-1024x768.jpg',
-            alt: 'Factory project consultation meeting',
-        },
-        {
-            src: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2025/10/LINE_ALBUM_240725-%E0%B8%95%E0%B8%A3%E0%B8%A7%E0%B8%88%E0%B8%A3%E0%B8%B1%E0%B8%9A%E0%B9%80%E0%B8%84%E0%B8%A3%E0%B8%B7%E0%B9%88%E0%B8%AD%E0%B8%87%E0%B9%82%E0%B8%A3%E0%B8%87-2-New-Line_250819_2-1024x768.jpg',
-            alt: 'Machinery handover team group photo',
-        },
-        {
-            src: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2025/10/11896-1024x768.jpg',
-            alt: 'Conference room project briefing',
-        },
-        {
-            src: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2024/10/nggallery_import/237098_0-1024x768.jpg',
-            alt: 'Poultry farm ventilation and climate system commissioning',
-        },
-        {
-            src: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2024/10/nggallery_import/338213071_6247572745332805_2982020131925519013_n-1024x689.jpg',
-            alt: 'Corporate ceremonial plaque handover',
-        },
-        {
-            src: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2024/10/nggallery_import/20240910_142452-1024x768.jpg',
-            alt: 'MOU signing and formal financial cooperation',
-        },
-        {
-            src: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2024/10/237159_0-1-1024x768.jpg',
-            alt: 'Electrical switchgear and substation audit',
-        },
-        {
-            src: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_754/https://agileassets.co.th/wp-content/uploads/2022/01/263065161_417825200062927_7117604202506920683_n-754x1024-1.jpg',
-            alt: 'Industrial chiller piping and high-grade valve installation',
-        },
-        {
-            src: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2022/03/361722-1024x478.jpg',
-            alt: 'Heavy borehole drilling and water equipment project site',
-        },
-        {
-            src: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_768/https://agileassets.co.th/wp-content/uploads/2022/03/361724-768x1645.jpg',
-            alt: 'High-power diesel generator set motor unit',
-        },
-        {
-            src: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024/https://agileassets.co.th/wp-content/uploads/2022/03/361726-1024x478.jpg',
-            alt: 'Industrial machinery commissioning and engineer site review',
-        },
-    ];
-
-    const title = lang === 'th'
+    const title = content.metaTitle || (lang === 'th'
         ? 'ผลงานและกิจกรรม (Project & Activity) | Agile Assets'
-        : 'Project & Activity | Agile Assets - Industrial Machinery Financing';
-    const description = lang === 'th'
+        : 'Project & Activity | Agile Assets - Industrial Machinery Financing');
+    const description = content.metaDescription || (lang === 'th'
         ? 'ผลงานและกิจกรรมของ Agile Assets สะท้อนความเชี่ยวชาญ การเติบโตอย่างต่อเนื่อง ผ่านโครงการ ความร่วมมือและกิจกรรม ติดตามผลงานและกิจกรรมได้ที่นี่'
-        : 'Agile Assets Projects & Activity — Demonstrating our 16+ years of engineering heritage, equipment financing trust, and nationwide project commissionings.';
+        : 'Agile Assets Projects & Activity — Demonstrating our 16+ years of engineering heritage, equipment financing trust, and nationwide project commissionings.');
 
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-sky-500 selection:text-white">
@@ -285,7 +164,7 @@ export function ProjectActivityPage() {
                         {/* Dynamic Vignette & Ambient Light Overlays */}
                         <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
                         <div className="absolute inset-0 bg-radial-at-c from-sky-500/15 via-transparent to-black/80" />
-                        
+
                         {/* Soft Bottom Fog/Fade Gradient into next section */}
                         <div className="absolute bottom-0 left-0 right-0 h-56 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-10" />
                     </div>
@@ -331,7 +210,7 @@ export function ProjectActivityPage() {
                 {/* ─── 2. โครงการและกิจกรรมของเรา (8 Company Projects 4-Column Grid) ─── */}
                 <section className="relative py-16 sm:py-24 overflow-hidden bg-background">
                     {/* Subtle Silk Wave Gradients */}
-                    <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-40 dark:opacity-30">
+                    {!companies.hidden && (<div className="absolute inset-0 pointer-events-none overflow-hidden opacity-40 dark:opacity-30">
                         <svg className="absolute w-full h-full object-cover" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M-100,300 C400,100 900,600 1600,200" stroke="url(#projWaveGrad1)" strokeWidth="1.5" strokeDasharray="6 6" />
                             <path d="M-50,500 C450,250 950,750 1600,350" stroke="url(#projWaveGrad2)" strokeWidth="2" />
@@ -350,46 +229,44 @@ export function ProjectActivityPage() {
                         </svg>
                         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-sky-500/10 rounded-full blur-[140px]" />
                         <div className="absolute bottom-10 right-10 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[150px]" />
-                    </div>
+                    </div>)}
 
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                         {/* Section Header */}
-                        <ScrollReveal animation="fade-up">
+                        {!companies.hidden && (<ScrollReveal animation="fade-up">
                             <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
                                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3 shadow-sm border border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-bold uppercase tracking-wider">
-                                    Project & Activity
+                                    {companies.t('t01')}
                                 </div>
                                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-sans mb-4 bg-gradient-to-r from-blue-900 via-sky-600 to-blue-800 dark:from-white dark:via-sky-200 dark:to-sky-400 bg-clip-text text-transparent">
-                                    {lang === 'th' ? 'โครงการและกิจกรรมของเรา' : 'Our Projects & Activities'}
+                                    {companies.t('t02')}
                                 </h2>
                                 <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
-                                    {lang === 'th'
-                                        ? 'ร่วมขับเคลื่อนธุรกิจภาคอุตสาหกรรม การผลิต และการเกษตรกรรมไทยให้เติบโตอย่างมั่นคง'
-                                        : 'Partnering with manufacturers, food producers, and agro-industrial enterprises across Thailand.'}
+                                    {companies.t('t03')}
                                 </p>
                             </div>
-                        </ScrollReveal>
+                        </ScrollReveal>)}
 
                         {/* 4-Column Grid of 8 Company Project Slideshows */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7 mb-16">
-                            {companyProjects.map((company, idx) => (
+                        {!companies.hidden && (<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7 mb-16">
+                            {companies.items.map((company, idx) => (
                                 <ScrollReveal key={idx} animation="fade-up" delay={idx * 40}>
                                     <CompanySlideshowCard
-                                        title={company.title}
-                                        images={company.images}
+                                        title={company.t('title')}
+                                        images={company.lines('images')}
                                     />
                                 </ScrollReveal>
                             ))}
-                        </div>
+                        </div>)}
 
                         {/* ─── 3. 12-Image Photographic Activity Grid (4 columns x 3 rows) ─── */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mb-16">
-                            {collagePhotos.map((photo, idx) => (
+                        {!collage.hidden && (<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 mb-16">
+                            {collage.items.map((photo, idx) => (
                                 <ScrollReveal key={idx} animation="zoom-in" delay={idx * 30}>
                                     <div className="relative aspect-4/3 rounded-xl overflow-hidden shadow-lg bg-slate-900 group border border-white/10 dark:border-slate-800 hover:border-sky-500/40 transition-all duration-300">
                                         <img
-                                            src={photo.src}
-                                            alt={photo.alt}
+                                            src={photo.t('src')}
+                                            alt={photo.t('alt')}
                                             className="w-full h-full object-cover object-center group-hover:scale-108 transition-transform duration-500"
                                             loading="lazy"
                                             onError={(e) => {
@@ -400,37 +277,37 @@ export function ProjectActivityPage() {
                                         />
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-3">
                                             <p className="text-xs font-medium text-white line-clamp-1">
-                                                {photo.alt}
+                                                {photo.t('alt')}
                                             </p>
                                         </div>
                                     </div>
                                 </ScrollReveal>
                             ))}
-                        </div>
+                        </div>)}
 
                         {/* ─── 4. Bottom 3 Action Buttons ─── */}
-                        <ScrollReveal animation="fade-up">
+                        {!actions.hidden && (<ScrollReveal animation="fade-up">
                             <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 pt-4 pb-8">
                                 {/* Financing with Us (Opens Official LINE Add Friend) */}
                                 <a
-                                    href="https://line.me/R/ti/p/%40884ukedb"
+                                    href={actions.t('link01')}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white font-bold text-xs sm:text-sm tracking-wide shadow-lg shadow-sky-500/25 hover:scale-105 active:scale-95 transition-all min-w-[200px] flex items-center justify-center gap-2"
                                 >
                                     <DollarSign className="w-4 h-4" />
-                                    <span>Financing with Us</span>
+                                    <span>{actions.t('t02')}</span>
                                 </a>
 
                                 {/* Company Profile (Opens Company Profile PDF) */}
                                 <a
-                                    href="https://agileassets.co.th/wp-content/uploads/2021/11/Company-Profile-Agile-Assets.pdf"
+                                    href={actions.t('link03')}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white font-bold text-xs sm:text-sm tracking-wide shadow-lg shadow-sky-500/25 hover:scale-105 active:scale-95 transition-all min-w-[200px] flex items-center justify-center gap-2"
                                 >
                                     <FileText className="w-4 h-4" />
-                                    <span>Company Profile</span>
+                                    <span>{actions.t('t04')}</span>
                                 </a>
 
                                 {/* Newsletter */}
@@ -442,10 +319,10 @@ export function ProjectActivityPage() {
                                     className="px-8 py-3.5 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white font-bold text-xs sm:text-sm tracking-wide shadow-lg shadow-sky-500/25 hover:scale-105 active:scale-95 transition-all min-w-[200px] flex items-center justify-center gap-2"
                                 >
                                     <Mail className="w-4 h-4" />
-                                    <span>Newsletter</span>
+                                    <span>{actions.t('t05')}</span>
                                 </button>
                             </div>
-                        </ScrollReveal>
+                        </ScrollReveal>)}
                     </div>
                 </section>
             </main>

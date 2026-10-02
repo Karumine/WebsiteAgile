@@ -158,7 +158,24 @@ export interface PageCustomContent {
     whatWeDoImage?: string;
     whatWeDoItems?: PageSectionItem[];
 
+    sections?: Record<string, PageSectionContent>;
+    /** Page-builder blocks, used by admin-created pages (`page-*`). */
+    blocks?: PageBlock[];
+
     lastUpdated?: string;
+}
+
+export type SectionListItem = Record<string, string>;
+
+export interface PageSectionContent {
+    hidden?: boolean;
+    fields?: Record<string, string>;
+    items?: SectionListItem[];
+}
+
+export interface PageBlock extends PageSectionContent {
+    id: string;
+    type: string;
 }
 
 export interface CustomPageItem {

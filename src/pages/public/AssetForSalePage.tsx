@@ -8,14 +8,24 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { cn } from '@/lib/utils';
 import { useLeadSubmit } from '@/lib/useLeadSubmit';
 import { formService } from '@/services/formService';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
+import { useSections } from '@/lib/pageSections';
+import { usedMachineSections } from '@/data/pageSections/usedMachine';
 
 export function AssetForSalePage() {
     const { lang } = useLanguage();
+    const { content } = usePageContent('used-machine', DEFAULT_PAGE_CONTENTS['used-machine']);
+    const section = useSections(content, usedMachineSections);
+    const heroExtras = section('hero-extras');
+    const featured = section('featured');
+    const specsSec = section('specs');
+    const gallerySec = section('gallery');
     const { settings } = useSiteSettings();
     const machineryList = settings.usedMachinery || [];
     const primaryAsset = machineryList[0];
@@ -39,11 +49,7 @@ export function AssetForSalePage() {
     };
 
     // 3 Secondary Gallery Images
-    const secondaryImages = [
-        'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024,h_768/https://agileassets.co.th/wp-content/uploads/2026/04/9525_0-1-1024x768.jpg',
-        'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024,h_768/https://agileassets.co.th/wp-content/uploads/2026/04/9511_0-1024x768.jpg',
-        'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024,h_768/https://agileassets.co.th/wp-content/uploads/2026/04/9510_0-1024x768.jpg',
-    ];
+    const secondaryImages = gallerySec.items.map((it) => it.raw.value);
 
     // Comment Form states
     const [commentText, setCommentText] = useState('');
@@ -79,24 +85,14 @@ export function AssetForSalePage() {
         setAuthorPhone('');
     };
 
-    const specs = [
-        { label: 'Capacity', value: '400 Cfm' },
-        { label: 'Controller Model', value: 'AUJW04CT' },
-        { label: 'Speed', value: '2500 RPM' },
-        { label: 'Horse system', value: '115 HP' },
-        { label: 'Compressor Oil', value: '50 ml' },
-        { label: 'Fuel (Diesel)', value: '100 L' },
-        { label: 'Net Weight', value: '1300 Kgs' },
-        { label: 'Tower Speed', value: '40 Km/Hr' },
-        { label: 'Overall LxBxH (mm)', value: '3200x1615x1870' },
-    ];
+    const specs = specsSec.items.map((it) => ({ label: it.raw.label, value: it.raw.value }));
 
-    const pageTitle = lang === 'th'
+    const pageTitle = content.metaTitle || (lang === 'th'
         ? 'Asset for Sale ขายเครื่องจักรมือสอง สินทรัพย์รอการขาย | Agile Assets'
-        : 'Asset for Sale | Agile Assets Used Industrial Machinery Auction';
-    const pageDescription = lang === 'th'
+        : 'Asset for Sale | Agile Assets Used Industrial Machinery Auction');
+    const pageDescription = content.metaDescription || (lang === 'th'
         ? 'สินทรัพย์รอการขาย ประมูลเครื่องจักรมือสอง คุณภาพดี เครื่องจักรแนะนำที่ไม่ควรพลาด จาก Agile Assets'
-        : 'Used industrial equipment and machinery for auction and direct sale from Agile Assets.';
+        : 'Used industrial equipment and machinery for auction and direct sale from Agile Assets.');
 
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-sky-500 selection:text-white">
@@ -116,7 +112,7 @@ export function AssetForSalePage() {
                     {/* Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img
-                            src={heroBg}
+                            src={content.heroImage || heroBg}
                             alt="Agile Assets Asset For Sale"
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
@@ -124,7 +120,7 @@ export function AssetForSalePage() {
                         {/* Dynamic Vignette & Ambient Light Overlays */}
                         <div className="absolute inset-0 bg-gradient-to-t from-background via-slate-950/75 to-slate-950/60" />
                         <div className="absolute inset-0 bg-radial-at-c from-sky-500/15 via-transparent to-black/80" />
-                        
+
                         {/* Soft Bottom Fog/Fade Gradient into next section */}
                         <div className="absolute bottom-0 left-0 right-0 h-56 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-10" />
                     </div>
@@ -155,21 +151,21 @@ export function AssetForSalePage() {
                                 >
                                     <Tag className="w-3.5 h-3.5" />
                                 </div>
-                                <span>Certified Pre-Owned Machinery & Equipment</span>
+                                <span>{(lang === 'th' ? (content.heroBadgeTh || content.heroBadgeEn || 'Certified Pre-Owned Machinery & Equipment') : (content.heroBadgeEn || content.heroBadgeTh || 'Certified Pre-Owned Machinery & Equipment'))}</span>
                             </div>
                         </ScrollReveal>
 
                         <ScrollReveal animation="fade-up" delay={100}>
                             <p className="text-xl sm:text-3xl font-semibold text-sky-200/90 mb-2 font-sans tracking-wide drop-shadow-md">
-                                Agile Assets
+                                {heroExtras.t('t01')}
                             </p>
                             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mb-4 text-white drop-shadow-2xl font-sans">
                                 <span className="bg-gradient-to-r from-white via-sky-100 to-sky-300 bg-clip-text text-transparent">
-                                    Asset For Sale
+                                    {(lang === 'th' ? (content.heroTitleTh || content.heroTitleEn || 'Asset For Sale') : (content.heroTitleEn || content.heroTitleTh || 'Asset For Sale'))}
                                 </span>
                             </h1>
                             <p className="text-2xl sm:text-3xl lg:text-4xl font-semibold text-sky-200 tracking-wide mb-8 drop-shadow-lg font-sans">
-                                {lang === 'th' ? 'สินทรัพย์รอการขายและประมูลเครื่องจักรมือสอง' : 'Certified Used Industrial Machinery'}
+                                {(lang === 'th' ? (content.heroSubtitleTh || content.heroSubtitleEn || 'สินทรัพย์รอการขายและประมูลเครื่องจักรมือสอง') : (content.heroSubtitleEn || content.heroSubtitleTh || 'Certified Used Industrial Machinery'))}
                             </p>
 
                             {/* CTA Action Button */}
@@ -179,7 +175,7 @@ export function AssetForSalePage() {
                                     className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-sky-500/30 hover:shadow-sky-500/50 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200"
                                 >
                                     <Tag className="w-4 h-4" />
-                                    <span>{lang === 'th' ? 'ดูรายการเครื่องจักรพร้อมส่งมอบ' : 'Explore Available Assets'}</span>
+                                    <span>{heroExtras.t('t02')}</span>
                                 </a>
                             </div>
                         </ScrollReveal>
@@ -187,26 +183,26 @@ export function AssetForSalePage() {
                 </section>
 
                 {/* ─── 2. Featured Auction Machine & Gallery ─── */}
-                <section id="auction-section" className="py-14 sm:py-20 bg-background scroll-mt-24">
+                {!featured.hidden && (<section id="auction-section" className="py-14 sm:py-20 bg-background scroll-mt-24">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                         {/* Title */}
                         <ScrollReveal animation="fade-up">
                             <div className="text-center mb-10">
                                 <p className="text-sm sm:text-base font-semibold text-sky-600 dark:text-sky-400 mb-1 font-mono uppercase tracking-wider">
-                                    Asset for Sale
+                                    {featured.t('t01')}
                                 </p>
                                 <h2 className="text-2xl sm:text-4xl font-extrabold text-foreground font-sans">
-                                    {lang === 'th' ? 'สินทรัพย์รอการขาย' : 'Assets for Sale'}
+                                    {featured.t('t02')}
                                 </h2>
                             </div>
 
                             {/* Blue Category Banner */}
                             <div className="bg-gradient-to-r from-blue-900 via-sky-950 to-blue-950 text-white rounded-2xl p-6 sm:p-8 shadow-xl mb-10 border border-sky-500/30 backdrop-blur-xl">
                                 <h3 className="text-lg sm:text-xl font-bold font-sans mb-1 text-white">
-                                    {lang === 'th' ? 'ประมูลเครื่องจักรมือสอง คุณภาพดี' : 'High Quality Used Industrial Machinery Auction'}
+                                    {featured.t('t03')}
                                 </h3>
                                 <p className="text-xs sm:text-sm text-sky-200 font-normal">
-                                    {lang === 'th' ? 'เครื่องจักรแนะนำที่ไม่ควรพลาด ตรวจเช็กมาตรฐานพร้อมใช้งานทันที' : 'Featured Machinery & Equipment for Bidding, thoroughly inspected and certified'}
+                                    {featured.t('t04')}
                                 </p>
                             </div>
                         </ScrollReveal>
@@ -226,14 +222,14 @@ export function AssetForSalePage() {
                                         {/* Watermark text */}
                                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none bg-black/10">
                                             <span className="text-white/40 text-2xl sm:text-4xl font-extrabold tracking-widest uppercase drop-shadow-md select-none">
-                                                Agile Assets Co., Ltd.
+                                                {featured.t('t05')}
                                             </span>
                                         </div>
 
                                         {/* Tag badge */}
                                         <div className="absolute top-4 left-4 z-10 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-900/80 backdrop-blur-md text-white text-xs font-bold border border-white/20">
                                             <Tag className="w-3.5 h-3.5" />
-                                            <span>แนะนำ / Featured</span>
+                                            <span>{featured.t('t06')}</span>
                                         </div>
 
                                         {/* Slider Navigation Arrows */}
@@ -299,22 +295,22 @@ export function AssetForSalePage() {
 
                                             {/* Engineer Contact Notice */}
                                             <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 mb-6">
-                                                ติดต่อวิศวกรเพื่อขอเข้าดูเครื่องจักร :{' '}
-                                                <a href="tel:0952460255" className="text-sky-600 dark:text-sky-400 font-bold hover:underline">
-                                                    095-246-0255
+                                                {featured.t('t07')}{' '}
+                                                <a href={featured.t('link08')} className="text-sky-600 dark:text-sky-400 font-bold hover:underline">
+                                                    {featured.t('t09')}
                                                 </a>
                                             </div>
                                         </div>
 
                                         {/* Action Button */}
                                         <a
-                                            href="https://line.me/R/ti/p/%40884ukedb"
+                                            href={featured.t('link10')}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             className="w-full py-3 px-4 rounded-xl bg-sky-400 hover:bg-sky-500 text-white font-bold text-xs sm:text-sm shadow-md transition-all text-center flex items-center justify-center gap-2 active:scale-95"
                                         >
                                             <Phone className="w-4 h-4" />
-                                            <span>ติดต่อเข้าร่วมประมูลเครื่องจักร</span>
+                                            <span>{featured.t('t11')}</span>
                                         </a>
                                     </div>
                                 </div>
@@ -330,14 +326,14 @@ export function AssetForSalePage() {
                                         className="relative bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm aspect-4/3 group"
                                     >
                                         <img
-                                            src={img}
+                                            src={featured.t('img12') || img}
                                             alt={`Used Machine Gallery ${idx + 1}`}
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                             loading="lazy"
                                         />
                                         <div className="absolute inset-0 bg-black/10 flex items-center justify-center pointer-events-none">
                                             <span className="text-white/30 text-xs sm:text-sm font-bold tracking-wider uppercase select-none">
-                                                Agile Assets Co., Ltd.
+                                                {featured.t('t05')}
                                             </span>
                                         </div>
                                     </div>
@@ -352,15 +348,13 @@ export function AssetForSalePage() {
                                     <div className="text-center mb-8">
                                         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 text-xs font-bold mb-2">
                                             <Tag className="w-3 h-3" />
-                                            <span>Certified Pre-Owned Machinery</span>
+                                            <span>{featured.t('t13')}</span>
                                         </div>
                                         <h3 className="text-2xl sm:text-3xl font-extrabold text-foreground font-sans mb-2">
-                                            {lang === 'th' ? 'รายการเครื่องจักรมือสองพร้อมส่งมอบอื่นๆ' : 'Available Industrial Machinery Catalog'}
+                                            {featured.t('t14')}
                                         </h3>
                                         <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-                                            {lang === 'th'
-                                                ? 'เครื่องจักรผ่านการตรวจสอบมาตรฐานโดยวิศวกรผู้เชี่ยวชาญ พร้อมใช้งานและรองรับสินเชื่อเช่าซื้อ'
-                                                : 'Certified industrial equipment inspected and ready for immediate operation and lease financing.'}
+                                            {featured.t('t15')}
                                         </p>
                                     </div>
 
@@ -379,7 +373,7 @@ export function AssetForSalePage() {
                                                     />
                                                     <div className="absolute inset-0 bg-black/10 flex items-center justify-center pointer-events-none">
                                                         <span className="text-white/30 text-xs font-bold tracking-wider uppercase select-none">
-                                                            Agile Assets Co., Ltd.
+                                                            {featured.t('t05')}
                                                         </span>
                                                     </div>
                                                     <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-blue-900/80 backdrop-blur-md text-white text-xs font-bold border border-white/20">
@@ -387,7 +381,7 @@ export function AssetForSalePage() {
                                                     </div>
                                                     {asset.status === 'available' && (
                                                         <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full bg-emerald-600/90 text-white text-[11px] font-bold shadow-md">
-                                                            {lang === 'th' ? 'พร้อมส่งมอบ' : 'Available'}
+                                                            {featured.t('t16')}
                                                         </div>
                                                     )}
                                                 </div>
@@ -406,13 +400,13 @@ export function AssetForSalePage() {
                                                     </div>
 
                                                     <a
-                                                        href="https://line.me/R/ti/p/%40884ukedb"
+                                                        href={featured.t('link17')}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                         className="w-full py-3 px-4 rounded-xl bg-sky-400 hover:bg-sky-500 text-white font-bold text-xs sm:text-sm shadow-md transition-all text-center flex items-center justify-center gap-2 active:scale-95"
                                                     >
                                                         <Phone className="w-4 h-4" />
-                                                        <span>{lang === 'th' ? 'ติดต่อสอบถามเครื่องนี้' : 'Inquire This Machine'}</span>
+                                                        <span>{featured.t('t18')}</span>
                                                     </a>
                                                 </div>
                                             </div>
@@ -426,19 +420,17 @@ export function AssetForSalePage() {
                         <ScrollReveal animation="fade-up">
                             <div className="border-t border-slate-200 dark:border-slate-800 pt-10">
                                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-sans mb-1">
-                                    {lang === 'th' ? 'สอบถามข้อมูลเครื่องจักร' : 'Ask About This Machinery'}
+                                    {featured.t('t19')}
                                 </h3>
                                 <p className="text-xs text-slate-500 dark:text-slate-400 mb-6">
-                                    {lang === 'th'
-                                        ? 'สนใจเครื่องจักร ต้องการนัดดูเครื่อง หรือสอบถามราคา ฝากข้อความไว้ เจ้าหน้าที่จะติดต่อกลับ ช่องที่จำเป็นมีเครื่องหมาย *'
-                                        : 'Interested, want to schedule a viewing, or need a price? Leave a message and our team will reach out. Required fields are marked *'}
+                                    {featured.t('t20')}
                                 </p>
 
                                 <form onSubmit={handleCommentSubmit} className="space-y-4 max-w-4xl">
                                     {/* Textarea */}
                                     <div>
                                         <label htmlFor="asset-for-sale-field-1" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                                            {lang === 'th' ? 'ข้อความ / เครื่องจักรที่สนใจ *' : 'Message / Machinery of interest *'}
+                                            {featured.t('t21')}
                                         </label>
                                         <textarea id="asset-for-sale-field-1"
                                             rows={6}
@@ -454,12 +446,12 @@ export function AssetForSalePage() {
                                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                         <div>
                                             <label htmlFor="asset-for-sale-field-2" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                                                {lang === 'th' ? 'ชื่อ *' : 'Name *'}
+                                                {featured.t('t22')}
                                             </label>
                                             <input id="asset-for-sale-field-2"
                                                 type="text"
                                                 required
-                                                placeholder={lang === 'th' ? 'ชื่อ-นามสกุล' : 'Name'}
+                                                placeholder={featured.t('t23')}
                                                 maxLength={200}
                                                 autoComplete="name"
                                                 value={authorName}
@@ -470,7 +462,7 @@ export function AssetForSalePage() {
 
                                         <div>
                                             <label htmlFor="asset-for-sale-field-3" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                                                {lang === 'th' ? 'อีเมล *' : 'Email *'}
+                                                {featured.t('t24')}
                                             </label>
                                             <input id="asset-for-sale-field-3"
                                                 type="email"
@@ -486,7 +478,7 @@ export function AssetForSalePage() {
 
                                         <div>
                                             <label htmlFor="asset-for-sale-field-4" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                                                {lang === 'th' ? 'เบอร์โทรศัพท์' : 'Phone'}
+                                                {featured.t('t25')}
                                             </label>
                                             <input id="asset-for-sale-field-4"
                                                 type="tel"
@@ -514,14 +506,14 @@ export function AssetForSalePage() {
                                             ) : (
                                                 <Send className="w-3.5 h-3.5" />
                                             )}
-                                            <span>{lang === 'th' ? 'ส่งคำถาม' : 'Send Inquiry'}</span>
+                                            <span>{featured.t('t26')}</span>
                                         </button>
                                     </div>
                                 </form>
                             </div>
                         </ScrollReveal>
                     </div>
-                </section>
+                </section>)}
             </main>
 
             <Footer />

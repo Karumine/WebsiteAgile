@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, ArrowRightLeft, Droplets, Wheat, Factory, Flame, Sun } from 'lucide-react';
+import { ArrowRight, ArrowRightLeft } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { CookieConsent } from '@/components/ui/CookieConsent';
@@ -12,11 +12,17 @@ import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { InterestRates } from '@/components/sections/InterestRates';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
+import { useSections } from '@/lib/pageSections';
+import { interestRateSections } from '@/data/pageSections/interestRate';
 
 export function InterestRateConversionPage() {
     const { lang } = useLanguage();
     const navigate = useNavigate();
     const { content } = usePageContent('interest-rate', DEFAULT_PAGE_CONTENTS['interest-rate']);
+    const section = useSections(content, interestRateSections);
+    const explanation = section('explanation');
+    const converter = section('converter');
+    const solutions = section('solutions');
 
     // Form states
     const [conversionType, setConversionType] = useState<'flatToEff' | 'effToFlat'>('flatToEff');
@@ -53,61 +59,12 @@ export function InterestRateConversionPage() {
         e.preventDefault();
     };
 
-    // 5 Industries for bottom grid
-    const industries = [
-        {
-            titleTh: 'สินเชื่อธุรกิจผลิตน้ำดื่ม',
-            titleEn: 'Drinking Water Production',
-            descTh: 'สินเชื่อเช่าซื้อสำหรับเครื่องจักรและอุปกรณ์ในการผลิตน้ำดื่ม',
-            descEn: 'Machinery leasing for purified drinking water manufacturing',
-            image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img/https://agileassets.co.th/wp-content/uploads/2026/03/ธุรกิจผลิตน้ำดื่ม.jpg',
-            href: '/drinking-water-production',
-            icon: Droplets,
-        },
-        {
-            titleTh: 'สินเชื่อฟาร์มปศุสัตว์',
-            titleEn: 'Livestock Farm Financing',
-            descTh: 'สินเชื่อเช่าซื้อสำหรับอุปกรณ์และระบบการจัดการแบบบูรณาการในฟาร์มปศุสัตว์',
-            descEn: 'Integrated agricultural & livestock climate system loans',
-            image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img/https://agileassets.co.th/wp-content/uploads/2026/03/ฟาร์มปศุสัตว์ไก่.jpg',
-            href: '/livestock-farm',
-            icon: Wheat,
-        },
-        {
-            titleTh: 'สินเชื่อธุรกิจแปรรูปอาหาร',
-            titleEn: 'Food Processing Machinery',
-            descTh: 'สินเชื่อเช่าซื้อสำหรับเครื่องจักรในกระบวนการแปรรูปอาหาร',
-            descEn: 'Commercial grade food processing & packing equipment',
-            image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img/https://agileassets.co.th/wp-content/uploads/2026/03/ธุรกิจแปรรูปอาหาร2.jpg',
-            href: '/food-processing',
-            icon: Factory,
-        },
-        {
-            titleTh: 'สินเชื่อผลิตพลังงานก๊าซชีวภาพ',
-            titleEn: 'Biogas Production Systems',
-            descTh: 'สินเชื่อเช่าซื้อสำหรับอุปกรณ์และเครื่องจักรที่ใช้ในการผลิตก๊าซชีวภาพ',
-            descEn: 'Industrial anaerobic digestion & biogas gen-sets financing',
-            image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img/https://agileassets.co.th/wp-content/uploads/2026/03/ธุรกิจผลิตพลังงานจากก๊าซชีวภาพ.jpg',
-            href: '/biogas-production',
-            icon: Flame,
-        },
-        {
-            titleTh: 'สินเชื่อผลิตพลังงานจากแสงอาทิตย์',
-            titleEn: 'Solar Power Generation',
-            descTh: 'สินเชื่อเช่าซื้อสำหรับอุปกรณ์สำหรับการผลิตพลังงานแสงอาทิตย์',
-            descEn: 'Commercial solar PV rooftops & clean energy inverters',
-            image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img/https://agileassets.co.th/wp-content/uploads/2026/03/ธุรกิจผลิตพลังงานจากแสงอาทิตย์.jpg',
-            href: '/solar-power-generation-en',
-            icon: Sun,
-        },
-    ];
-
-    const pageTitle = lang === 'th'
+    const pageTitle = content.metaTitle || (lang === 'th'
         ? 'แปลงดอกเบี้ย Flat Rate / Effective Rate | Agile Assets'
-        : 'Interest Rate Converter | Agile Assets - Flat Rate vs Effective Rate';
-    const pageDescription = lang === 'th'
+        : 'Interest Rate Converter | Agile Assets - Flat Rate vs Effective Rate');
+    const pageDescription = content.metaDescription || (lang === 'th'
         ? 'แปลงดอกเบี้ยคงที่ Flat Rate เป็น ดอกเบี้ยลดต้นลดดอก Effective Rate คำนวณอัตราดอกเบี้ยแม่นยำ ใช้งานง่าย ช่วยคำนวณสินเชื่อได้แม่นยำ'
-        : 'Convert between Flat Rate and Effective Rate for industrial equipment financing and factory machinery loans with Agile Assets.';
+        : 'Convert between Flat Rate and Effective Rate for industrial equipment financing and factory machinery loans with Agile Assets.');
 
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-sky-500 selection:text-white">
@@ -134,7 +91,7 @@ export function InterestRateConversionPage() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
                         <div className="absolute inset-0 bg-radial-at-c from-sky-500/10 via-transparent to-black/80" />
-                        
+
                         {/* Soft Bottom Fog/Fade Gradient into next section */}
                         <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none z-10" />
                     </div>
@@ -164,43 +121,43 @@ export function InterestRateConversionPage() {
                 {/* ─── 2. Main Explanation Section ─── */}
                 <section className="py-16 sm:py-20 bg-white dark:bg-slate-950">
                     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-                        <ScrollReveal animation="fade-up">
+                        {!explanation.hidden && (<ScrollReveal animation="fade-up">
                             <div className="text-center mb-10">
                                 <p className="text-sm font-semibold text-sky-600 dark:text-sky-400 mb-1">
-                                    Interest Rate Converter
+                                    {explanation.t('t01')}
                                 </p>
                                 <h2 className="text-2xl sm:text-4xl font-extrabold text-blue-900 dark:text-blue-400 font-sans">
-                                    แปลงดอกเบี้ย Flat Rate / Effective Rate
+                                    {explanation.t('t02')}
                                 </h2>
                             </div>
 
                             <div className="mb-14 space-y-4">
                                 <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-sans">
-                                    ดอกเบี้ยคงที่ ( Flat Rate ) กับ ดอกเบี้ยแบบลดลดดอก ( Effective) แตกต่างกันอย่างไร
+                                    {explanation.t('t03')}
                                 </h3>
                                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed text-justify">
-                                    <strong>ดอกเบี้ยคงที่ ( Flat Rate )</strong> คือ อัตราดอกเบี้ยที่ผู้ให้สินเชื่อกำหนดไว้ตายตัว โดยจะไม่มีการปรับยอดชำระตลอดการทำสัญญา โดยคำนวณจากจำนวนเงินต้นที่ขอสินเชื่อ และนำมาหารกับจำนวนงวดที่ต้องจ่ายในอัตราการคิดดอกเบี้ยที่เท่ากันในแต่ละครั้งของการชำระหนี้ ทำให้ยอดชำระต่องวดเท่ากันทุกงวด จนครบจำนวนงวดตามสัญญา
+                                    <strong>{explanation.t('t04')}</strong> {explanation.t('t05')}
                                 </p>
                                 <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed text-justify">
-                                    <strong>ดอกเบี้ยลดต้นลดดอก ( Effective)</strong> คือ ดอกเบี้ยที่เปลี่ยนแปลงไปตามจำนวนเงินต้นที่ผู้ขอสินเชื่อได้ชำระในแต่ละงวด โดยดอกเบี้ยจะลดลงเรื่อย ๆ ตามเงินต้นที่ลดลง เนื่องจากถูกหักออกไปจากการชำระหนี้งวดก่อนหน้า หรือการที่เราผ่อนหรือชำระในแต่ละงวด จะทำให้เงินต้นลดลงดอกเบี้ยที่เรียกเก็บ จากเราก็จะลดลงไปด้วย
+                                    <strong>{explanation.t('t06')}</strong> {explanation.t('t07')}
                                 </p>
                             </div>
-                        </ScrollReveal>
+                        </ScrollReveal>)}
 
                         {/* ─── 3. Converter Form & Illustration ─── */}
-                        <ScrollReveal animation="fade-up">
+                        {!converter.hidden && (<ScrollReveal animation="fade-up">
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center mb-20 bg-slate-50 dark:bg-slate-900/60 p-6 sm:p-10 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl">
                                 {/* Form Left */}
                                 <div className="lg:col-span-6">
                                     <h3 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white font-sans mb-6">
-                                        โปรแกรมแปลงดอกเบี้ย FLAT RATE / EFFECTIVE RATE
+                                        {converter.t('t01')}
                                     </h3>
 
                                     <form onSubmit={handleFormSubmit} className="space-y-4">
                                         {/* ประเภทดอกเบี้ย */}
                                         <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2">
                                             <label className="sm:col-span-5 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                                ประเภทดอกเบี้ย
+                                                {converter.t('t02')}
                                             </label>
                                             <div className="sm:col-span-7">
                                                 <select
@@ -216,8 +173,8 @@ export function InterestRateConversionPage() {
                                                     }}
                                                     className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs sm:text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none shadow-sm"
                                                 >
-                                                    <option value="flatToEff">Flat Rate (คงที่) &gt; Effective Rate</option>
-                                                    <option value="effToFlat">Effective Rate &gt; Flat Rate (คงที่)</option>
+                                                    <option value="flatToEff">{converter.t('t03')}</option>
+                                                    <option value="effToFlat">{converter.t('t04')}</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -225,7 +182,7 @@ export function InterestRateConversionPage() {
                                         {/* ดอกเบี้ย */}
                                         <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2">
                                             <label className="sm:col-span-5 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                                ดอกเบี้ย<span className="text-red-500 font-bold ml-0.5">*</span>
+                                                {converter.t('t05')}<span className="text-red-500 font-bold ml-0.5">*</span>
                                             </label>
                                             <div className="sm:col-span-7">
                                                 <div className="relative">
@@ -248,7 +205,7 @@ export function InterestRateConversionPage() {
                                         {/* ระยะเวลาผ่อนชำระ */}
                                         <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2">
                                             <label className="sm:col-span-5 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                                ระยะเวลาผ่อนชำระ
+                                                {converter.t('t06')}
                                             </label>
                                             <div className="sm:col-span-7">
                                                 <select
@@ -256,14 +213,14 @@ export function InterestRateConversionPage() {
                                                     onChange={(e) => setInstallmentMonths(parseInt(e.target.value, 10))}
                                                     className="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-xs sm:text-sm focus:ring-2 focus:ring-sky-500 focus:outline-none shadow-sm"
                                                 >
-                                                    <option value={15}>15 เดือน</option>
-                                                    <option value={24}>24 เดือน (2 ปี)</option>
-                                                    <option value={30}>30 เดือน</option>
-                                                    <option value={36}>36 เดือน (3 ปี)</option>
-                                                    <option value={48}>48 เดือน (4 ปี)</option>
-                                                    <option value={60}>60 เดือน (5 ปี)</option>
-                                                    <option value={72}>72 เดือน (6 ปี)</option>
-                                                    <option value={84}>84 เดือน (7 ปี)</option>
+                                                    <option value={15}>{converter.t('t07')}</option>
+                                                    <option value={24}>{converter.t('t08')}</option>
+                                                    <option value={30}>{converter.t('t09')}</option>
+                                                    <option value={36}>{converter.t('t10')}</option>
+                                                    <option value={48}>{converter.t('t11')}</option>
+                                                    <option value={60}>{converter.t('t12')}</option>
+                                                    <option value={72}>{converter.t('t13')}</option>
+                                                    <option value={84}>{converter.t('t14')}</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -271,7 +228,7 @@ export function InterestRateConversionPage() {
                                         {/* ดอกเบี้ยเทียบเท่า */}
                                         <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2">
                                             <label className="sm:col-span-5 text-xs sm:text-sm font-semibold text-slate-700 dark:text-slate-300">
-                                                ดอกเบี้ยเทียบเท่า
+                                                {converter.t('t15')}
                                             </label>
                                             <div className="sm:col-span-7">
                                                 <input
@@ -291,7 +248,7 @@ export function InterestRateConversionPage() {
                                                 className="px-6 py-2.5 rounded-lg bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs sm:text-sm tracking-wide shadow-md transition-all flex items-center justify-center gap-1.5 active:scale-95"
                                             >
                                                 <ArrowRightLeft className="w-4 h-4" />
-                                                <span>แปลงดอกเบี้ย</span>
+                                                <span>{converter.t('t16')}</span>
                                             </button>
                                         </div>
                                     </form>
@@ -300,25 +257,25 @@ export function InterestRateConversionPage() {
                                 {/* Graphic Right */}
                                 <div className="lg:col-span-6 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 shadow-md">
                                     <img
-                                        src="https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024,h_683/https://agileassets.co.th/wp-content/uploads/2026/05/piles-coins-top-graph-1024x683.jpg"
+                                        src={converter.t('img17')}
                                         alt="Coins on Growth Financial Graph"
                                         className="w-full h-auto object-cover hover:scale-105 transition-transform duration-500"
                                         loading="lazy"
                                     />
                                 </div>
                             </div>
-                        </ScrollReveal>
+                        </ScrollReveal>)}
 
                         {/* ─── 4. โซลูชั่นทางการเงินของเราในอุตสาหกรรม (5 Industry Cards) ─── */}
-                        <ScrollReveal animation="fade-up">
+                        {!solutions.hidden && (<ScrollReveal animation="fade-up">
                             <div className="text-center mb-12">
                                 <h3 className="text-xl sm:text-3xl font-extrabold text-blue-900 dark:text-blue-400 font-sans">
-                                    โซลูชั่นทางการเงินของเราในอุตสาหกรรม
+                                    {solutions.t('t01')}
                                 </h3>
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5 mb-12">
-                                {industries.map((ind, idx) => (
+                                {solutions.items.map((ind, idx) => (
                                     <div
                                         key={idx}
                                         className="bg-white dark:bg-slate-900 rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl hover:border-sky-500/50 transition-all duration-300 flex flex-col justify-between group"
@@ -326,28 +283,28 @@ export function InterestRateConversionPage() {
                                         <div>
                                             <div className="aspect-16/10 overflow-hidden bg-slate-100 dark:bg-slate-800">
                                                 <img
-                                                    src={ind.image}
-                                                    alt={ind.titleTh}
+                                                    src={ind.t('image')}
+                                                    alt={ind.t('title')}
                                                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                                                     loading="lazy"
                                                 />
                                             </div>
                                             <div className="p-4 text-center">
                                                 <h4 className="text-sm font-bold text-slate-900 dark:text-white font-sans mb-1.5 line-clamp-2">
-                                                    {lang === 'th' ? ind.titleTh : ind.titleEn}
+                                                    {ind.t('title')}
                                                 </h4>
                                                 <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-3">
-                                                    {lang === 'th' ? ind.descTh : ind.descEn}
+                                                    {ind.t('desc')}
                                                 </p>
                                             </div>
                                         </div>
 
                                         <div className="p-4 pt-0">
                                             <button
-                                                onClick={() => navigate(ind.href)}
+                                                onClick={() => navigate(ind.t('href'))}
                                                 className="w-full py-2 px-3 rounded-lg bg-sky-400 hover:bg-sky-500 text-white text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1 group-hover:shadow-md"
                                             >
-                                                <span>อ่านเพิ่มเติม</span>
+                                                <span>{solutions.t('t02')}</span>
                                                 <ArrowRight className="w-3 h-3" />
                                             </button>
                                         </div>
@@ -358,27 +315,27 @@ export function InterestRateConversionPage() {
                             {/* Bottom Dual Action Buttons */}
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                                 <a
-                                    href="https://line.me/R/ti/p/%40884ukedb"
+                                    href={solutions.t('link03')}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="w-full sm:w-auto px-8 py-3 rounded-xl bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs sm:text-sm tracking-wide shadow-lg transition-all text-center active:scale-95"
                                 >
-                                    ขอสินเชื่อกับเรา
+                                    {solutions.t('t04')}
                                 </a>
 
                                 <button
                                     onClick={() => navigate('/calculator')}
                                     className="w-full sm:w-auto px-8 py-3 rounded-xl border-2 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-900 dark:text-white font-bold text-xs sm:text-sm tracking-wide shadow-sm transition-all text-center active:scale-95"
                                 >
-                                    คำนวณค่างวด
+                                    {solutions.t('t05')}
                                 </button>
                             </div>
-                        </ScrollReveal>
+                        </ScrollReveal>)}
                     </div>
                 </section>
 
                 {/* Live Interest Rates from CMS */}
-                <InterestRates />
+                {!solutions.hidden && (<InterestRates />)}
             </main>
 
             <Footer />

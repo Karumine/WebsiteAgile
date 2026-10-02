@@ -10,10 +10,14 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
+import { useSections } from '@/lib/pageSections';
+import { calculatorSections } from '@/data/pageSections/calculator';
 
 export function CalculatorPage() {
     const { lang } = useLanguage();
     const { content } = usePageContent('calculator', DEFAULT_PAGE_CONTENTS['calculator']);
+    const section = useSections(content, calculatorSections);
+    const calc = section('calculator');
 
     // Form state
     const [machinePrice, setMachinePrice] = useState<string>('5000000');
@@ -71,12 +75,12 @@ export function CalculatorPage() {
         setIsSubmitted(true);
     };
 
-    const pageTitle = lang === 'th'
+    const pageTitle = content.metaTitle || (lang === 'th'
         ? 'คำนวณสินเชื่อ (Financing Calculator) | Agile Assets'
-        : 'Financing Calculator | Agile Assets - Industrial Machinery Financing';
-    const pageDescription = lang === 'th'
+        : 'Financing Calculator | Agile Assets - Industrial Machinery Financing');
+    const pageDescription = content.metaDescription || (lang === 'th'
         ? 'คำนวณสินเชื่อออนไลน์ รู้ค่างวด ดอกเบี้ย และวงเงินได้ทันที ใช้งานง่าย ช่วยวางแผนการเงินโรงงานได้อย่างแม่นยำ'
-        : 'Calculate your industrial machinery loan installments and effective interest rates online with Agile Assets.';
+        : 'Calculate your industrial machinery loan installments and effective interest rates online with Agile Assets.');
 
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-sky-500 selection:text-white">
@@ -104,7 +108,7 @@ export function CalculatorPage() {
                         {/* Dynamic Vignette & Ambient Light Overlays */}
                         <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
                         <div className="absolute inset-0 bg-radial-at-c from-sky-500/10 via-transparent to-black/80" />
-                        
+
                         {/* Soft Bottom Fog/Fade Gradient into next section */}
                         <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none z-10" />
                     </div>
@@ -133,25 +137,25 @@ export function CalculatorPage() {
                 </section>
 
                 {/* ─── 2. Main Calculator Section ─── */}
-                <section className="py-16 sm:py-24 bg-white dark:bg-slate-950">
+                {!calc.hidden && (<section className="py-16 sm:py-24 bg-white dark:bg-slate-950">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                         <ScrollReveal animation="fade-up">
                             <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
                                 {/* Left Form Column */}
                                 <div className="lg:col-span-7">
                                     <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white font-sans mb-4">
-                                        คำนวณสินเชื่อโดย AGILE ASSETS
+                                        {calc.t('t01')}
                                     </h2>
 
                                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed mb-8">
-                                        ดอกเบี้ยลดต้นลดดอก ( Effective) คือ ดอกเบี้ยที่เปลี่ยนแปลงไปตามจำนวนเงินต้นที่ผู้ขอสินเชื่อได้ชำระในแต่ละงวด โดยดอกเบี้ยจะลดลงเรื่อย ๆ ตามเงินต้นที่ลดลง เนื่องจากถูกหักออกไปจากการชำระหนี้งวดก่อนหน้า หรือการที่เราผ่อนหรือชำระในแต่ละงวด จะทำให้เงินต้นลดลงดอกเบี้ยที่เรียกเก็บ จากเราก็จะลดลงไปด้วย
+                                        {calc.t('t02')}
                                     </p>
 
                                     <form onSubmit={handleSubmit} className="space-y-5">
                                         {/* 1. มูลค่าเครื่องจักร */}
                                         <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                                             <label className="sm:col-span-5 text-sm font-semibold text-slate-800 dark:text-slate-200">
-                                                มูลค่าเครื่องจักร<span className="text-red-500 font-bold ml-0.5">*</span>
+                                                {calc.t('t03')}<span className="text-red-500 font-bold ml-0.5">*</span>
                                             </label>
                                             <div className="sm:col-span-7">
                                                 <input
@@ -168,7 +172,7 @@ export function CalculatorPage() {
                                         {/* 2. ประเภทดอกเบี้ย */}
                                         <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                                             <label className="sm:col-span-5 text-sm font-semibold text-slate-800 dark:text-slate-200">
-                                                ประเภทดอกเบี้ย
+                                                {calc.t('t04')}
                                             </label>
                                             <div className="sm:col-span-7">
                                                 <select
@@ -184,8 +188,8 @@ export function CalculatorPage() {
                                                     }}
                                                     className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all shadow-sm"
                                                 >
-                                                    <option value="flat">Flat Rate (คงที่)</option>
-                                                    <option value="effective">Effective Rate (ลดต้นลดดอก)</option>
+                                                    <option value="flat">{calc.t('t05')}</option>
+                                                    <option value="effective">{calc.t('t06')}</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -193,7 +197,7 @@ export function CalculatorPage() {
                                         {/* 3. เงินดาวน์ */}
                                         <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                                             <label className="sm:col-span-5 text-sm font-semibold text-slate-800 dark:text-slate-200">
-                                                เงินดาวน์
+                                                {calc.t('t07')}
                                             </label>
                                             <div className="sm:col-span-7">
                                                 <select
@@ -215,7 +219,7 @@ export function CalculatorPage() {
                                         {/* 4. ระยะเวลาผ่อนชำระ */}
                                         <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                                             <label className="sm:col-span-5 text-sm font-semibold text-slate-800 dark:text-slate-200">
-                                                ระยะเวลาผ่อนชำระ
+                                                {calc.t('t08')}
                                             </label>
                                             <div className="sm:col-span-7">
                                                 <select
@@ -223,14 +227,14 @@ export function CalculatorPage() {
                                                     onChange={(e) => setInstallmentPeriod(parseInt(e.target.value, 10))}
                                                     className="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all shadow-sm"
                                                 >
-                                                    <option value={15}>15 เดือน</option>
-                                                    <option value={24}>24 เดือน (2 ปี)</option>
-                                                    <option value={30}>30 เดือน</option>
-                                                    <option value={36}>36 เดือน (3 ปี)</option>
-                                                    <option value={48}>48 เดือน (4 ปี)</option>
-                                                    <option value={60}>60 เดือน (5 ปี)</option>
-                                                    <option value={72}>72 เดือน (6 ปี)</option>
-                                                    <option value={84}>84 เดือน (7 ปี)</option>
+                                                    <option value={15}>{calc.t('t09')}</option>
+                                                    <option value={24}>{calc.t('t10')}</option>
+                                                    <option value={30}>{calc.t('t11')}</option>
+                                                    <option value={36}>{calc.t('t12')}</option>
+                                                    <option value={48}>{calc.t('t13')}</option>
+                                                    <option value={60}>{calc.t('t14')}</option>
+                                                    <option value={72}>{calc.t('t15')}</option>
+                                                    <option value={84}>{calc.t('t16')}</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -238,7 +242,7 @@ export function CalculatorPage() {
                                         {/* 5. อัตราดอกเบี้ย (%) */}
                                         <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                                             <label className="sm:col-span-5 text-sm font-semibold text-slate-800 dark:text-slate-200">
-                                                อัตราดอกเบี้ย(%)
+                                                {calc.t('t17')}
                                             </label>
                                             <div className="sm:col-span-7">
                                                 <input
@@ -254,7 +258,7 @@ export function CalculatorPage() {
                                         {/* 6. เงินที่ต้องผ่อนชำระ */}
                                         <div className="grid grid-cols-1 sm:grid-cols-12 items-center gap-2 sm:gap-4">
                                             <label className="sm:col-span-5 text-sm font-semibold text-slate-800 dark:text-slate-200">
-                                                เงินที่ต้องผ่อนชำระ
+                                                {calc.t('t18')}
                                             </label>
                                             <div className="sm:col-span-7">
                                                 <input
@@ -271,12 +275,12 @@ export function CalculatorPage() {
                                         {loanPrincipal > 0 && monthlyPayment && (
                                             <div className="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-4 border border-slate-200 dark:border-slate-800 text-xs space-y-2 mt-4">
                                                 <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                                                    <span>วงเงินสินเชื่อ (หลังหักเงินดาวน์):</span>
-                                                    <span className="font-bold text-slate-900 dark:text-white">{loanPrincipal.toLocaleString('th-TH')} บาท</span>
+                                                    <span>{calc.t('t19')}</span>
+                                                    <span className="font-bold text-slate-900 dark:text-white">{loanPrincipal.toLocaleString('th-TH')} {calc.t('t20')}</span>
                                                 </div>
                                                 <div className="flex justify-between text-slate-600 dark:text-slate-400">
-                                                    <span>ประมาณการดอกเบี้ยรวมตลอดสัญญา:</span>
-                                                    <span className="font-bold text-slate-900 dark:text-white">{totalInterest.toLocaleString('th-TH', { maximumFractionDigits: 0 })} บาท</span>
+                                                    <span>{calc.t('t21')}</span>
+                                                    <span className="font-bold text-slate-900 dark:text-white">{totalInterest.toLocaleString('th-TH', { maximumFractionDigits: 0 })} {calc.t('t20')}</span>
                                                 </div>
                                             </div>
                                         )}
@@ -289,7 +293,7 @@ export function CalculatorPage() {
                                                 className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-sky-400 hover:bg-sky-500 text-white font-bold text-xs sm:text-sm tracking-wide shadow-md transition-all flex items-center justify-center gap-1.5 active:scale-95"
                                             >
                                                 <RotateCcw className="w-3.5 h-3.5" />
-                                                <span>ล้างข้อมูล</span>
+                                                <span>{calc.t('t22')}</span>
                                             </button>
 
                                             <button
@@ -297,7 +301,7 @@ export function CalculatorPage() {
                                                 className="w-full sm:w-auto px-8 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm tracking-wide shadow-md transition-all flex items-center justify-center gap-1.5 active:scale-95"
                                             >
                                                 <Send className="w-3.5 h-3.5" />
-                                                <span>Submit</span>
+                                                <span>{calc.t('t23')}</span>
                                             </button>
                                         </div>
                                     </form>
@@ -308,19 +312,19 @@ export function CalculatorPage() {
                                             <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
                                             <div>
                                                 <h4 className="text-sm font-bold text-emerald-900 dark:text-emerald-300">
-                                                    บันทึกการคำนวณสินเชื่อสำเร็จ!
+                                                    {calc.t('t24')}
                                                 </h4>
                                                 <p className="text-xs text-emerald-700 dark:text-emerald-400 mt-1">
-                                                    ค่างวดโดยประมาณ: <strong className="underline">{monthlyPayment} บาท/เดือน</strong> ท่านสามารถติดต่อเจ้าหน้าที่สินเชื่อเพื่อรับเงื่อนไขอัตราดอกเบี้ยพิเศษเฉพาะโรงงานของท่านได้ทันที
+                                                    {calc.t('t25')} <strong className="underline">{monthlyPayment} {calc.t('t26')}</strong> {calc.t('t27')}
                                                 </p>
                                                 <a
-                                                    href="https://line.me/R/ti/p/%40884ukedb"
+                                                    href={calc.t('link28')}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="inline-flex items-center gap-1.5 mt-2 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition-colors"
                                                 >
                                                     <PhoneCall className="w-3.5 h-3.5" />
-                                                    <span>ปรึกษาเจ้าหน้าที่สินเชื่อทาง LINE</span>
+                                                    <span>{calc.t('t29')}</span>
                                                 </a>
                                             </div>
                                         </div>
@@ -331,7 +335,7 @@ export function CalculatorPage() {
                                 <div className="lg:col-span-5 flex flex-col items-center justify-center pt-6 lg:pt-0">
                                     <div className="relative w-full max-w-md mx-auto">
                                         <img
-                                            src="https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img/https://agileassets.co.th/wp-content/uploads/elementor/thumbs/BG3@300x-8-scaled-e1775098240775-rle932y5135na1zc22d4pk6m1ykg488qdgq4codu74.png"
+                                            src={calc.t('img30')}
                                             alt="Industrial Machinery Components & Gears"
                                             className="w-full h-auto object-contain drop-shadow-2xl hover:scale-105 transition-transform duration-500"
                                             loading="lazy"
@@ -341,7 +345,7 @@ export function CalculatorPage() {
                             </div>
                         </ScrollReveal>
                     </div>
-                </section>
+                </section>)}
             </main>
 
             <Footer />

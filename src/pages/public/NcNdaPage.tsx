@@ -1,10 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
-import {
-    ShieldCheck, ChevronRight, Printer, CheckCircle2,
-    RefreshCw, PenTool, Share2, Check, Building2, User, Mail, CreditCard, Lock
-} from 'lucide-react';
+import { ShieldCheck, ChevronRight, Printer, CheckCircle2, RefreshCw, PenTool, Share2, Check, Building2, User, Mail, CreditCard, Lock } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -16,6 +13,8 @@ import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { useLeadSubmit } from '@/lib/useLeadSubmit';
 import { formService } from '@/services/formService';
+import { useSections } from '@/lib/pageSections';
+import { ncNdaSections } from '@/data/pageSections/ncNda';
 
 function isValidThaiId(digits: string): boolean {
     if (!/^\d{13}$/.test(digits)) return false;
@@ -32,6 +31,11 @@ function maskIdentity(value: string): string {
 export function NcNdaPage() {
     const { lang } = useLanguage();
     const { content } = usePageContent('nc-nda', DEFAULT_PAGE_CONTENTS['nc-nda']);
+    const section = useSections(content, ncNdaSections);
+    const heroExtras = section('hero-extras');
+    const doc = section('document');
+    const signoff = section('signoff');
+    const success = section('success');
 
     // Form state
     const [fullName, setFullName] = useState('');
@@ -222,13 +226,13 @@ export function NcNdaPage() {
         );
     };
 
-    const pageTitle = lang === 'th'
+    const pageTitle = content.metaTitle || (lang === 'th'
         ? 'สัญญาการรักษาความลับของลูกค้า (NC-NDA) | Agile Assets'
-        : 'Non-Circumvention & Non-Disclosure Agreement (NC-NDA) | Agile Assets';
+        : 'Non-Circumvention & Non-Disclosure Agreement (NC-NDA) | Agile Assets');
 
-    const pageDescription = lang === 'th'
+    const pageDescription = content.metaDescription || (lang === 'th'
         ? 'สัญญาการรักษาความลับของลูกค้า (NC-NDA) บริษัท อาร์จิสท์ แอสเซ็ทส์ จำกัด เพื่อคุ้มครองข้อมูลความลับและข้อกำหนด Non-Circumvention'
-        : 'Non-Circumvention and Non-Disclosure Agreement (NC-NDA) for Agile Assets Co., Ltd. protecting confidential business information.';
+        : 'Non-Circumvention and Non-Disclosure Agreement (NC-NDA) for Agile Assets Co., Ltd. protecting confidential business information.');
 
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-sky-500/20 selection:text-sky-500">
@@ -283,13 +287,13 @@ export function NcNdaPage() {
                             </p>
 
                             {/* Action Bar */}
-                            <div className="flex flex-wrap items-center justify-center gap-3 mt-8">
+                            {!heroExtras.hidden && (<div className="flex flex-wrap items-center justify-center gap-3 mt-8">
                                 <a
-                                    href="#sign-form"
+                                    href={heroExtras.t('link01')}
                                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-xs sm:text-sm font-bold shadow-lg shadow-sky-500/25 transition-all duration-200"
                                 >
                                     <PenTool className="w-4 h-4" />
-                                    <span>{lang === 'th' ? 'ลงนามอิเล็กทรอนิกส์' : 'Sign Agreement Online'}</span>
+                                    <span>{heroExtras.t('t02')}</span>
                                 </a>
                                 <button
                                     type="button"
@@ -297,7 +301,7 @@ export function NcNdaPage() {
                                     className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl glass border border-border/80 hover:border-sky-500/40 text-foreground text-xs sm:text-sm font-semibold transition-all duration-200"
                                 >
                                     <Printer className="w-4 h-4 text-sky-400" />
-                                    <span>{lang === 'th' ? 'พิมพ์เอกสาร' : 'Print Document'}</span>
+                                    <span>{heroExtras.t('t03')}</span>
                                 </button>
                                 <button
                                     type="button"
@@ -305,9 +309,9 @@ export function NcNdaPage() {
                                     className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl glass border border-border/80 hover:border-sky-500/40 text-foreground text-xs sm:text-sm font-semibold transition-all duration-200"
                                 >
                                     {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Share2 className="w-4 h-4 text-sky-400" />}
-                                    <span>{copied ? (lang === 'th' ? 'คัดลอกแล้ว' : 'Copied!') : (lang === 'th' ? 'แชร์ลิงก์' : 'Share')}</span>
+                                    <span>{copied ? (heroExtras.t('t04')) : (heroExtras.t('t05'))}</span>
                                 </button>
-                            </div>
+                            </div>)}
                         </ScrollReveal>
                     </div>
                 </section>
@@ -324,31 +328,29 @@ export function NcNdaPage() {
                                 </div>
 
                                 {/* Official Header */}
-                                <div className="text-center pb-8 mb-8 border-b border-border/60">
+                                {!doc.hidden && (<div className="text-center pb-8 mb-8 border-b border-border/60">
                                     <div className="inline-block px-3 py-1 rounded bg-sky-500/10 text-sky-500 font-mono text-xs font-bold tracking-widest uppercase mb-2">
-                                        NC-NDA
+                                        {doc.t('t01')}
                                     </div>
                                     <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-foreground tracking-tight font-sans">
-                                        {lang === 'th'
-                                            ? 'สัญญาการรักษาความลับของลูกค้า'
-                                            : 'Customer Confidentiality Agreement'}
+                                        {doc.t('t02')}
                                     </h2>
                                     <p className="text-sm sm:text-base font-bold text-sky-500 mt-1 font-mono">
-                                        (Non-Circumvention a non-disclosure agreement)
+                                        {doc.t('t03')}
                                     </p>
-                                </div>
+                                </div>)}
 
                                 {/* Legal Text Body */}
-                                <div className="space-y-6 text-xs sm:text-sm text-foreground/90 leading-relaxed font-sans text-justify">
+                                {!doc.hidden && (<div className="space-y-6 text-xs sm:text-sm text-foreground/90 leading-relaxed font-sans text-justify">
                                     {/* Preamble */}
                                     <p className="indent-8 text-foreground/95">
                                         {lang === 'th' ? (
                                             <>
-                                                สัญญาให้เก็บรักษาข้อมูลฉบับนี้ (<strong>"สัญญา"</strong>) ทำขึ้นที่ บริษัท อาร์จิสท์ แอสเซ็ทส์ จำกัด (สำนักงานใหญ่) เมื่อวันที่ (<strong>"วันที่มีผลใช้บังคับ"</strong>) โดยและระหว่าง:
+                                                {doc.t('t04')}<strong>{doc.t('t05')}</strong>{doc.t('t06')}<strong>{doc.t('t07')}</strong>{doc.t('t08')}
                                             </>
                                         ) : (
                                             <>
-                                                This Non-Disclosure and Non-Circumvention Agreement (the <strong>"Agreement"</strong>) is entered into at Agile Assets Co., Ltd. (Headquarters) as of the Effective Date, by and between:
+                                                {doc.t('t09')} <strong>{doc.t('t10')}</strong>{doc.t('t11')}
                                             </>
                                         )}
                                     </p>
@@ -358,63 +360,39 @@ export function NcNdaPage() {
                                         <div className="flex items-start gap-2">
                                             <span className="font-bold text-sky-500 flex-shrink-0">1.</span>
                                             <div>
-                                                {lang === 'th' ? (
-                                                    <span>
-                                                        <strong>บริษัท อาร์จิสท์ แอสเซ็ทส์ จำกัด</strong> (โดยนายพรรษา เริงพิทยา และ นายกอบพงศ์ ตรีสุขี กรรมการผู้มีอำนาจกระทำการแทนบริษัท) มีสำนักงานใหญ่ตั้งอยู่เลขที่ 20 หมู่ 1 ถนนสุขุมวิท ตำบลบางเมืองใหม่ อำเภอเมืองสมุทรปราการ จังหวัดสมุทรปราการ ทะเบียนนิติบุคคลเลขที่ 0115558012195 ซึ่งต่อไปนี้จะเรียกว่า (<strong>"ผู้ให้ข้อมูล"</strong>) ฝ่ายหนึ่ง กับ
-                                                    </span>
-                                                ) : (
-                                                    <span>
-                                                        <strong>Agile Assets Co., Ltd.</strong> (represented by authorized directors Mr. Pansa Reongpitaya and Mr. Kobpong Treerukeekee), having its principal office at 20 Moo 1, Sukhumvit Road, Bang Mueang Mai Subdistrict, Mueang Samut Prakan District, Samut Prakan Province, Corporate Registration No. 0115558012195 (hereinafter referred to as the <strong>"Disclosing Party"</strong>), of the one part; and
-                                                    </span>
-                                                )}
+                                                {<span>
+                                                        <strong>{doc.t('t12')}</strong> {doc.t('t13')}<strong>{doc.t('t14')}</strong>{doc.t('t15')}
+                                                    </span>}
                                             </div>
                                         </div>
 
                                         <div className="flex items-start gap-2 pt-2 border-t border-sky-500/15">
                                             <span className="font-bold text-sky-500 flex-shrink-0">2.</span>
                                             <div>
-                                                {lang === 'th' ? (
-                                                    <span>
-                                                        <strong>ข้าพเจ้า</strong> ซึ่งต่อไปนี้จะเรียกว่า (<strong>"ผู้รับข้อมูล"</strong>) อีกฝ่ายหนึ่ง
-                                                    </span>
-                                                ) : (
-                                                    <span>
-                                                        <strong>The Undersigned / Applicant</strong> (hereinafter referred to as the <strong>"Receiving Party"</strong>), of the other part.
-                                                    </span>
-                                                )}
+                                                {<span>
+                                                        <strong>{doc.t('t16')}</strong> {doc.t('t17')}<strong>{doc.t('t18')}</strong>{doc.t('t19')}
+                                                    </span>}
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Introduction */}
                                     <p className="indent-8">
-                                        {lang === 'th' ? (
-                                            <>
-                                                ตามที่ทั้งสองฝ่ายได้ทำสัญญาการรักษาความลับไว้ต่อกัน โดยที่ผู้ให้ข้อมูลเป็นเจ้าของข้อมูลตามสัญญาดังกล่าว มีความประสงค์ที่จะเปิดเผยข้อมูลให้แก่ผู้รับข้อมูล เพื่อใช้ในการดำเนินธุรกิจทั้งด้านทางการค้าและด้านกฎหมาย ซึ่งข้อมูลที่ผู้ให้ข้อมูลจะเปิดเผยให้แก่ผู้รับข้อมูล เป็นข้อมูลที่เป็นความลับของผู้ให้ข้อมูล ผู้ให้ข้อมูลจึงทำสัญญาฉบับนี้ขึ้น โดยมีข้อกำหนดและเงื่อนไขดังต่อไปนี้
-                                            </>
-                                        ) : (
-                                            <>
-                                                WHEREAS, the Disclosing Party possesses certain proprietary and confidential information and wishes to disclose such information to the Receiving Party for lawful business and commercial purposes; and WHEREAS, the parties desire to establish confidentiality safeguards and non-circumvention protection; NOW, THEREFORE, the parties agree as follows:
-                                            </>
-                                        )}
+                                        {<>
+                                                {doc.t('t20')}
+                                            </>}
                                     </p>
 
                                     {/* Clause 1 */}
                                     <div className="pt-2">
                                         <h3 className="font-bold text-foreground text-sm sm:text-base flex items-center gap-2 mb-2">
                                             <span className="w-6 h-6 rounded-full bg-sky-500/10 text-sky-500 text-xs flex items-center justify-center font-mono font-bold">1</span>
-                                            {lang === 'th' ? 'คำนิยาม "ข้อมูลความลับ"' : 'Definition of "Confidential Information"'}
+                                            {doc.t('t21')}
                                         </h3>
                                         <p className="pl-8">
-                                            {lang === 'th' ? (
-                                                <>
-                                                    ในสัญญาฉบับนี้ คำว่า <strong>"ข้อมูลความลับ"</strong> หมายความรวมถึง สิ่งที่สื่อความหมายให้รู้ข้อความ เรื่องราว ข้อมูลเดิมเกี่ยวกับธุรกิจ กระบวนการดำเนินธุรกิจ แผน วิธีการและหลักปฏิบัติทางธุรกิจ หรือสิ่งอื่นใดอันเกี่ยวเนื่องกับธุรกิจของผู้ให้ข้อมูลและรายละเอียดทั้งปวงที่เป็นข้อมูลของผู้ให้ข้อมูล ไม่ว่าจะอยู่ในรูปแบบที่จับต้องได้หรือไม่ หรือสื่อแบบใด รวมทั้งข้อมูลของลูกค้า ตลอดจนข้อมูลอื่นใดที่อาจก่อให้เกิดความเสียหายกับผู้ให้ข้อมูล ไม่ว่าผู้ให้ข้อมูลจะแจ้งให้ทราบว่าเป็นความลับหรือไม่ก็ตาม
-                                                </>
-                                            ) : (
-                                                <>
-                                                    In this Agreement, <strong>"Confidential Information"</strong> encompasses all proprietary business data, trade secrets, processes, business plans, technical specifications, customer lists, pricing, financing structures, and any tangible or intangible materials relating to the Disclosing Party, whether or not expressly marked as confidential.
-                                                </>
-                                            )}
+                                            {<>
+                                                    {doc.t('t22')} <strong>{doc.t('t23')}</strong> {doc.t('t24')}
+                                                </>}
                                         </p>
                                     </div>
 
@@ -422,18 +400,12 @@ export function NcNdaPage() {
                                     <div className="pt-2">
                                         <h3 className="font-bold text-foreground text-sm sm:text-base flex items-center gap-2 mb-2">
                                             <span className="w-6 h-6 rounded-full bg-sky-500/10 text-sky-500 text-xs flex items-center justify-center font-mono font-bold">2</span>
-                                            {lang === 'th' ? 'การเก็บรักษาและการใช้มาตรการความปลอดภัย' : 'Duty of Confidentiality and Protection'}
+                                            {doc.t('t25')}
                                         </h3>
                                         <p className="pl-8">
-                                            {lang === 'th' ? (
-                                                <>
-                                                    ข้อมูลใดๆ ที่ผู้ให้ข้อมูลได้เปิดเผยให้แก่ผู้รับข้อมูล หรือตัวแทนของผู้รับข้อมูล ผู้รับข้อมูลจะต้องเก็บรักษาและระมัดระวังเอกสารข้อมูลที่เป็นความลับไว้อย่างเคร่งครัด ไม่เปิดเผย ไม่ทำสำเนา หรือทำการอื่นใดในทำนองเดียวกัน ผู้รับข้อมูลต้องใช้มาตรการที่เหมาะสมในการเก็บรักษาข้อมูลที่เป็นความลับ เพื่อป้องกันมิให้ข้อมูลที่เป็นความลับถูกนำไปใช้หรือเผยแพร่บุคคลภายนอก
-                                                </>
-                                            ) : (
-                                                <>
-                                                    The Receiving Party shall exercise the utmost care to maintain the strict confidentiality of all disclosed materials, taking reasonable and necessary security measures to prevent unauthorized disclosure, duplication, or dissemination to third parties.
-                                                </>
-                                            )}
+                                            {<>
+                                                    {doc.t('t26')}
+                                                </>}
                                         </p>
                                     </div>
 
@@ -441,18 +413,12 @@ export function NcNdaPage() {
                                     <div className="pt-2">
                                         <h3 className="font-bold text-foreground text-sm sm:text-base flex items-center gap-2 mb-2">
                                             <span className="w-6 h-6 rounded-full bg-sky-500/10 text-sky-500 text-xs flex items-center justify-center font-mono font-bold">3</span>
-                                            {lang === 'th' ? 'ข้อจำกัดการใช้ข้อมูลและการห้ามติดต่อลูกค้า' : 'Non-Disclosure and Use Restrictions'}
+                                            {doc.t('t27')}
                                         </h3>
                                         <p className="pl-8">
-                                            {lang === 'th' ? (
-                                                <>
-                                                    ผู้รับข้อมูล ลูกจ้าง หรือตัวแทนของผู้รับข้อมูลที่ได้รับทราบข้อมูลของผู้ให้ข้อมูลต้องตระหนักถึงความเป็นความลับของข้อมูล และจะไม่นำข้อมูลของผู้ให้ข้อมูลไม่ว่าทั้งหมดหรือแต่บางส่วนไปใช้ในการอื่นใด หรือนำไปเปิดเผยต่อบุคคลภายนอก และไม่นำข้อมูลของผู้ให้ข้อมูลไปติดต่อลูกค้าของผู้ให้ข้อมูล หรือนำข้อมูลไปติดต่อบุคคลที่สาม หรือทำการอื่นใดในทำนองเดียวกัน รวมทั้งซื้อขายข้อมูล แลกเปลี่ยนข้อมูล หรือหาประโยชน์จากข้อมูลโดยทางตรงและทางอ้อม เว้นแต่จะได้รับอนุญาตเป็นหนังสือจากผู้ให้ข้อมูล
-                                                </>
-                                            ) : (
-                                                <>
-                                                    The Receiving Party, its employees, and representatives shall not use the Confidential Information for any purpose other than authorized business evaluations, and shall not contact the Disclosing Party's clients, trade partners, or third parties using such information without prior written consent.
-                                                </>
-                                            )}
+                                            {<>
+                                                    {doc.t('t28')}
+                                                </>}
                                         </p>
                                     </div>
 
@@ -462,9 +428,7 @@ export function NcNdaPage() {
                                             <div className="flex items-center gap-2.5 pb-2 border-b border-sky-500/20">
                                                 <ShieldCheck className="w-5 h-5 text-sky-500 flex-shrink-0" />
                                                 <h3 className="font-extrabold text-foreground text-sm sm:text-base tracking-tight">
-                                                    {lang === 'th'
-                                                        ? '4. การไม่ก้าวข้ามหรือหลีกเลี่ยงผู้ให้ข้อมูล (Non-Circumvention)'
-                                                        : '4. Non-Circumvention Covenants'}
+                                                    {doc.t('t29')}
                                                 </h3>
                                             </div>
 
@@ -473,67 +437,43 @@ export function NcNdaPage() {
                                                     <strong className="text-sky-500">4.1</strong>{' '}
                                                     {lang === 'th' ? (
                                                         <>
-                                                            ผู้รับข้อมูล ลูกจ้าง หรือตัวแทนของผู้รับข้อมูล จะไม่ติดต่อ ดำเนินธุรกรรม ทำสัญญา หรือดำเนินการใดๆ ไม่ว่าโดยทางตรงหรือทางอ้อม กับลูกค้า คู่ค้า พันธมิตร หรือบุคคลที่สาม (ต่อไปนี้เรียกว่า <strong>"บุคคลที่เกี่ยวข้อง"</strong>) ซึ่งผู้รับข้อมูลได้ทราบ ได้รับการแนะนำ หรือได้การติดต่อมาจากผู้ให้ข้อมูล หรือได้ข้อมูลมาจากผู้ให้ข้อมูลอันเนื่องมาจากข้อมูลความลับหรือการติดต่อกับผู้ให้ข้อมูลตามสัญญานี้ โดยมีวัตถุประสงค์เพื่อหลีกเลี่ยง ตัดผู้ให้ข้อมูลออกจากธุรกรรม ลดทอนผลประโยชน์ที่พึงได้ของผู้ให้ข้อมูล หรือเพื่อประโยชน์ของผู้รับข้อมูลเองหรือบุคคลที่สาม เว้นแต่จะได้รับความยินยอมเป็นหนังสือล่วงหน้าจากผู้ให้ข้อมูล
+                                                            {doc.t('t30')} <strong>{doc.t('t31')}</strong>{doc.t('t32')}
                                                         </>
                                                     ) : (
                                                         <>
-                                                            The Receiving Party shall not directly or indirectly circumvent, avoid, or bypass the Disclosing Party with respect to any clients, suppliers, or business opportunities introduced by the Disclosing Party.
+                                                            {doc.t('t33')}
                                                         </>
                                                     )}
                                                 </p>
 
                                                 <p>
                                                     <strong className="text-sky-500">4.2</strong>{' '}
-                                                    {lang === 'th' ? (
-                                                        <>
-                                                            ผู้รับข้อมูลตกลงที่จะไม่ชักชวน ชักจูง หรือกระทำการใดอันมีลักษณะเป็นการจูงใจให้บุคคลที่เกี่ยวข้อง ยุติ ละทิ้ง หรือเปลี่ยนแปลงความสัมพันธ์ทางธุรกิจที่มีอยู่กับผู้ให้ข้อมูล
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            The Receiving Party agrees not to solicit, induce, or influence any related parties to terminate or modify their business relationships with the Disclosing Party.
-                                                        </>
-                                                    )}
+                                                    {<>
+                                                            {doc.t('t34')}
+                                                        </>}
                                                 </p>
 
                                                 <div className="p-3 bg-card/80 rounded-xl border border-sky-500/30 text-sky-500 font-semibold">
                                                     <p>
                                                         <strong className="text-foreground">4.3</strong>{' '}
-                                                        {lang === 'th' ? (
-                                                            <>
-                                                                หน้าที่ตามข้อ 4 นี้มีผลผูกพันเป็นระยะเวลา <strong>2 (สอง) ปี</strong> นับแต่วันที่ทำสัญญา หรือนับแต่วันที่ผู้ให้ข้อมูลเปิดเผยข้อมูลความลับให้แก่ผู้รับข้อมูลเป็นครั้งสุดท้าย แล้วแต่วันใดจะถึงภายหลัง และให้คงมีผลบังคับต่อไปแม้สัญญานี้จะสิ้นสุดลงด้วยเหตุใดก็ตาม
-                                                            </>
-                                                        ) : (
-                                                            <>
-                                                                The covenants in this Section 4 shall remain binding for a period of <strong>2 (two) years</strong> from the effective date or last disclosure date, and shall survive termination.
-                                                            </>
-                                                        )}
+                                                        {<>
+                                                                {doc.t('t35')} <strong>{doc.t('t36')}</strong> {doc.t('t37')}
+                                                            </>}
                                                     </p>
                                                 </div>
 
                                                 <p>
                                                     <strong className="text-sky-500">4.4</strong>{' '}
-                                                    {lang === 'th' ? (
-                                                        <>
-                                                            ความในข้อ 4 นี้ไม่ใช้บังคับแก่กรณีที่ผู้รับข้อมูลพิสูจน์ได้ด้วยหลักฐานเป็นลายลักษณ์อักษรว่า ผู้รับข้อมูลมีความสัมพันธ์ทางธุรกิจกับบุคคลที่เกี่ยวข้องนั้นอยู่ก่อนแล้ว ก่อนที่ตนจะได้รับข้อมูลความลับจากผู้ให้ข้อมูล หรือได้รู้จักบุคคลดังกล่าวจากแหล่งอื่นโดยชอบด้วยกฎหมายและโดยมิได้ผูกพันตามหน้าที่รักษาความลับ ทั้งนี้ ภาระการพิสูจน์ตกอยู่แก่ผู้รับข้อมูล
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            Exclusion applies only if the Receiving Party provides clear written evidence of prior documented business relations preceding this Agreement. The burden of proof rests on the Receiving Party.
-                                                        </>
-                                                    )}
+                                                    {<>
+                                                            {doc.t('t38')}
+                                                        </>}
                                                 </p>
 
                                                 <p>
                                                     <strong className="text-sky-500">4.5</strong>{' '}
-                                                    {lang === 'th' ? (
-                                                        <>
-                                                            ในกรณีที่มีการฝ่าฝืนข้อ 4 นี้ ผู้ให้ข้อมูลมีสิทธิเรียกร้องค่าเสียหายทั้งปวงที่เกิดขึ้น รวมถึงค่าตอบแทน ค่านายหน้า หรือผลกำไรที่ผู้รับข้อมูลหรือบุคคลที่สามได้รับจากธุรกรรมที่เกิดจากการฝ่าฝืนดังกล่าว และมีสิทธิร้องขอต่อศาลให้มีคำสั่งห้ามหรือคุ้มครองชั่วคราวได้ โดยไม่เป็นการตัดสิทธิเรียกร้องอื่นใดตามสัญญานี้หรือตามกฎหมาย
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            In case of breach, the Disclosing Party is entitled to total monetary damages, disgorgement of profits/commissions, injunctive relief, and all remedies provided under applicable law.
-                                                        </>
-                                                    )}
+                                                    {<>
+                                                            {doc.t('t39')}
+                                                        </>}
                                                 </p>
                                             </div>
                                         </div>
@@ -543,18 +483,12 @@ export function NcNdaPage() {
                                     <div className="pt-2">
                                         <h3 className="font-bold text-foreground text-sm sm:text-base flex items-center gap-2 mb-2">
                                             <span className="w-6 h-6 rounded-full bg-sky-500/10 text-sky-500 text-xs flex items-center justify-center font-mono font-bold">5</span>
-                                            {lang === 'th' ? 'ผลบังคับหลังสิ้นสุดสัญญา' : 'Survival of Obligations'}
+                                            {doc.t('t40')}
                                         </h3>
                                         <p className="pl-8">
-                                            {lang === 'th' ? (
-                                                <>
-                                                    ในกรณีที่ผู้รับข้อมูล ลูกจ้างหรือตัวแทนของผู้รับข้อมูล ฝ่าฝืนข้อกำหนดและเงื่อนไขตามสัญญาฉบับนี้ และหรือกรณีที่สัญญาฉบับนี้สิ้นสุดลงไม่ว่าในกรณีใดๆ ผู้รับข้อมูล ลูกจ้าง และหรือตัวแทนของผู้รับข้อมูลที่ได้ทราบข้อมูลของผู้ให้ข้อมูล ยังคงมีหน้าที่ต่อไปที่จะต้องเก็บรักษาหรือปกปิดข้อมูลของผู้ให้ข้อมูลไว้เป็นความลับ และจะต้องไม่ใช้ข้อมูลของผู้ให้ข้อมูลไม่ว่าจะด้วยวัตถุประสงค์ใดๆ ก็ตาม
-                                                </>
-                                            ) : (
-                                                <>
-                                                    Upon expiration or termination of this Agreement for any reason, the confidentiality obligations shall remain in full force and effect indefinitely.
-                                                </>
-                                            )}
+                                            {<>
+                                                    {doc.t('t41')}
+                                                </>}
                                         </p>
                                     </div>
 
@@ -562,39 +496,27 @@ export function NcNdaPage() {
                                     <div className="pt-2">
                                         <h3 className="font-bold text-foreground text-sm sm:text-base flex items-center gap-2 mb-2">
                                             <span className="w-6 h-6 rounded-full bg-sky-500/10 text-sky-500 text-xs flex items-center justify-center font-mono font-bold">6</span>
-                                            {lang === 'th' ? 'การผิดสัญญาและค่าเสียหาย' : 'Breach and Liability'}
+                                            {doc.t('t42')}
                                         </h3>
                                         <p className="pl-8">
-                                            {lang === 'th' ? (
-                                                <>
-                                                    ในกรณีที่ผู้รับข้อมูล ลูกจ้าง และหรือตัวแทนของผู้รับข้อมูลฝ่าฝืนข้อกำหนดและเงื่อนไขของสัญญาฉบับนี้ ให้ถือว่าผู้รับข้อมูลเป็นผู้ผิดสัญญาและตกลงชดใช้ค่าเสียหายทั้งปวงที่เกิดขึ้น โดยไม่มีข้อโต้แย้งใดๆ ทั้งสิ้น ให้แก่ผู้ให้ข้อมูล
-                                                </>
-                                            ) : (
-                                                <>
-                                                    Any breach by the Receiving Party or its representatives shall constitute a default, and the Receiving Party agrees to indemnify and hold harmless the Disclosing Party from any and all damages incurred without contest.
-                                                </>
-                                            )}
+                                            {<>
+                                                    {doc.t('t43')}
+                                                </>}
                                         </p>
                                     </div>
 
                                     {/* Conclusion */}
                                     <p className="indent-8 pt-4 text-foreground/95 border-t border-border/60">
-                                        {lang === 'th' ? (
-                                            <>
-                                                สัญญานี้จัดทำขึ้น 2 (สอง) ฉบับ มีข้อความถูกต้องตรงกัน คู่สัญญาได้อ่านและเข้าใจข้อความในสัญญาฉบับนี้โดยตลอดแล้ว จึงได้ลงลายมือชื่อพร้อมทั้งประทับตรา (ถ้ามี) ไว้เป็นสำคัญต่อหน้าพยานและต่างยึดถือไว้ฝ่ายละฉบับ
-                                            </>
-                                        ) : (
-                                            <>
-                                                This Agreement is made in duplicate with identical wording. Both parties have thoroughly read, fully understood, and agreed to all terms, and have executed this instrument on the date indicated below.
-                                            </>
-                                        )}
+                                        {<>
+                                                {doc.t('t44')}
+                                            </>}
                                     </p>
-                                </div>
+                                </div>)}
                             </div>
                         </ScrollReveal>
 
                         {/* Interactive Sign-off Form Section */}
-                        <div id="sign-form" className="mt-12 sm:mt-16 scroll-mt-28 print:hidden">
+                        {!signoff.hidden && (<div id="sign-form" className="mt-12 sm:mt-16 scroll-mt-28 print:hidden">
                             <ScrollReveal animation="fade-up">
                                 <div className="bg-card border-2 border-sky-500/30 rounded-2xl sm:rounded-3xl p-6 sm:p-10 shadow-2xl shadow-sky-500/5">
                                     <div className="flex items-center gap-3 pb-6 mb-6 border-b border-border/80">
@@ -603,12 +525,10 @@ export function NcNdaPage() {
                                         </div>
                                         <div>
                                             <h3 className="text-lg sm:text-xl font-bold text-foreground">
-                                                {lang === 'th' ? 'แบบฟอร์มลงนามยอมรับสัญญาอิเล็กทรอนิกส์' : 'Electronic Acknowledgment & Signature Form'}
+                                                {signoff.t('t01')}
                                             </h3>
                                             <p className="text-xs sm:text-sm text-muted-foreground">
-                                                {lang === 'th'
-                                                    ? 'กรุณากรอกข้อมูลและลงนามเพื่อยืนยันความยินยอมปฏิบัติตามสัญญา NC-NDA'
-                                                    : 'Please complete your information and sign to acknowledge the NC-NDA agreement'}
+                                                {signoff.t('t02')}
                                             </p>
                                         </div>
                                     </div>
@@ -619,7 +539,7 @@ export function NcNdaPage() {
                                             <div className="space-y-2">
                                                 <label htmlFor="nc-nda-field-1" className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5">
                                                     <User className="w-3.5 h-3.5 text-sky-500" />
-                                                    <span>{lang === 'th' ? 'ชื่อ-สกุล' : 'Full Name / Representative'}</span>
+                                                    <span>{signoff.t('t03')}</span>
                                                     <span className="text-rose-500">*</span>
                                                 </label>
                                                 <input id="nc-nda-field-1"
@@ -627,7 +547,7 @@ export function NcNdaPage() {
                                                     required
                                                     value={fullName}
                                                     onChange={(e) => setFullName(e.target.value)}
-                                                    placeholder={lang === 'th' ? 'ระบุชื่อและนามสกุล' : 'e.g. John Doe'}
+                                                    placeholder={signoff.t('t04')}
                                                     className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 text-xs sm:text-sm text-foreground outline-none transition-all"
                                                 />
                                             </div>
@@ -636,7 +556,7 @@ export function NcNdaPage() {
                                             <div className="space-y-2">
                                                 <label htmlFor="nc-nda-field-2" className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5">
                                                     <CreditCard className="w-3.5 h-3.5 text-sky-500" />
-                                                    <span>{lang === 'th' ? 'เลขบัตรประชาชน / Passport' : 'National ID / Passport No.'}</span>
+                                                    <span>{signoff.t('t05')}</span>
                                                     <span className="text-rose-500">*</span>
                                                 </label>
                                                 <input id="nc-nda-field-2"
@@ -655,7 +575,7 @@ export function NcNdaPage() {
                                             <div className="space-y-2 sm:col-span-2">
                                                 <label htmlFor="nc-nda-field-3" className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5">
                                                     <Mail className="w-3.5 h-3.5 text-sky-500" />
-                                                    <span>{lang === 'th' ? 'อีเมล' : 'Email Address'}</span>
+                                                    <span>{signoff.t('t06')}</span>
                                                     <span className="text-rose-500">*</span>
                                                 </label>
                                                 <input id="nc-nda-field-3"
@@ -672,13 +592,13 @@ export function NcNdaPage() {
                                             <div className="space-y-2">
                                                 <label htmlFor="nc-nda-field-4" className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5">
                                                     <Building2 className="w-3.5 h-3.5 text-sky-500" />
-                                                    <span>{lang === 'th' ? 'ชื่อบริษัท / นิติบุคคล (ถ้ามี)' : 'Company Name (Optional)'}</span>
+                                                    <span>{signoff.t('t07')}</span>
                                                 </label>
                                                 <input id="nc-nda-field-4"
                                                     type="text"
                                                     value={company}
                                                     onChange={(e) => setCompany(e.target.value)}
-                                                    placeholder={lang === 'th' ? 'ระบุชื่อบริษัท' : 'Company Co., Ltd.'}
+                                                    placeholder={signoff.t('t08')}
                                                     className="w-full px-4 py-3 rounded-xl bg-background border border-border focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 text-xs sm:text-sm text-foreground outline-none transition-all"
                                                 />
                                             </div>
@@ -686,7 +606,7 @@ export function NcNdaPage() {
                                             {/* Phone (Optional) */}
                                             <div className="space-y-2">
                                                 <label htmlFor="nc-nda-field-5" className="text-xs sm:text-sm font-semibold text-foreground">
-                                                    <span>{lang === 'th' ? 'เบอร์โทรศัพท์ (ถ้ามี)' : 'Phone Number (Optional)'}</span>
+                                                    <span>{signoff.t('t09')}</span>
                                                 </label>
                                                 <input id="nc-nda-field-5"
                                                     type="tel"
@@ -703,7 +623,7 @@ export function NcNdaPage() {
                                             <div className="flex items-center justify-between">
                                                 <label className="text-xs sm:text-sm font-semibold text-foreground flex items-center gap-1.5">
                                                     <PenTool className="w-3.5 h-3.5 text-sky-500" />
-                                                    <span>{lang === 'th' ? 'ลงลายมือชื่อดิจิทัล (Digital Signature)' : 'Digital Signature'}</span>
+                                                    <span>{signoff.t('t10')}</span>
                                                 </label>
                                                 {hasSignature && (
                                                     <button
@@ -712,7 +632,7 @@ export function NcNdaPage() {
                                                         className="text-xs text-muted-foreground hover:text-rose-500 flex items-center gap-1 transition-colors"
                                                     >
                                                         <RefreshCw className="w-3 h-3" />
-                                                        <span>{lang === 'th' ? 'ล้างลายเซ็น' : 'Clear'}</span>
+                                                        <span>{signoff.t('t11')}</span>
                                                     </button>
                                                 )}
                                             </div>
@@ -732,7 +652,7 @@ export function NcNdaPage() {
                                                     <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center text-muted-foreground/50 gap-1">
                                                         <PenTool className="w-5 h-5" />
                                                         <span className="text-xs">
-                                                            {lang === 'th' ? 'เซ็นชื่อที่นี่ (ใช้นิ้วหรือเมาส์)' : 'Sign here (use finger or mouse)'}
+                                                            {signoff.t('t12')}
                                                         </span>
                                                     </div>
                                                 )}
@@ -749,15 +669,9 @@ export function NcNdaPage() {
                                                     className="w-4 h-4 mt-0.5 rounded border-border text-sky-500 focus:ring-sky-400"
                                                 />
                                                 <span className="text-xs sm:text-sm text-foreground/80 leading-relaxed">
-                                                    {lang === 'th' ? (
-                                                        <>
-                                                            ข้าพเจ้าได้อ่านและเข้าใจข้อความในสัญญาการรักษาความลับ (NC-NDA) ฉบับนี้โดยตลอดแล้ว และตกลงยินยอมผูกพันตามข้อกำหนดและเงื่อนไขทุกประการ
-                                                        </>
-                                                    ) : (
-                                                        <>
-                                                            I have thoroughly read and understood the terms of this NC-NDA Agreement and agree to be legally bound by all conditions.
-                                                        </>
-                                                    )}
+                                                    {<>
+                                                            {signoff.t('t13')}
+                                                        </>}
                                                 </span>
                                             </label>
                                         </div>
@@ -774,12 +688,12 @@ export function NcNdaPage() {
                                                 {isSubmitting ? (
                                                     <>
                                                         <RefreshCw className="w-5 h-5 animate-spin" />
-                                                        <span>{lang === 'th' ? 'กำลังบันทึกข้อมูล...' : 'Submitting...'}</span>
+                                                        <span>{signoff.t('t14')}</span>
                                                     </>
                                                 ) : (
                                                     <>
                                                         <CheckCircle2 className="w-5 h-5" />
-                                                        <span>{lang === 'th' ? 'ยืนยันและส่งแบบฟอร์ม (Submit)' : 'Submit Agreement'}</span>
+                                                        <span>{signoff.t('t15')}</span>
                                                     </>
                                                 )}
                                             </button>
@@ -789,21 +703,19 @@ export function NcNdaPage() {
                                         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground pt-1">
                                             <Lock className="w-3.5 h-3.5 text-sky-500" />
                                             <span>
-                                                {lang === 'th'
-                                                    ? 'ข้อมูลของท่านได้รับการเข้ารหัสความปลอดภัยตามมาตรฐาน PDPA'
-                                                    : 'Your information is securely encrypted in compliance with PDPA standards'}
+                                                {signoff.t('t16')}
                                             </span>
                                         </div>
                                     </form>
                                 </div>
                             </ScrollReveal>
-                        </div>
+                        </div>)}
                     </div>
                 </section>
             </main>
 
             {/* Success Modal */}
-            {isSuccessModalOpen && submissionData && (
+            {!success.hidden && (isSuccessModalOpen && submissionData && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in print:hidden">
                     <div className="bg-card border border-sky-500/30 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-6">
                         <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-500 flex items-center justify-center mx-auto">
@@ -812,35 +724,33 @@ export function NcNdaPage() {
 
                         <div className="text-center space-y-1.5">
                             <h3 className="text-xl sm:text-2xl font-extrabold text-foreground">
-                                {lang === 'th' ? 'ลงนามสัญญาสำเร็จ' : 'Agreement Signed Successfully'}
+                                {success.t('t01')}
                             </h3>
                             <p className="text-xs sm:text-sm text-muted-foreground">
-                                {lang === 'th'
-                                    ? 'ระบบได้บันทึกการยอมรับสัญญาการรักษาความลับ (NC-NDA) เรียบร้อยแล้ว'
-                                    : 'Your NC-NDA acknowledgment has been recorded in the system'}
+                                {success.t('t02')}
                             </p>
                         </div>
 
                         {/* Confirmation Card */}
                         <div className="bg-muted/40 rounded-2xl p-4 space-y-2.5 text-xs sm:text-sm border border-border/60">
                             <div className="flex justify-between items-center py-1 border-b border-border/40">
-                                <span className="text-muted-foreground">{lang === 'th' ? 'รหัสอ้างอิง' : 'Reference ID'}</span>
+                                <span className="text-muted-foreground">{success.t('t03')}</span>
                                 <span className="font-mono font-bold text-sky-500">{submissionData.refId}</span>
                             </div>
                             <div className="flex justify-between items-center py-1 border-b border-border/40">
-                                <span className="text-muted-foreground">{lang === 'th' ? 'ผู้ลงนาม' : 'Signee'}</span>
+                                <span className="text-muted-foreground">{success.t('t04')}</span>
                                 <span className="font-semibold text-foreground">{submissionData.fullName}</span>
                             </div>
                             <div className="flex justify-between items-center py-1 border-b border-border/40">
-                                <span className="text-muted-foreground">{lang === 'th' ? 'เลขบัตร' : 'ID No.'}</span>
+                                <span className="text-muted-foreground">{success.t('t05')}</span>
                                 <span className="font-mono text-foreground">{submissionData.idCard}</span>
                             </div>
                             <div className="flex justify-between items-center py-1 border-b border-border/40">
-                                <span className="text-muted-foreground">{lang === 'th' ? 'อีเมล' : 'Email'}</span>
+                                <span className="text-muted-foreground">{success.t('t06')}</span>
                                 <span className="text-foreground">{submissionData.email}</span>
                             </div>
                             <div className="flex justify-between items-center py-1">
-                                <span className="text-muted-foreground">{lang === 'th' ? 'วันเวลาที่บันทึก' : 'Timestamp'}</span>
+                                <span className="text-muted-foreground">{success.t('t07')}</span>
                                 <span className="text-foreground">{submissionData.timestamp}</span>
                             </div>
                         </div>
@@ -853,23 +763,23 @@ export function NcNdaPage() {
                                 className="flex-1 py-3 px-4 rounded-xl glass border border-border/80 hover:border-sky-500/40 text-foreground text-xs sm:text-sm font-semibold flex items-center justify-center gap-2 transition-all"
                             >
                                 <Printer className="w-4 h-4 text-sky-400" />
-                                <span>{lang === 'th' ? 'พิมพ์หลักฐาน' : 'Print Receipt'}</span>
+                                <span>{success.t('t08')}</span>
                             </button>
                             <button
                                 type="button"
                                 onClick={() => setIsSuccessModalOpen(false)}
                                 className="flex-1 py-3 px-4 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-xs sm:text-sm font-bold shadow-md shadow-sky-500/25 transition-all"
                             >
-                                {lang === 'th' ? 'เสร็จสิ้น' : 'Done'}
+                                {success.t('t09')}
                             </button>
                         </div>
                     </div>
                 </div>
-            )}
+            ))}
 
-            <QuickContactWidget />
-            <CookieConsent />
-            <Footer />
+            {!success.hidden && (<QuickContactWidget />)}
+            {!success.hidden && (<CookieConsent />)}
+            {!success.hidden && (<Footer />)}
         </div>
     );
 }

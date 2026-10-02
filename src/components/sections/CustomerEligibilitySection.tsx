@@ -1,9 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Building, Cog, Clock, ShieldCheck, TrendingUp } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { ArrowRight } from 'lucide-react';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import { useSections } from '@/lib/pageSections';
+import { homeEligibilitySections } from '@/data/pageSections/homeEligibility';
+import { getSectionIcon } from '@/lib/sectionIcons';
 
 function useAnimatedStat(raw: string | undefined, fallback: string, duration: number = 1800, trigger: boolean = false): string {
     const rawVal = (raw && raw.trim().length > 0) ? raw.trim() : fallback;
@@ -45,7 +49,9 @@ function useAnimatedStat(raw: string | undefined, fallback: string, duration: nu
 }
 
 export function CustomerEligibilitySection() {
-    const { lang } = useLanguage();
+    const { content } = usePageContent('home', DEFAULT_PAGE_CONTENTS['home']);
+    const section = useSections(content, homeEligibilitySections);
+    const eligibility = section('eligibility');
     const { settings } = useSiteSettings();
     const navigate = useNavigate();
 
@@ -76,44 +82,7 @@ export function CustomerEligibilitySection() {
     const contractsCount = useAnimatedStat(settings.impactStats?.totalContractsCount, '50', 1800, isVisible);
     const valueCount = useAnimatedStat(settings.impactStats?.totalCreditValueMB, '400', 2000, isVisible);
 
-    const criterias = [
-        {
-            icon: Building,
-            title: lang === 'th' ? 'ลูกค้านิติบุคคลเท่านั้น' : 'Corporate Entities Only',
-            desc: lang === 'th'
-                ? 'ให้บริการเฉพาะผู้ประกอบการที่จดทะเบียนในรูปแบบนิติบุคคลเท่านั้น เพื่อสร้างมาตรฐานความร่วมมือทางธุรกิจอย่างมืออาชีพและตรวจสอบได้'
-                : 'Exclusively servicing registered corporate enterprises to ensure institutional business governance and transparency.',
-        },
-        {
-            icon: Cog,
-            title: lang === 'th' ? 'ปล่อยสินเชื่อเช่าซื้อเครื่องจักรเป็นหลัก' : 'Machinery Hire Purchase Focus',
-            desc: lang === 'th'
-                ? 'เราพิจารณาสินเชื่อเครื่องจักรอุตสาหกรรมประเภทต่างๆ เพื่อส่งมอบศักยภาพในการผลิตให้ถึงมือผู้ใช้โดยตรง โดยไม่ใช่การปล่อยกู้เป็นเงินสด เพื่อต่อยอดการเติบโตของธุรกิจ'
-                : 'Credit facilities dedicated directly to industrial equipment delivery rather than cash lending, empowering immediate operational capability.',
-        },
-        {
-            icon: Clock,
-            title: lang === 'th' ? 'ผ่อนยาว 3-5 ปี' : 'Flexible 3 – 5 Year Terms',
-            desc: lang === 'th'
-                ? 'ระยะเวลาการผ่อนชำระที่ยืดหยุ่นตั้งแต่ 3 – 5 ปี เพื่อให้ธุรกิจสามารถบริหารจัดการกระแสเงินสด เพื่อให้สอดคล้องกับการหมุนเวียนในธุรกิจ'
-                : 'Extended repayment structures from 3 to 5 years designed to optimize cash flow alignment with revenue generation.',
-        },
-        {
-            icon: ShieldCheck,
-            title: lang === 'th' ? 'หลักประกันยืดหยุ่นได้' : 'Flexible Collateral Requirements',
-            desc: lang === 'th'
-                ? 'มีเครื่องจักรที่เช่าซื้อเป็นหลักประกัน ประกอบกับหลักประกันอื่นๆ เสริม ที่สามารถยืดหยุ่นได้ เพื่อลดความเสี่ยง'
-                : 'Financed equipment acts as core security, augmented by flexible secondary guarantees tailored to mitigate project risks.',
-        },
-        {
-            icon: TrendingUp,
-            title: lang === 'th' ? 'สนับสนุนกิจการพร้อมโต' : 'Supporting High-Growth Ventures',
-            desc: lang === 'th'
-                ? 'คัดเลือกธุรกิจที่มีความ พร้อมในการขยายกำลังการผลิต และสามารถสร้างยอดขายเพิ่มขึ้นได้ทันทีที่เครื่องจักรถูกส่งมอบและติดตั้ง เพื่อผลกำไรเติบโตอย่างก้าวกระโดด'
-                : 'Partnering with enterprises primed for manufacturing expansion, ensuring rapid ROI and multiplied profitability.',
-        },
-    ];
-
+    if (eligibility.hidden) return null;
     return (
         <section ref={sectionRef} className="relative pt-20 sm:pt-24 pb-28 bg-[#0a234d] text-white overflow-hidden">
             {/* Background Decorative Grid and Glow */}
@@ -126,18 +95,18 @@ export function CustomerEligibilitySection() {
                 <ScrollReveal animation="fade-up">
                     <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-16">
                         <p className="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-sky-400 mb-3 font-sans">
-                            CUSTOMER ELIGIBILITY CRITERIAS
+                            {eligibility.t('t01')}
                         </p>
                         <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight font-sans">
-                            {lang === 'th' ? 'เกณฑ์การเป็นลูกค้าของอาไจล์ แอสเซ็ทส์' : 'Agile Assets Customer Eligibility Criteria'}
+                            {eligibility.t('t02')}
                         </h2>
                     </div>
                 </ScrollReveal>
 
                 {/* 6-Card Grid (5 Criteria Cards + 1 CTA Card) */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-16 sm:mb-20">
-                    {criterias.map((item, index) => {
-                        const IconComp = item.icon;
+                    {eligibility.items.map((item, index) => {
+                        const IconComp = getSectionIcon(item.raw.icon);
                         return (
                             <ScrollReveal
                                 key={index}
@@ -150,10 +119,10 @@ export function CustomerEligibilitySection() {
                                         <IconComp className="w-6 h-6 sm:w-7 sm:h-7" />
                                     </div>
                                     <h3 className="text-lg sm:text-xl font-extrabold text-sky-900 font-sans mb-3 group-hover:text-sky-600 transition-colors">
-                                        {item.title}
+                                        {item.t('title')}
                                     </h3>
                                     <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-normal">
-                                        {item.desc}
+                                        {item.t('desc')}
                                     </p>
                                 </div>
                             </ScrollReveal>
@@ -176,10 +145,10 @@ export function CustomerEligibilitySection() {
                                     <ArrowRight className="w-6 h-6 sm:w-7 sm:h-7" />
                                 </div>
                                 <h3 className="text-lg sm:text-xl font-extrabold text-sky-900 font-sans">
-                                    {lang === 'th' ? 'ขอสินเชื่อกับ Agile Assets' : 'Apply with Agile Assets'}
+                                    {eligibility.t('t03')}
                                 </h3>
                                 <p className="text-xs text-slate-500 font-medium">
-                                    {lang === 'th' ? 'กรอกฟอร์มเพื่อให้เจ้าหน้าที่ติดต่อกลับ' : 'Fill out application form for specialist callback'}
+                                    {eligibility.t('t04')}
                                 </p>
                                 <div className="pt-2">
                                     <button
@@ -189,7 +158,7 @@ export function CustomerEligibilitySection() {
                                         }}
                                         className="inline-flex items-center justify-center gap-2 px-8 py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-extrabold text-xs sm:text-sm shadow-md shadow-sky-500/25 hover:scale-105 active:scale-95 transition-all"
                                     >
-                                        <span>{lang === 'th' ? 'คลิกที่นี่' : 'Click Here'}</span>
+                                        <span>{eligibility.t('t05')}</span>
                                         <ArrowRight className="w-4 h-4" />
                                     </button>
                                 </div>
@@ -208,7 +177,7 @@ export function CustomerEligibilitySection() {
                                     {factoryCount}
                                 </div>
                                 <div className="text-sm sm:text-base font-bold text-slate-700 font-sans">
-                                    {lang === 'th' ? 'โรงงาน' : 'Industrial Plants'}
+                                    {eligibility.t('t06')}
                                 </div>
                             </div>
 
@@ -218,7 +187,7 @@ export function CustomerEligibilitySection() {
                                     {contractsCount}
                                 </div>
                                 <div className="text-sm sm:text-base font-bold text-slate-700 font-sans">
-                                    {lang === 'th' ? 'สัญญาเช่าซื้อ' : 'Active Leasing Contracts'}
+                                    {eligibility.t('t07')}
                                 </div>
                             </div>
 
@@ -228,7 +197,7 @@ export function CustomerEligibilitySection() {
                                     {valueCount}
                                 </div>
                                 <div className="text-sm sm:text-base font-bold text-slate-700 font-sans">
-                                    {lang === 'th' ? 'มูลค่าสินเชื่อที่บริหารรวม (MB)' : 'Total Managed Value (MB)'}
+                                    {eligibility.t('t08')}
                                 </div>
                             </div>
                         </div>

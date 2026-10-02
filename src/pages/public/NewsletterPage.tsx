@@ -6,7 +6,11 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
+import { useSections } from '@/lib/pageSections';
+import { newsletterPageSections } from '@/data/pageSections/newsletterPage';
 
 interface NewsletterItem {
     id: string;
@@ -20,36 +24,12 @@ interface NewsletterItem {
 
 export function NewsletterPage() {
     const { lang } = useLanguage();
+    const { content } = usePageContent('newsletter', DEFAULT_PAGE_CONTENTS['newsletter']);
+    const section = useSections(content, newsletterPageSections);
+    const heroExtras = section('hero-extras');
+    const issuesSec = section('issues');
 
-    const newsletters: NewsletterItem[] = [
-        {
-            id: 'newsletter-1',
-            titleTh: 'Agile Assets Newsletter No.1',
-            titleEn: 'Agile Assets Newsletter No.1',
-            issueTh: 'ฉบับที่ 1',
-            issueEn: 'Issue No.1',
-            pdfUrl: 'https://agileassets.co.th/wp-content/uploads/2026/03/Agile-Assets-Newsletter.-No1.pdf',
-            year: '2026',
-        },
-        {
-            id: 'newsletter-2',
-            titleTh: 'Agile Assets Newsletter No.2',
-            titleEn: 'Agile Assets Newsletter No.2',
-            issueTh: 'ฉบับที่ 2',
-            issueEn: 'Issue No.2',
-            pdfUrl: 'https://agileassets.co.th/wp-content/uploads/2026/03/Agile-Assets-Newsletter.-No2.pdf',
-            year: '2026',
-        },
-        {
-            id: 'newsletter-3',
-            titleTh: 'Newsletter Issue 3 Final',
-            titleEn: 'Newsletter Issue 3 Final',
-            issueTh: 'ฉบับที่ 3 (ล่าสุด)',
-            issueEn: 'Issue No.3 (Latest)',
-            pdfUrl: 'https://agileassets.co.th/wp-content/uploads/2026/06/Newsletter-issue-3_Final.pdf',
-            year: '2026',
-        },
-    ];
+    const newsletters: NewsletterItem[] = issuesSec.items.map((it) => ({ id: it.raw.id, titleTh: it.raw.titleTh, titleEn: it.raw.titleEn, issueTh: it.raw.issueTh, issueEn: it.raw.issueEn, pdfUrl: it.raw.pdfUrl, year: it.raw.year }));
 
     const scrollToNewsletter = () => {
         const el = document.getElementById('newsletter');
@@ -58,12 +38,12 @@ export function NewsletterPage() {
         }
     };
 
-    const pageTitle = lang === 'th'
+    const pageTitle = content.metaTitle || (lang === 'th'
         ? 'ดาวน์โหลดจดหมายข่าว (Newsletter Download) | Agile Assets'
-        : 'Newsletter Download | Agile Assets - Industrial Machinery Financing';
-    const pageDescription = lang === 'th'
+        : 'Newsletter Download | Agile Assets - Industrial Machinery Financing');
+    const pageDescription = content.metaDescription || (lang === 'th'
         ? 'ดาวน์โหลดจดหมายข่าว (Newsletter) รวมข้อมูลธุรกิจ บทวิเคราะห์ และอัปเดตจากบริษัทครบถ้วน ดาวน์โหลด Newsletter ล่าสุดได้ที่นี่'
-        : 'Download Agile Assets Newsletters — Industry insights, machinery finance updates, and ESG growth reports.';
+        : 'Download Agile Assets Newsletters — Industry insights, machinery finance updates, and ESG growth reports.');
 
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-sky-500 selection:text-white">
@@ -83,7 +63,7 @@ export function NewsletterPage() {
                     {/* Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img
-                            src={heroBg}
+                            src={content.heroImage || heroBg}
                             alt="Agile Assets Newsletter"
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
@@ -91,7 +71,7 @@ export function NewsletterPage() {
                         {/* Dynamic Vignette & Ambient Light Overlays */}
                         <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
                         <div className="absolute inset-0 bg-radial-at-c from-sky-500/15 via-transparent to-black/80" />
-                        
+
                         {/* Soft Bottom Fog/Fade Gradient into next section */}
                         <div className="absolute bottom-0 left-0 right-0 h-56 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-10" />
                     </div>
@@ -114,21 +94,19 @@ export function NewsletterPage() {
                                 }}
                             >
                                 <span className="w-2 h-2 rounded-full animate-ping" style={{ backgroundColor: 'var(--theme-sky-400, #38bdf8)' }} />
-                                <span>Agile Newsletter · Annual Reports & Insights</span>
+                                <span>{(lang === 'th' ? (content.heroBadgeTh || content.heroBadgeEn || 'Agile Newsletter · Annual Reports & Insights') : (content.heroBadgeEn || content.heroBadgeTh || 'Agile Newsletter · Annual Reports & Insights'))}</span>
                             </div>
                         </ScrollReveal>
 
                         <ScrollReveal animation="fade-up" delay={100}>
                             <p className="text-xl sm:text-3xl font-semibold text-sky-200/90 mb-3 font-sans tracking-wide drop-shadow-md">
-                                Agile Assets
+                                {heroExtras.t('t01')}
                             </p>
                             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight drop-shadow-2xl font-sans mb-4 bg-gradient-to-r from-white via-sky-100 to-sky-300 bg-clip-text text-transparent">
-                                Agile Newsletter
+                                {(lang === 'th' ? (content.heroTitleTh || content.heroTitleEn || 'Agile Newsletter') : (content.heroTitleEn || content.heroTitleTh || 'Agile Newsletter'))}
                             </h1>
                             <p className="text-sm sm:text-lg text-slate-300 max-w-2xl mx-auto font-light leading-relaxed drop-shadow-md mb-8">
-                                {lang === 'th'
-                                    ? 'รวบรวมจดหมายข่าวประจำปี สรุปผลการดำเนินงาน และสาระความรู้สินเชื่อเครื่องจักรอุตสาหกรรม'
-                                    : 'Annual corporate newsletters, operational recaps, and specialized machinery finance reports.'}
+                                {(lang === 'th' ? (content.heroSubtitleTh || content.heroSubtitleEn || 'รวบรวมจดหมายข่าวประจำปี สรุปผลการดำเนินงาน และสาระความรู้สินเชื่อเครื่องจักรอุตสาหกรรม') : (content.heroSubtitleEn || content.heroSubtitleTh || 'Annual corporate newsletters, operational recaps, and specialized machinery finance reports.'))}
                             </p>
 
                             {/* Learn More Button */}
@@ -137,7 +115,7 @@ export function NewsletterPage() {
                                     onClick={scrollToNewsletter}
                                     className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white font-bold text-xs sm:text-sm tracking-wide shadow-lg shadow-sky-500/25 hover:scale-105 active:scale-95 transition-all duration-200"
                                 >
-                                    <span>Learn More</span>
+                                    <span>{heroExtras.t('t02')}</span>
                                     <ChevronDown className="w-4 h-4" />
                                 </button>
                             </div>
@@ -146,7 +124,7 @@ export function NewsletterPage() {
                 </section>
 
                 {/* ─── 2. จดหมายข่าวประจำปี (3 PDF Embed Documents Grid) ─── */}
-                <section id="newsletter" className="relative py-16 sm:py-24 overflow-hidden bg-background">
+                {!issuesSec.hidden && (<section id="newsletter" className="relative py-16 sm:py-24 overflow-hidden bg-background">
                     {/* Subtle Silk Wave Gradients */}
                     <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-40 dark:opacity-30">
                         <svg className="absolute w-full h-full object-cover" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -174,15 +152,13 @@ export function NewsletterPage() {
                         <ScrollReveal animation="fade-up">
                             <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
                                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3 shadow-sm border border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-bold uppercase tracking-wider">
-                                    Agile Newsletter
+                                    {issuesSec.t('t01')}
                                 </div>
                                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-sans mb-4 bg-gradient-to-r from-blue-900 via-sky-600 to-blue-800 dark:from-white dark:via-sky-200 dark:to-sky-400 bg-clip-text text-transparent">
-                                    {lang === 'th' ? 'จดหมายข่าวประจำปี' : 'Annual Newsletters'}
+                                    {issuesSec.t('t02')}
                                 </h2>
                                 <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
-                                    {lang === 'th'
-                                        ? 'ดาวน์โหลดและอ่านฉบับเต็มของจดหมายข่าว Agile Assets แบบ Interactive'
-                                        : 'Download and read full interactive editions of Agile Assets annual reports.'}
+                                    {issuesSec.t('t03')}
                                 </p>
                             </div>
                         </ScrollReveal>
@@ -214,7 +190,7 @@ export function NewsletterPage() {
                                                     href={item.pdfUrl}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    title={lang === 'th' ? 'เปิดดูเต็มจอ' : 'Open in New Tab'}
+                                                    title={issuesSec.t('t04')}
                                                     className="p-2 rounded-lg bg-slate-800 hover:bg-sky-600 text-slate-300 hover:text-white transition-colors"
                                                 >
                                                     <ExternalLink className="w-3.5 h-3.5" />
@@ -222,7 +198,7 @@ export function NewsletterPage() {
                                                 <a
                                                     href={item.pdfUrl}
                                                     download
-                                                    title={lang === 'th' ? 'ดาวน์โหลดเอกสาร' : 'Download PDF'}
+                                                    title={issuesSec.t('t05')}
                                                     className="p-2 rounded-lg bg-slate-800 hover:bg-sky-600 text-slate-300 hover:text-white transition-colors"
                                                 >
                                                     <Download className="w-3.5 h-3.5" />
@@ -242,7 +218,7 @@ export function NewsletterPage() {
                                             {/* Overlay for quick action on hover/fallback */}
                                             <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent flex items-center justify-between text-xs">
                                                 <span className="text-slate-400">
-                                                    PDF • Agile Assets
+                                                    {issuesSec.t('t06')}
                                                 </span>
                                                 <a
                                                     href={item.pdfUrl}
@@ -251,7 +227,7 @@ export function NewsletterPage() {
                                                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-500 hover:bg-sky-400 text-white font-medium shadow transition-all"
                                                 >
                                                     <ExternalLink className="w-3 h-3" />
-                                                    <span>{lang === 'th' ? 'อ่านฉบับเต็ม' : 'Read Full PDF'}</span>
+                                                    <span>{issuesSec.t('t07')}</span>
                                                 </a>
                                             </div>
                                         </div>
@@ -260,7 +236,7 @@ export function NewsletterPage() {
                             ))}
                         </div>
                     </div>
-                </section>
+                </section>)}
             </main>
 
             <Footer />

@@ -15,19 +15,18 @@ import { cn } from '@/lib/utils';
 import { useLeadSubmit } from '@/lib/useLeadSubmit';
 import { formService } from '@/services/formService';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
+import { useSections } from '@/lib/pageSections';
+import { contactSections } from '@/data/pageSections/contact';
 
-interface FaqItem {
-    id: string;
-    questionTh: string;
-    questionEn: string;
-    answerTh: string;
-    answerEn: string;
-}
 
 export function ContactPage() {
     const { lang } = useLanguage();
     const { settings } = useSiteSettings();
     const { content } = usePageContent('contact', DEFAULT_PAGE_CONTENTS['contact']);
+    const section = useSections(content, contactSections);
+    const contactCards = section('contact-cards');
+    const location = section('location');
+    const faqForm = section('faq-form');
     const companyInfo = settings.companyInfo;
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -73,71 +72,12 @@ export function ContactPage() {
         setMessage('');
     };
 
-    const faqs: FaqItem[] = [
-        {
-            id: 'contact-faq-1',
-            questionTh: 'สินเชื่อเครื่องจักรคืออะไร',
-            questionEn: 'What is Machinery Financing?',
-            answerTh: 'ลูกค้าสามารถซื้อเครื่องจักรที่จะนำมาใช้ในธุรกิจ โดยไม่จำเป็นต้องจ่ายเป็นเงินก้อน สามารถจัดการแผนการผ่อนชำระได้ตามความต้องการ และเมื่อผ่อนชำระครบตามกำหนด เครื่องจักรจะกลายเป็นของลูกค้าทันทีโดยไม่มีเงื่อนไข',
-            answerEn: 'Clients can acquire industrial machinery for business expansion without substantial upfront capital outlay. Repayments are structured according to cash flows, and full legal ownership transfers to the client automatically upon final settlement.',
-        },
-        {
-            id: 'contact-faq-2',
-            questionTh: 'บุคคลธรรมดาขอสินเชื่อเครื่องจักรได้ไหม ?',
-            questionEn: 'Can individuals apply for machinery financing?',
-            answerTh: 'สามารถขอสินเชื่อเครื่องจักรได้ โดยเป็นไปตามเงื่อนไขที่ระบุ เช่น การแสดงตัวตน, ประเภทธุรกิจ, แสดงการเดินบัญชีรายรับ-รายจ่าย เป็นต้น',
-            answerEn: 'Yes, subject to identity verification, business type, and verified bank statement analysis.',
-        },
-        {
-            id: 'contact-faq-3',
-            questionTh: 'ขอสินเชื่อเป็นเงินสดได้ไหม ?',
-            questionEn: 'Can financing be disbursed in cash?',
-            answerTh: 'เราสนับสนุนการลงทุนโดยการปล่อยสินเชื่อเครื่องจักรเป็นหลัก ลูกค้าสามารถนำใบเสนอราคาเครื่องจักรที่ต้องการ หรือ ให้เราช่วยในการหาเครื่องจักรที่ลูกค้าต้องการได้ และเราจะเป็นผู้ประสานงานซื้อ-ขาย รวมถึงตรวจสอบรายละเอียดเบื้องต้น เป็นการช่วยลูกค้าในการรับมอบเครื่องจักรอีกทาง',
-            answerEn: 'We primarily finance direct machinery acquisitions by remitting payments to certified suppliers/manufacturers.',
-        },
-        {
-            id: 'contact-faq-4',
-            questionTh: 'ไม่มีเงินดาวน์ สามารถขอสินเชื่อได้หรือไม่',
-            questionEn: 'Can I apply without down payment?',
-            answerTh: 'เพื่อเป็นการยืนยันความพร้อมเบื้องต้นของลูกค้า เราจำเป็นต้องเรียกเก็บเงินดาวน์ เป็นการช่วยลดภาระค่างวดการผ่อนชำระให้ลดลง และ ให้ความรู้สึกเป็นเจ้าของตั้งแต่วันแรกที่ลูกค้าได้นำเครื่องจักรไปใช้งาน',
-            answerEn: 'Advance deposits help lower ongoing monthly debt burdens and instill ownership commitment from day one.',
-        },
-        {
-            id: 'contact-faq-5',
-            questionTh: 'ธุรกิจประเภทใดที่สามารถขอสินเชื่อได้บ้าง?',
-            questionEn: 'Which business types can apply?',
-            answerTh: 'ทุกธุรกิจที่ใช้เครื่องจักรในการดำเนินการและสร้างรายได้ให้กับลูกค้าทั้งทางตรงหรือทางอ้อม',
-            answerEn: 'Any enterprise leveraging commercial production machinery to generate ongoing revenues.',
-        },
-        {
-            id: 'contact-faq-6',
-            questionTh: 'ติดเครดิตบูโร สามารถขอสินเชื่อได้ไหม',
-            questionEn: 'Can I apply with credit bureau history?',
-            answerTh: 'Agile Assets เข้าใจผู้ประกอบการ เราจึงมีความยืดหยุ่นในการพิจารณาสินเชื่อ กู้แบงค์ไม่ผ่าน หรือติดเครดิตบูโร ก็สามารถขอสินเชื่อที่ Agile Assets ได้',
-            answerEn: 'We understand entrepreneurs and offer flexible underwriting even if bank loans were previously challenging.',
-        },
-        {
-            id: 'contact-faq-7',
-            questionTh: 'สมัครสินเชื่อไปแล้ว แต่ยังไม่มีเจ้าหน้าที่ติดต่อกลับ ต้องทำอย่างไร ?',
-            questionEn: 'What to do if no officer has contacted back?',
-            answerTh: 'ในกรณีที่ท่านทำการสมัครสินเชื่อเข้ามาแล้วทางเว็บไซต์ agileassets.co.th แต่ยังไม่มีเจ้าหน้าที่ติดต่อกลับภายใน 3 วันทำการ อาจเป็นเพราะคุณสมบัติของท่านยังไม่เข้าเงื่อนไขของบริษัท ทั้งนี้สามารถโทรสอบถามรายละเอียดเพิ่มเติมได้ที่เบอร์ 092 279 7699 หรือ โทร 02 000 9392',
-            answerEn: 'If uncontacted within 3 business days, please reach out directly at 092-279-7699 or 02-000-9392.',
-        },
-        {
-            id: 'contact-faq-8',
-            questionTh: 'อัตราดอกเบี้ยเท่าไร ?',
-            questionEn: 'What is the interest rate?',
-            answerTh: 'สินเชื่อเครื่องจักรที่ Agile Assets ดอกเบี้ยเพียง 1.25% ต่อเดือน (อัตราดอกเบี้ยแบบลดต้นลดดอก)',
-            answerEn: 'Machinery financing starting at 1.25% per month (Effective Rate / Reducing Balance).',
-        },
-    ];
-
-    const pageTitle = lang === 'th'
+    const pageTitle = content.metaTitle || (lang === 'th'
         ? 'ติดต่อเรา (Contact Us) | Agile Assets สินเชื่อเช่าซื้อเครื่องจักรอุตสาหกรรม'
-        : 'Contact Us | Agile Assets Industrial Equipment Financing';
-    const pageDescription = lang === 'th'
+        : 'Contact Us | Agile Assets Industrial Equipment Financing');
+    const pageDescription = content.metaDescription || (lang === 'th'
         ? 'ติดต่อ Agile Assets สำนักงานใหญ่ โทร. 02-000-9392, 02-005-1599 อีเมล rattinun@agileassets.co.th พร้อมแผนที่และการเดินทาง'
-        : 'Contact Agile Assets Head Office, phone numbers, email, interactive location maps, and submit inquiries online.';
+        : 'Contact Agile Assets Head Office, phone numbers, email, interactive location maps, and submit inquiries online.');
 
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-sky-500 selection:text-white">
@@ -164,7 +104,7 @@ export function ContactPage() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
                         <div className="absolute inset-0 bg-radial-at-c from-sky-500/10 via-transparent to-black/80" />
-                        
+
                         {/* Soft Bottom Fog/Fade Gradient into next section */}
                         <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none z-10" />
                     </div>
@@ -192,7 +132,7 @@ export function ContactPage() {
                 </section>
 
                 {/* ─── 2. Top 3 Contact Cards ─── */}
-                <section className="py-12 sm:py-16 bg-slate-50/50 dark:bg-slate-950">
+                {!contactCards.hidden && (<section className="py-12 sm:py-16 bg-slate-50/50 dark:bg-slate-950">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                         <ScrollReveal animation="fade-up">
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -202,7 +142,7 @@ export function ContactPage() {
                                         <Phone className="w-6 h-6" />
                                     </div>
                                     <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-sans mb-3">
-                                        Tel.
+                                        {contactCards.t('t01')}
                                     </h3>
                                     <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 space-y-1 leading-relaxed">
                                         <p>
@@ -211,20 +151,20 @@ export function ContactPage() {
                                             </a>
                                             {companyInfo?.operatingHours && (
                                                 <span className="block text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                                                    เวลาทำการ: {companyInfo.operatingHours}
+                                                    {contactCards.t('t02')} {companyInfo.operatingHours}
                                                 </span>
                                             )}
                                         </p>
                                         <p>
-                                            <a href="tel:020051599" className="hover:text-sky-600 transition-colors">02-0051599</a>
+                                            <a href={contactCards.t('link03')} className="hover:text-sky-600 transition-colors">{contactCards.t('t04')}</a>
                                         </p>
                                         <p>
-                                            <a href="tel:0982837700" className="hover:text-sky-600 transition-colors">098-2837700</a>,{' '}
-                                            <a href="tel:0839466561" className="hover:text-sky-600 transition-colors">083-9466561</a>
+                                            <a href={contactCards.t('link05')} className="hover:text-sky-600 transition-colors">{contactCards.t('t06')}</a>,{' '}
+                                            <a href={contactCards.t('link07')} className="hover:text-sky-600 transition-colors">{contactCards.t('t08')}</a>
                                         </p>
                                         <p>
-                                            <a href="tel:0915505999" className="hover:text-sky-600 transition-colors">091-5505999</a>,{' '}
-                                            <a href="tel:0922797699" className="hover:text-sky-600 transition-colors">092-2797699</a>
+                                            <a href={contactCards.t('link09')} className="hover:text-sky-600 transition-colors">{contactCards.t('t10')}</a>,{' '}
+                                            <a href={contactCards.t('link11')} className="hover:text-sky-600 transition-colors">{contactCards.t('t12')}</a>
                                         </p>
                                     </div>
                                 </div>
@@ -235,7 +175,7 @@ export function ContactPage() {
                                         <Mail className="w-6 h-6" />
                                     </div>
                                     <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-sans mb-3">
-                                        E-Mail
+                                        {contactCards.t('t13')}
                                     </h3>
                                     <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 space-y-1.5 leading-relaxed">
                                         <p>
@@ -244,13 +184,13 @@ export function ContactPage() {
                                             </a>
                                         </p>
                                         <p>
-                                            <a href="mailto:worathep@agileassets.co.th" className="hover:text-sky-600 transition-colors">
-                                                worathep@agileassets.co.th
+                                            <a href={contactCards.t('link14')} className="hover:text-sky-600 transition-colors">
+                                                {contactCards.t('t15')}
                                             </a>
                                         </p>
                                         {companyInfo?.lineId && (
                                             <p className="text-sky-600 dark:text-sky-400 font-bold text-xs pt-1">
-                                                LINE: {companyInfo.lineId}
+                                                {contactCards.t('t16')} {companyInfo.lineId}
                                             </p>
                                         )}
                                     </div>
@@ -262,7 +202,7 @@ export function ContactPage() {
                                         <MapPin className="w-6 h-6" />
                                     </div>
                                     <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white font-sans mb-3">
-                                        Head Office
+                                        {contactCards.t('t17')}
                                     </h3>
                                     <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed max-w-xs">
                                         <p>{companyInfo?.address || 'เลขที่ 20 หมู่ 1 ถ.สุขุมวิท ต.บางเมืองใหม่ อ.เมือง จ.สมุทรปราการ 10270'}</p>
@@ -271,18 +211,18 @@ export function ContactPage() {
                             </div>
                         </ScrollReveal>
                     </div>
-                </section>
+                </section>)}
 
                 {/* ─── 3. Company Location (ที่ตั้งบริษัท) ─── */}
-                <section className="py-14 sm:py-20 bg-white dark:bg-slate-900/60">
+                {!location.hidden && (<section className="py-14 sm:py-20 bg-white dark:bg-slate-900/60">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                         <ScrollReveal animation="fade-up">
                             <div className="text-center mb-10">
                                 <h2 className="text-2xl sm:text-4xl font-extrabold text-blue-900 dark:text-blue-400 font-sans mb-2">
-                                    ที่ตั้งบริษัท
+                                    {location.t('t01')}
                                 </h2>
                                 <p className="text-sm sm:text-base font-semibold text-slate-700 dark:text-slate-300 font-sans">
-                                    อาไจล์ แอสเซ็ทส์ สำนักงานใหญ่
+                                    {location.t('t02')}
                                 </p>
                             </div>
 
@@ -291,7 +231,7 @@ export function ContactPage() {
                                 {/* Graphic Road Map */}
                                 <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-md bg-white dark:bg-slate-950 p-2">
                                     <img
-                                        src="https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_1024,h_724/https://agileassets.co.th/wp-content/uploads/2021/05/Agile-Assets-Map-1024x724.jpg"
+                                        src={location.t('img03')}
                                         alt="Agile Assets Head Office Graphic Map"
                                         className="w-full h-auto object-contain rounded-xl hover:scale-105 transition-transform duration-500"
                                         loading="lazy"
@@ -301,7 +241,7 @@ export function ContactPage() {
                                 {/* Interactive Google Maps Iframe */}
                                 <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-md h-[340px] sm:h-[400px] lg:h-[420px] bg-slate-100 dark:bg-slate-950">
                                     <iframe
-                                        src="https://maps.google.com/maps?q=%E0%B8%AD%E0%B8%B2%E0%B9%84%E0%B8%88%E0%B8%A5%E0%B9%8C%20%E0%B9%81%E0%B8%AD%E0%B8%AA%E0%B9%80%E0%B8%8B%E0%B9%87%E0%B8%97%E0%B8%AA%E0%B9%8C&t=m&z=15&output=embed&iwloc=near"
+                                        src={location.t('img04')}
                                         title="อาไจล์ แอสเซ็ทส์ แผนที่ Google Maps"
                                         className="w-full h-full border-0"
                                         loading="lazy"
@@ -311,25 +251,25 @@ export function ContactPage() {
                             </div>
                         </ScrollReveal>
                     </div>
-                </section>
+                </section>)}
 
                 {/* ─── 4. FAQ & Contact Form Section (2 Columns) ─── */}
-                <section className="py-16 sm:py-24 bg-slate-50/70 dark:bg-slate-950">
+                {!faqForm.hidden && (<section className="py-16 sm:py-24 bg-slate-50/70 dark:bg-slate-950">
                     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
                             {/* Left Column: FAQ Accordion */}
                             <div className="lg:col-span-6 space-y-4">
                                 <ScrollReveal animation="fade-up">
                                     <h2 className="text-xl sm:text-2xl font-extrabold text-blue-900 dark:text-blue-400 font-sans mb-6">
-                                        คำถามที่พบบ่อย (FAQ)
+                                        {faqForm.t('t01')}
                                     </h2>
 
                                     <div className="space-y-3">
-                                        {faqs.map((faq, index) => {
+                                        {faqForm.items.map((faq, index) => {
                                             const isOpen = openIndex === index;
                                             return (
                                                 <div
-                                                    key={faq.id}
+                                                    key={faq.raw.id}
                                                     className={cn(
                                                         "rounded-xl border transition-all duration-200 overflow-hidden",
                                                         isOpen
@@ -343,7 +283,7 @@ export function ContactPage() {
                                                         className="w-full px-4 sm:px-5 py-3.5 flex items-center justify-between text-left gap-3"
                                                     >
                                                         <span className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 font-sans leading-snug">
-                                                            {lang === 'th' ? faq.questionTh : faq.questionEn}
+                                                            {faq.t('question')}
                                                         </span>
                                                         <ChevronRight className={cn(
                                                             "w-4 h-4 text-slate-400 transition-transform duration-200 flex-shrink-0",
@@ -354,7 +294,7 @@ export function ContactPage() {
                                                     {isOpen && (
                                                         <div className="px-4 sm:px-5 pb-4 pt-1 animate-fade-in border-t border-slate-100 dark:border-slate-800">
                                                             <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed italic bg-slate-50 dark:bg-slate-950 p-3 rounded-lg">
-                                                                “{lang === 'th' ? faq.answerTh : faq.answerEn}”
+                                                                “{faq.t('answer')}”
                                                             </p>
                                                         </div>
                                                     )}
@@ -370,10 +310,10 @@ export function ContactPage() {
                                 <ScrollReveal animation="fade-up">
                                     <div className="bg-blue-900 dark:bg-slate-900 text-white rounded-3xl p-6 sm:p-10 shadow-2xl border border-blue-800 dark:border-slate-800">
                                         <h2 className="text-2xl sm:text-3xl font-extrabold font-sans mb-2 tracking-tight">
-                                            {lang === 'th' ? 'ส่งข้อความถึงเรา' : 'Send Us a Message'}
+                                            {faqForm.t('t02')}
                                         </h2>
                                         <p className="text-xs sm:text-sm text-sky-200/90 font-light mb-8">
-                                            {lang === 'th' ? 'เจ้าหน้าที่ของบริษัทจะติดต่อกลับภายใน 24 ชั่วโมง หลังจากได้รับข้อความ' : 'Our team will get back to you within 24 hours of receiving your message.'}
+                                            {faqForm.t('t03')}
                                         </p>
 
                                         {isSubmitted ? (
@@ -382,16 +322,16 @@ export function ContactPage() {
                                                     <CheckCircle2 className="w-7 h-7" />
                                                 </div>
                                                 <h3 className="text-base font-bold text-white">
-                                                    {lang === 'th' ? 'ส่งข้อความสำเร็จ!' : 'Message sent!'}
+                                                    {faqForm.t('t04')}
                                                 </h3>
                                                 <p className="text-xs text-sky-200">
-                                                    {lang === 'th' ? 'ขอบคุณที่สนใจบริการของเรา เจ้าหน้าที่จะติดต่อกลับไปยังอีเมลหรือเบอร์โทรศัพท์ของท่านโดยเร็วที่สุด' : 'Thank you for your interest. Our team will contact you by email or phone shortly.'}
+                                                    {faqForm.t('t05')}
                                                 </p>
                                                 <button
                                                     onClick={() => setIsSubmitted(false)}
                                                     className="mt-3 px-4 py-2 rounded-lg bg-sky-500 hover:bg-sky-600 text-white text-xs font-bold transition-all"
                                                 >
-                                                    {lang === 'th' ? 'ส่งข้อความใหม่' : 'Send another message'}
+                                                    {faqForm.t('t06')}
                                                 </button>
                                             </div>
                                         ) : (
@@ -400,8 +340,8 @@ export function ContactPage() {
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                     <input
                                                         type="text"
-                                                        placeholder={lang === 'th' ? 'ชื่อ *' : 'First Name'}
-                                                        aria-label={lang === 'th' ? 'ชื่อ *' : 'First Name'}
+                                                        placeholder={faqForm.t('t07')}
+                                                        aria-label={faqForm.t('t07')}
                                                         required
                                                         maxLength={100}
                                                         autoComplete="given-name"
@@ -411,8 +351,8 @@ export function ContactPage() {
                                                     />
                                                     <input
                                                         type="text"
-                                                        placeholder={lang === 'th' ? 'นามสกุล' : 'Last Name'}
-                                                        aria-label={lang === 'th' ? 'นามสกุล' : 'Last Name'}
+                                                        placeholder={faqForm.t('t08')}
+                                                        aria-label={faqForm.t('t08')}
                                                         maxLength={100}
                                                         autoComplete="family-name"
                                                         value={lastName}
@@ -425,8 +365,8 @@ export function ContactPage() {
                                                 <div>
                                                     <input
                                                         type="email"
-                                                        placeholder={lang === 'th' ? 'อีเมล *' : 'Email Address'}
-                                                        aria-label={lang === 'th' ? 'อีเมล *' : 'Email Address'}
+                                                        placeholder={faqForm.t('t09')}
+                                                        aria-label={faqForm.t('t09')}
                                                         maxLength={200}
                                                         autoComplete="email"
                                                         required
@@ -440,8 +380,8 @@ export function ContactPage() {
                                                 <div>
                                                     <input
                                                         type="text"
-                                                        placeholder={lang === 'th' ? 'หัวข้อ' : 'Subject'}
-                                                        aria-label={lang === 'th' ? 'หัวข้อ' : 'Subject'}
+                                                        placeholder={faqForm.t('t10')}
+                                                        aria-label={faqForm.t('t10')}
                                                         maxLength={300}
                                                         value={subject}
                                                         onChange={(e) => setSubject(e.target.value)}
@@ -453,8 +393,8 @@ export function ContactPage() {
                                                 <div>
                                                     <textarea
                                                         rows={4}
-                                                        placeholder={lang === 'th' ? 'ข้อความของคุณ *' : 'Your Message'}
-                                                        aria-label={lang === 'th' ? 'ข้อความของคุณ *' : 'Your Message'}
+                                                        placeholder={faqForm.t('t11')}
+                                                        aria-label={faqForm.t('t11')}
                                                         maxLength={5000}
                                                         required
                                                         value={message}
@@ -477,7 +417,7 @@ export function ContactPage() {
                                                         ) : (
                                                             <Send className="w-4 h-4" />
                                                         )}
-                                                        <span>{lang === 'th' ? 'ส่งข้อความ' : 'Submit Form'}</span>
+                                                        <span>{faqForm.t('t12')}</span>
                                                     </button>
                                                 </div>
                                             </form>
@@ -487,7 +427,7 @@ export function ContactPage() {
                             </div>
                         </div>
                     </div>
-                </section>
+                </section>)}
             </main>
 
             <Footer />

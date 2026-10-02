@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { 
-    Sun, DollarSign, ArrowRight, Send, Download, Building2, 
-    FileText, Check 
-} from 'lucide-react';
+import { Sun, DollarSign, ArrowRight, Send, Download, Building2, FileText, Check } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
@@ -15,10 +12,16 @@ import { useLeadSubmit } from '@/lib/useLeadSubmit';
 import { formService } from '@/services/formService';
 import { usePageContent } from '@/lib/usePageContent';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
+import { useSections } from '@/lib/pageSections';
+import { solarPowerSections } from '@/data/pageSections/solarPower';
 
 export function SolarPowerPage() {
     const { lang } = useLanguage();
     const { content } = usePageContent('solar-power', DEFAULT_PAGE_CONTENTS['solar-power']);
+    const section = useSections(content, solarPowerSections);
+    const showcase = section('showcase');
+    const extra = section('extra');
+    const inquiry = section('inquiry');
     const [submitting, setSubmitting] = useState(false);
     const { send, guardFields } = useLeadSubmit();
     const [submitted, setSubmitted] = useState(false);
@@ -91,8 +94,8 @@ export function SolarPowerPage() {
         if (!result) return;
         setSubmitted(true);
         toast.success(
-            lang === 'th' 
-                ? 'ส่งข้อมูลสำเร็จ! เจ้าหน้าที่ฝ่ายสินเชื่อโซลาร์เซลล์จะติดต่อกลับภายใน 24 ชั่วโมง' 
+            lang === 'th'
+                ? 'ส่งข้อมูลสำเร็จ! เจ้าหน้าที่ฝ่ายสินเชื่อโซลาร์เซลล์จะติดต่อกลับภายใน 24 ชั่วโมง'
                 : 'Inquiry submitted successfully! Our solar financing specialist will contact you within 24 hours.'
         );
     };
@@ -109,12 +112,12 @@ export function SolarPowerPage() {
         scrollToForm();
     };
 
-    const title = lang === 'th' 
+    const title = content.metaTitle || (lang === 'th'
         ? 'สินเชื่อเช่าซื้อเพื่อธุรกิจผลิตพลังงานจากแสงอาทิตย์ (Solar Power Generation) | Agile Assets'
-        : 'Commercial Solar Rooftop & Solar Power Generation Hire Purchase Financing | Agile Assets';
-    const description = lang === 'th'
+        : 'Commercial Solar Rooftop & Solar Power Generation Hire Purchase Financing | Agile Assets');
+    const description = content.metaDescription || (lang === 'th'
         ? 'Agile Assets บริการสินเชื่อเช่าซื้อระบบโซลาร์เซลล์ Solar Power Generation สำหรับโรงงาน อาคารพาณิชย์ แผงโซลาร์เซลล์ อินเวอร์เตอร์ สายไฟ PV และอุปกรณ์ระบบป้องกัน'
-        : 'Agile Assets provides structured hire-purchase financing for commercial & industrial solar rooftop systems, Tier-1 PV panels, and high-efficiency inverters.';
+        : 'Agile Assets provides structured hire-purchase financing for commercial & industrial solar rooftop systems, Tier-1 PV panels, and high-efficiency inverters.');
 
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-amber-500 selection:text-white">
@@ -133,9 +136,9 @@ export function SolarPowerPage() {
                 <section className="relative min-h-[96vh] flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 pb-8 sm:pb-10">
                     {/* Unique Solar Power Installation Background Image */}
                     <div className="absolute inset-0 z-0">
-                        <img 
-                            src={content.heroImage || "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=1920&q=85"} 
-                            alt="Commercial Solar Rooftop Installation" 
+                        <img
+                            src={content.heroImage || "https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=1920&q=85"}
+                            alt="Commercial Solar Rooftop Installation"
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
                             fetchPriority="high"
@@ -198,21 +201,19 @@ export function SolarPowerPage() {
                 </section>
 
                 {/* ─── 2. Main Equipment Showcase (4 Core Solar Components) ─── */}
-                <section className="py-20 lg:py-28 relative bg-background">
+                {!showcase.hidden && (<section className="py-20 lg:py-28 relative bg-background">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         {/* Section Header */}
                         <ScrollReveal animation="fade-up">
                             <div className="text-center max-w-3xl mx-auto mb-16">
                                 <p className="text-xs font-bold uppercase tracking-widest text-sky-500 mb-2">
-                                    Financing Service
+                                    {showcase.t('t01')}
                                 </p>
                                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight mb-6 font-sans">
-                                    SOLAR POWER GENERATION
+                                    {showcase.t('t02')}
                                 </h2>
                                 <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-                                    {lang === 'th' 
-                                        ? 'สินเชื่อเช่าซื้อระบบผลิตพลังงานจากแสงอาทิตย์ เพื่อลดต้นทุนค่าไฟฟ้า เพิ่มความมั่นคงทางพลังงาน และเสริมศักยภาพให้ธุรกิจเติบโตอย่างยั่งยืน' 
-                                        : 'Hire purchase loans for solar power generation systems designed to reduce energy costs, enhance power stability, and strengthen business potential for sustainable growth.'}
+                                    {showcase.t('t03')}
                                 </p>
                             </div>
                         </ScrollReveal>
@@ -270,16 +271,16 @@ export function SolarPowerPage() {
                                     onClick={scrollToForm}
                                     className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-sm shadow-xl shadow-sky-500/25 hover:shadow-sky-500/40 hover:scale-[1.03] transition-all duration-200"
                                 >
-                                    <span>{lang === 'th' ? 'ขอสินเชื่อกับเรา' : 'Financing with Us'}</span>
+                                    <span>{showcase.t('t04')}</span>
                                     <ArrowRight className="w-4 h-4" />
                                 </button>
                             </div>
                         </ScrollReveal>
                     </div>
-                </section>
+                </section>)}
 
                 {/* ─── 3. Catalogues Download Bar ─── */}
-                <section className="py-12 relative bg-slate-900/30 border-y border-border/60">
+                {!extra.hidden && (<section className="py-12 relative bg-slate-900/30 border-y border-border/60">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                         <div className="flex flex-wrap items-center justify-center gap-3">
                             <a
@@ -288,7 +289,7 @@ export function SolarPowerPage() {
                                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl glass border border-border/80 hover:border-sky-400 text-xs font-semibold text-foreground hover:text-sky-400 transition-all"
                             >
                                 <Download className="w-3.5 h-3.5 text-sky-400" />
-                                <span>Company Profile (PDF)</span>
+                                <span>{extra.t('t01')}</span>
                             </a>
                             <a
                                 href="#inquiry-form"
@@ -296,7 +297,7 @@ export function SolarPowerPage() {
                                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl glass border border-border/80 hover:border-sky-400 text-xs font-semibold text-foreground hover:text-sky-400 transition-all"
                             >
                                 <FileText className="w-3.5 h-3.5 text-sky-400" />
-                                <span>Construction Catalogue (PDF)</span>
+                                <span>{extra.t('t02')}</span>
                             </a>
                             <a
                                 href="#inquiry-form"
@@ -304,18 +305,18 @@ export function SolarPowerPage() {
                                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl glass border border-border/80 hover:border-sky-400 text-xs font-semibold text-foreground hover:text-sky-400 transition-all"
                             >
                                 <Building2 className="w-3.5 h-3.5 text-sky-400" />
-                                <span>Building Catalogue (PDF)</span>
+                                <span>{extra.t('t03')}</span>
                             </a>
                         </div>
                     </div>
-                </section>
+                </section>)}
 
                 {/* ─── 4. Business Partnership Inquiries Form ─── */}
-                <section id="inquiry-form" className="py-20 lg:py-28 relative overflow-hidden">
+                {!inquiry.hidden && (<section id="inquiry-form" className="py-20 lg:py-28 relative overflow-hidden">
                     <div className="absolute inset-0 z-0">
-                        <img 
-                            src="https://images.unsplash.com/photo-1521791136064-7986c2920216?w=1600&q=80" 
-                            alt="Business Partnership" 
+                        <img
+                            src={inquiry.t('img01')}
+                            alt="Business Partnership"
                             className="w-full h-full object-cover"
                         />
                         <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-md" />
@@ -326,12 +327,10 @@ export function SolarPowerPage() {
                         <ScrollReveal animation="fade-up">
                             <div className="text-center mb-10">
                                 <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-wider uppercase font-sans mb-4">
-                                    BUSINESS PARTNERSHIP INQUIRIES
+                                    {inquiry.t('t02')}
                                 </h2>
                                 <p className="text-xs sm:text-sm text-slate-300 max-w-2xl mx-auto leading-relaxed">
-                                    {lang === 'th'
-                                        ? 'บริษัท อาไจล์ แอสเซ็ทส์ ขับเคลื่อนภายใต้วิสัยทัศน์ของผู้บริหาร เดินหน้าให้บริการเช่าซื้อระบบโซลาร์เซลล์แก่โรงงานและอาคารธุรกิจทั่วประเทศ เพื่อร่วมขับเคลื่อนธุรกิจไทยสู่พลังงานสะอาดอย่างยั่งยืน'
-                                        : 'Agile Assets empowers commercial and industrial enterprises nationwide with tailored solar power equipment leasing and clean energy financing.'}
+                                    {inquiry.t('t03')}
                                 </p>
                             </div>
                         </ScrollReveal>
@@ -345,12 +344,10 @@ export function SolarPowerPage() {
                                             <Check className="w-8 h-8" />
                                         </div>
                                         <h3 className="text-xl font-bold text-white">
-                                            {lang === 'th' ? 'ส่งข้อมูลเรียบร้อยแล้ว' : 'Inquiry Received'}
+                                            {inquiry.t('t04')}
                                         </h3>
                                         <p className="text-xs text-slate-300 max-w-md mx-auto">
-                                            {lang === 'th' 
-                                                ? 'ขอบคุณที่ให้ความสนใจ เจ้าหน้าที่ผู้เชี่ยวชาญด้านสินเชื่อระบบโซลาร์เซลล์จะติดต่อกลับไปยังท่านโดยเร็วที่สุด' 
-                                                : 'Thank you for your inquiry. Our solar power financing specialist will reach out to you shortly.'}
+                                            {inquiry.t('t05')}
                                         </p>
                                         <button
                                             onClick={() => {
@@ -359,7 +356,7 @@ export function SolarPowerPage() {
                                             }}
                                             className="px-6 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold"
                                         >
-                                            {lang === 'th' ? 'ส่งข้อความใหม่อีกครั้ง' : 'Send Another Inquiry'}
+                                            {inquiry.t('t06')}
                                         </button>
                                     </div>
                                 ) : (
@@ -367,21 +364,21 @@ export function SolarPowerPage() {
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <label htmlFor="solar-power-field-1" className="block text-xs font-semibold text-slate-300 mb-1.5">
-                                                    {lang === 'th' ? 'ชื่อ-นามสกุล ผู้ติดต่อ *' : 'Full Name *'}
+                                                    {inquiry.t('t07')}
                                                 </label>
                                                 <input id="solar-power-field-1"
                                                     type="text"
                                                     required
                                                     value={formData.name}
                                                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                                    placeholder={lang === 'th' ? 'คุณสมชาย ใจดี' : 'Your Full Name'}
+                                                    placeholder={inquiry.t('t08')}
                                                     className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/15 text-white placeholder-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all"
                                                 />
                                             </div>
 
                                             <div>
                                                 <label htmlFor="solar-power-field-2" className="block text-xs font-semibold text-slate-300 mb-1.5">
-                                                    {lang === 'th' ? 'เบอร์โทรศัพท์ติดต่อ *' : 'Phone Number *'}
+                                                    {inquiry.t('t09')}
                                                 </label>
                                                 <input id="solar-power-field-2"
                                                     type="tel"
@@ -397,7 +394,7 @@ export function SolarPowerPage() {
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
                                                 <label htmlFor="solar-power-field-3" className="block text-xs font-semibold text-slate-300 mb-1.5">
-                                                    {lang === 'th' ? 'อีเมล' : 'Email Address'}
+                                                    {inquiry.t('t10')}
                                                 </label>
                                                 <input id="solar-power-field-3"
                                                     type="email"
@@ -410,13 +407,13 @@ export function SolarPowerPage() {
 
                                             <div>
                                                 <label htmlFor="solar-power-field-4" className="block text-xs font-semibold text-slate-300 mb-1.5">
-                                                    {lang === 'th' ? 'ชื่อโครงการ / บริษัท' : 'Project / Company Name'}
+                                                    {inquiry.t('t11')}
                                                 </label>
                                                 <input id="solar-power-field-4"
                                                     type="text"
                                                     value={formData.company}
                                                     onChange={(e) => setFormData({ ...formData, company: e.target.value })}
-                                                    placeholder={lang === 'th' ? 'บริษัท พลังงานแสงอาทิตย์ จำกัด' : 'Your Company Name'}
+                                                    placeholder={inquiry.t('t12')}
                                                     className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/15 text-white placeholder-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all"
                                                 />
                                             </div>
@@ -424,13 +421,13 @@ export function SolarPowerPage() {
 
                                         <div>
                                             <label htmlFor="solar-power-field-5" className="block text-xs font-semibold text-slate-300 mb-1.5">
-                                                {lang === 'th' ? 'ข้อความ / ขนาดระบบโซลาร์เซลล์ที่ต้องการขอสินเชื่อ' : 'Message / Desired Solar System Capacity & Details'}
+                                                {inquiry.t('t13')}
                                             </label>
                                             <textarea id="solar-power-field-5"
                                                 rows={4}
                                                 value={formData.note}
                                                 onChange={(e) => setFormData({ ...formData, note: e.target.value })}
-                                                placeholder={lang === 'th' ? 'เช่น สนใจติดตั้ง Solar Rooftop โรงงานขนาด 250 kWp ขอรายละเอียดเงื่อนไขสินเชื่อ...' : 'Tell us about your required solar installation capacity or rooftop area...'}
+                                                placeholder={inquiry.t('t14')}
                                                 className="w-full px-4 py-3 rounded-xl bg-white/10 border border-white/15 text-white placeholder-slate-400 text-xs focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition-all resize-none"
                                             />
                                         </div>
@@ -447,7 +444,7 @@ export function SolarPowerPage() {
                                                 ) : (
                                                     <>
                                                         <Send className="w-4 h-4" />
-                                                        <span>{lang === 'th' ? 'ส่งข้อมูลขอสินเชื่อ' : 'Submit Inquiry'}</span>
+                                                        <span>{inquiry.t('t15')}</span>
                                                     </>
                                                 )}
                                             </button>
@@ -457,7 +454,7 @@ export function SolarPowerPage() {
                             </div>
                         </ScrollReveal>
                     </div>
-                </section>
+                </section>)}
             </main>
 
             <Footer />

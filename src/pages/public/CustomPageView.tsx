@@ -10,6 +10,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { NotFoundPage } from '@/pages/public/NotFoundPage';
 import { sanitizeHtml, safeHref, isExternalUrl } from '@/lib/sanitize';
+import { PageBlocks } from '@/components/blocks/PageBlocks';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
 
 /**
@@ -117,6 +118,10 @@ export function CustomPageView() {
                     </div>
                 </section>
 
+                {pc?.blocks ? (
+                    <PageBlocks blocks={pc.blocks} />
+                ) : (
+                <>
                 {/* ── Body Content ─────────────────────────────────────── */}
                 {bodyContent && (
                     <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto">
@@ -207,6 +212,8 @@ export function CustomPageView() {
                         </div>
                     </div>
                 </section>
+                </>
+                )}
             </main>
 
             <Footer />

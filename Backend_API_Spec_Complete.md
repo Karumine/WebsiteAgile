@@ -4,7 +4,7 @@
 > ทุก endpoint ในเอกสารนี้ **ถูกเรียกจริงจากโค้ด Frontend ปัจจุบัน** (อ้างอิงไฟล์ใน `src/services/*`) ยกเว้นที่ระบุว่า *Phase 2*
 >
 > Base URL: `https://api.tunjai.in.th/api/v1` · Stack: ASP.NET Core 8 · SQL Server · JWT Bearer
-> อัปเดตล่าสุด: 2026-10-01
+> อัปเดตล่าสุด: 2026-10-02 (เพิ่ม `sections`, การซ่อนส่วน `hidden` และ Page Builder `blocks` ใน PageCustomContent — ดู §0 ข้อ 13–18)
 
 ---
 
@@ -45,6 +45,12 @@
 | 10 | Refresh token | มี | **ไม่ใช้ในเฟสนี้** (access token 8 ชม.) | หน้าบ้านไม่มี flow refresh; ลดงานที่ไม่ได้ใช้ |
 | 11 | pageId | ตารางเดิมไม่ตรงโค้ด (เช่น `solar-power-generation`) | แก้ให้ตรงโค้ดจริง (ดู §9.10) | ป้องกันบันทึกแล้วหน้าไม่เปลี่ยน |
 | 12 | Cache ของ API สาธารณะ | `no-store` ทุก endpoint | `/site/public` ใช้ ETag + cache สั้น | ลดเวลาโหลดหน้าแรก |
+| 13 | เนื้อหาทุกส่วนของทุกหน้า | แก้ได้แค่ Hero / items / SEO ส่วนอื่นเขียนตายตัวในโค้ด | **ฟิลด์ใหม่ `sections`** ใน PageCustomContent (§9.10.1) | แอดมินต้องแก้ได้ทั้งหน้า — ไม่มี endpoint ใหม่ ใช้ `PUT /pages/{pageId}` เดิม |
+| 14 | pageId ที่จัดการได้ | 19 หน้า + `page-*` | **25 หน้า** + `page-*` (เพิ่ม `faq`, `news`, `knowledge`, `newsletter`, `leasing-application`, `used-machine`) | หน้าเหล่านี้เชื่อมกับ CMS แล้ว |
+| 15 | Validation ของ page document | trim + ปฏิเสธ control char + sanitize `content*` ทุกจุด | **ข้อยกเว้นเฉพาะ page document** (§2.5.1) | ข้อความหลายบรรทัด / ช่องว่างท้ายข้อความ / ข้อความธรรมดาที่ชื่อ `contentTh` ต้องไม่ถูกแก้ |
+| 16 | URL ใน page document | ตรวจเฉพาะ `*Image`, `image`, `link`, `ctaLink` | **ตรวจทุก string ใน `sections`** (§2.5.1) | `sections` มี URL หลายชื่อ key ที่ไปเป็น `href`/`src` บนหน้าเว็บ |
+| 17 | ซ่อน/แสดงแต่ละส่วนของหน้า | ทำไม่ได้ | **`sections.{id}.hidden: boolean`** (§9.10.1) | แอดมินปิดส่วนที่ไม่ใช้ได้โดยไม่ต้องลบข้อมูล |
+| 18 | หน้าที่แอดมินสร้างเอง (`page-*`) | Hero + การ์ด + CTA ตายตัว | **Page Builder: `blocks: PageBlock[]`** เรียงบล็อกได้อิสระ (§9.10.2) | ทีมการตลาดสร้างหน้าแคมเปญได้เองจากคลังบล็อกที่ออกแบบไว้ |
 
 ---
 
@@ -138,12 +144,38 @@ policy.WithOrigins("https://agileassets.co.th", "https://www.agileassets.co.th",
 5. Content filter: ข้อความมี URL > 3 ลิงก์ หรือคำ spam ที่กำหนด → spam
 
 ### 2.5 Input Validation
+> ⚠️ Page document (`PUT /pages/{pageId}`) มีข้อยกเว้นของกฎในหัวข้อนี้ — ดู **§2.5.1**
+
 - ทุก field มี max length ตาม §10 (ตรวจทั้งใน DTO ด้วย `[MaxLength]`/FluentValidation และ DB)
 - Trim whitespace, ปฏิเสธ control characters
 - อีเมล: RFC 5322 แบบพื้นฐาน + max 200; เบอร์โทร: `^[0-9+\-\s]{9,20}$`
 - URL ที่แอดมินกรอก (`ctaLink`, `link`, `image`, `href`): อนุญาตเฉพาะ `https://`, `http://`, `mailto:`, `tel:`, path ที่ขึ้นต้นด้วย `/`, หรือ `#anchor` — **ปฏิเสธ `javascript:` / `data:`**
 - **HTML จาก Rich Text Editor** (`content`, `content_en`, `contentTh`, `contentEn`): sanitize ฝั่ง server ด้วย [`HtmlSanitizer` (Ganss.Xss)](https://github.com/mganss/HtmlSanitizer) — อนุญาตเฉพาะ `p, br, strong, em, u, s, h2, h3, ul, ol, li, a[href,target,rel], blockquote` (หน้าบ้านใช้ DOMPurify อีกชั้น แต่ server ต้องทำด้วยเสมอ)
 - SQL: EF Core / parameterized query เท่านั้น
+
+#### 2.5.1 ข้อยกเว้นสำหรับ Page Document (`PUT /pages/{pageId}`) ⚠️
+กฎทั่วไปข้างบนบางข้อ **ทำให้เนื้อหาหน้าเว็บเสีย** ถ้าใช้กับ PageCustomContent ตรงๆ ให้ใช้กฎนี้แทนสำหรับ document นี้:
+
+| กฎทั่วไป | สำหรับ page document | เหตุผล |
+|---|---|---|
+| Trim whitespace | **ห้าม trim ค่าใดๆ ใน document** | บางข้อความตั้งใจมีช่องว่างท้าย เช่น `"(hereinafter referred to as the "` ที่ต่อด้วยคำตัวหนา — ถ้า trim คำจะติดกัน |
+| ปฏิเสธ control characters | **อนุญาต `\n` และ `\r`** (ยังปฏิเสธ control char อื่น) | ฟิลด์หลายบรรทัด เช่น รายการรูปสไลด์ (บรรทัดละ 1 URL), ย่อหน้าบทความ, ผลลัพธ์โครงการ, ตำแหน่งผู้ถือหุ้น — ถ้าปฏิเสธจะบันทึกไม่ได้ (400) |
+| Sanitize HTML ใน `contentTh/contentEn` | **เฉพาะ `contentTh` / `contentEn` ระดับบนสุดของ document** — ห้ามแตะค่าใน `sections` | ใน `sections` มี key ชื่อ `contentTh/contentEn` ที่เป็น *ข้อความธรรมดา* (เช่น บทความในหน้า Knowledge) ถ้าผ่าน sanitizer จะถูก encode เป็น `&amp;` แสดงผิดบนเว็บ |
+| — | **ห้าม HTML-encode ค่าใน `sections`** เก็บและส่งคืนตามที่ได้รับ | หน้าบ้าน render เป็น text node (React escape ให้แล้ว) |
+| ตรวจ URL เฉพาะ key ที่รู้จัก | **ทุก string ใน `sections` และ `blocks`** (แยกตรวจทีละบรรทัดถ้ามี `\n`): ตัด whitespace/control char นำหน้า แล้วถ้าขึ้นต้นด้วย `javascript:` `vbscript:` หรือ `data:` (ไม่สนตัวพิมพ์) → **422** `VALIDATION_ERROR` | `sections` มี URL ใน key หลายชื่อ (`img05`, `link28`, `href`, `url`, `pdfUrl`, `src`, `images`, …) ที่ไปเป็น `href`/`src` — ใช้กฎกลางแทนการไล่ชื่อ key |
+
+ตัวอย่าง C# (ตรวจ `sections` แบบ recursive):
+```csharp
+static readonly Regex DangerousScheme = new(@"^\s*(javascript|vbscript|data)\s*:", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+static bool HasDangerousUrl(JsonElement el) => el.ValueKind switch
+{
+    JsonValueKind.String => el.GetString()!.Split('\n').Any(line => DangerousScheme.IsMatch(new string(line.Where(c => !char.IsControl(c)).ToArray()))),
+    JsonValueKind.Object => el.EnumerateObject().Any(p => HasDangerousUrl(p.Value)),
+    JsonValueKind.Array  => el.EnumerateArray().Any(HasDangerousUrl),
+    _ => false,
+};
+```
 
 ### 2.6 Authentication & Session
 - รหัสผ่าน: **Argon2id** (หรือ BCrypt cost ≥ 12); นโยบาย ≥ 12 ตัวอักษร
@@ -489,14 +521,22 @@ pageId ที่หน้าบ้านใช้จริง:
 | `generator-set` | `/generator-set` |
 | `investor-relations` | `/investor-relations` |
 | `sustainability` | `/sustainability` |
-| `projects` | `/project-activity` |
+| `projects` | `/project` (alias `/project-activity`) |
 | `contact` | `/contact` |
 | `calculator` | `/calculator` |
 | `interest-rate` | `/interest-rate-conversion` |
 | `nc-nda` | `/nc-nda` |
 | `cookie-policy` | `/cookie-policy` |
 | `work-for-us` | `/work-for-us` |
+| `faq` | `/faq` — *ใหม่* (รายการคำถามยังอยู่ที่ `PUT /faqs` เดิม) |
+| `news` | `/news-update` — *ใหม่* (ตัวข่าวยังอยู่ที่ `/news` เดิม) |
+| `knowledge` | `/knowledge` — *ใหม่* |
+| `newsletter` | `/newsletter` — *ใหม่* |
+| `leasing-application` | `/leasing-application` — *ใหม่* |
+| `used-machine` | `/used-machine` — *ใหม่* (รายการทรัพย์ยังอยู่ที่ `/assets` เดิม) |
 | `page-*` | หน้าที่แอดมินสร้างเอง (path ใน CustomPages) |
+
+> ตรวจรูปแบบ `pageId` ด้วย `^[a-z0-9-]{1,100}$` แทนการ whitelist ชื่อ — หน้าบ้านเพิ่มหน้าได้โดยไม่ต้องแก้ backend
 
 ฟิลด์ (ทั้งหมด optional ยกเว้นที่ระบุ — ฝั่ง server **ต้องเก็บฟิลด์ที่ไม่รู้จักไว้ด้วย** เพราะหน้าบ้านเพิ่มฟิลด์ใหม่ได้โดยไม่ต้องแก้ backend):
 ```ts
@@ -510,11 +550,110 @@ pageId ที่หน้าบ้านใช้จริง:
   solutionsBadgeTh?, solutionsBadgeEn?, solutionsTitleTh?, solutionsTitleEn?, solutionsSubtitleTh?, solutionsSubtitleEn?, solutionsItems?: PageSectionItem[],
   machineryBadgeTh?, machineryBadgeEn?, machineryTitleTh?, machineryTitleEn?, machinerySubtitleTh?, machinerySubtitleEn?, machineryItems?: PageSectionItem[],
   whatWeDoBadgeTh?, whatWeDoBadgeEn?, whatWeDoTitleTh?, whatWeDoTitleEn?, whatWeDoSubtitleTh?, whatWeDoSubtitleEn?, whatWeDoImage?, whatWeDoItems?: PageSectionItem[],
+  sections?: Record<string, PageSectionContent>,   // ใหม่ — ดู §9.10.1
+  blocks?: PageBlock[],                              // ใหม่ — เฉพาะหน้า page-* ดู §9.10.2
   lastUpdated?
 }
 PageSectionItem { id, title, titleEn?, subTitle?, subTitleEn?, description, descEn?, badge?, icon?, image?, link?, quote?, quoteEn?, btnText?, btnTextEn? }
 ```
-Server-side validation ของ document: ขนาดรวม ≤ 512 KB, sanitize ทุกฟิลด์ที่ลงท้าย `Th`/`En` ของ `content*` (HTML), ตรวจ URL rule กับ `*Image`, `image`, `link`, `ctaLink`
+Server-side validation ของ document: ขนาดรวม ≤ 512 KB, sanitize HTML เฉพาะ `contentTh` / `contentEn` **ระดับบนสุด**, ตรวจ URL rule กับ `*Image`, `image`, `link`, `ctaLink` ระดับบนสุด และทุก string ใน `sections` / `blocks` — **ข้อยกเว้นเรื่อง trim / ขึ้นบรรทัดใหม่ / encode ดู §2.5.1 (ใช้กับ `blocks` ด้วย)**
+
+#### 9.10.1 `sections` — เนื้อหาส่วนอื่นๆ ของหน้า (ใหม่)
+ทุกส่วนของหน้าเว็บที่ไม่ใช่ Hero/SEO (หัวข้อแต่ละ section, การ์ด, รายการ, ปุ่ม, รูป, ลิงก์, ข้อความในฟอร์ม) เก็บอยู่ใน `sections` โดยหน้าบ้านเป็นผู้กำหนดว่ามี section/ฟิลด์อะไรบ้าง (schema อยู่ใน `src/data/pageSections/*.ts` ฝั่งหน้าบ้าน) — **backend ไม่ต้องรู้จักชื่อ section หรือชื่อฟิลด์ใดๆ** แค่เก็บและส่งคืนให้ครบ
+
+```ts
+sections?: {
+  [sectionId: string]: {            // เช่น "benefits", "jobs", "faq", "hero-extras"
+    hidden?: boolean,                     // true = แอดมินซ่อนส่วนนี้จากหน้าเว็บ (ข้อมูลยังอยู่ เปิดกลับได้)
+    fields?: { [key: string]: string },   // ข้อความ/URL ระดับ section เช่น titleTh, titleEn, img05, link28
+    items?:  { [key: string]: string }[]  // รายการการ์ด เรียงตามลำดับที่แสดง; ทุก item มี "id"
+  }
+}
+```
+กฎ:
+- **ค่าใน `fields` และ `items` เป็น `string` ทั้งหมด** (ตัวเลขก็ส่งมาเป็น string) — ห้ามแปลงชนิด; ข้อยกเว้นเดียวคือ `hidden` ซึ่งเป็น `boolean` ระดับ section
+- `hidden` ไม่มี หรือ `false` = แสดงตามปกติ; ต้องเก็บ `hidden: true` ไว้เสมอ (ถ้า server ตัด `hidden: false` ทิ้งได้ ผลเท่ากัน)
+- **`items: []` (อาร์เรย์ว่าง) = แอดมินตั้งใจลบรายการทั้งหมด** ต้องเก็บเป็นอาร์เรย์ว่าง ห้ามแปลงเป็น `null` หรือตัด key ทิ้ง (ถ้าไม่มี key `items` หน้าบ้านจะใช้ค่าเริ่มต้น)
+- ลำดับใน `items` คือลำดับที่แสดงบนเว็บ ต้องคงไว้ตามที่ได้รับ
+- ค่าอาจมี `\n` (ฟิลด์หลายบรรทัด) และช่องว่างหน้า/ท้าย — ห้าม trim / ห้าม encode (§2.5.1)
+- `GET /site/public` ส่งคืน `sections` ตามที่เก็บไว้ทุกตัวอักษร
+
+ตัวอย่าง (ย่อจากหน้า `work-for-us`):
+```json
+{
+  "id": "work-for-us",
+  "heroTitleTh": "ร่วมงานกับ Agile Assets",
+  "sections": {
+    "benefits": {
+      "fields": { "titleTh": "ทำงานกับ Agile ได้อะไรบ้าง?", "titleEn": "What You Get: Benefits & Perks" },
+      "items": [
+        { "id": "b1", "icon": "DollarSign", "titleTh": "ผลตอบแทน & โบนัสตามผลงาน", "titleEn": "Competitive Salary & Bonus", "descTh": "…", "descEn": "…" }
+      ]
+    },
+    "jobs": {
+      "fields": { "applyBtnTh": "สมัครตำแหน่งนี้", "applyBtnEn": "Apply Now" },
+      "items": [
+        { "id": "job-credit-bd", "department": "sales", "type": "Hybrid", "titleTh": "เจ้าหน้าที่บริหารงานลูกค้าและสินเชื่อธุรกิจ", "titleEn": "Commercial Credit & BD Specialist" }
+      ]
+    },
+    "departments": { "items": [] },
+    "process": { "hidden": true, "fields": { "titleTh": "4 ขั้นตอนการคัดเลือก", "titleEn": "Our 4-Step Hiring Process" }, "items": [] }
+  }
+}
+```
+(`departments.items: []` = ลบแท็บกรองทั้งหมด, `process.hidden: true` = ซ่อนส่วนขั้นตอนคัดเลือกทั้งส่วน)
+
+**สำหรับ ASP.NET Core:** ถ้ารับ body ด้วย class DTO ธรรมดา `System.Text.Json` จะ **ทิ้ง `sections` และฟิลด์ที่ไม่รู้จักเงียบๆ** → แอดมินกดบันทึกแล้วเนื้อหาหาย ต้องเลือกอย่างใดอย่างหนึ่ง:
+- รับเป็น `JsonElement` / `JsonDocument` ทั้งก้อน แล้วเก็บ raw JSON ลงคอลัมน์ `Document` (แนะนำ — ตรงกับ §10), หรือ
+- ใส่ `[JsonExtensionData] public Dictionary<string, JsonElement>? Extra { get; set; }` ใน DTO
+
+ขนาดโดยประมาณ (วัดจากค่าเริ่มต้นจริง): document ใหญ่สุด (`nc-nda`, `work-for-us`, `investor-relations`, `knowledge`) ≈ 22–27 KB ต่อหน้า — ต่ำกว่าลิมิต 512 KB มาก; ถ้าบันทึกครบทุกหน้า `pageContents` ทั้งหมดรวม ≈ 250 KB raw / ≈ 57 KB gzip / ≈ 42 KB brotli
+
+#### 9.10.2 `blocks` — Page Builder สำหรับหน้าที่แอดมินสร้างเอง (ใหม่)
+หน้า `page-*` (สร้างจากปุ่ม "เพิ่มหน้า") ใช้ `blocks` แทน `items`/`contentTh`: แอดมินเลือกบล็อกจากคลัง เพิ่ม ลบ ทำสำเนา สลับลำดับ และซ่อนได้ หน้าเว็บแสดงบล็อกเรียงตามลำดับในอาร์เรย์ ต่อจากส่วน Hero
+
+```ts
+PageBlock {
+  id: string,                            // client สร้าง เช่น "blk-m1abc-x9z1" — ไม่ซ้ำภายในหน้า
+  type: string,                          // ชนิดบล็อก (ดูตารางล่าง) — ชนิดที่หน้าบ้านไม่รู้จักจะถูกข้ามตอนแสดงผล
+  hidden?: boolean,
+  fields?: { [key: string]: string },    // รูปแบบเดียวกับ sections (§9.10.1)
+  items?:  { [key: string]: string }[]
+}
+```
+
+| `type` | ชื่อในหลังบ้าน | ฟิลด์หลัก (ข้อมูลอ้างอิง — backend ไม่ต้องตรวจ) |
+|---|---|---|
+| `text` | ข้อความ / บทความ | `badge*`, `title*`, `body*` (หลายบรรทัด = หลายย่อหน้า) |
+| `cards` | การ์ดไอคอน | `badge* title* subtitle* columns` + items `icon title* desc*` |
+| `image-cards` | การ์ดรูปภาพ | `badge* title* subtitle* columns` + items `image badge* title* subtitle* desc* btn* link` |
+| `image-text` | รูปคู่ข้อความ | `badge* title* body* image imagePosition btn* btnLink` |
+| `stats` | แถบตัวเลขสถิติ | `title*` + items `value label*` |
+| `steps` | ขั้นตอน | `badge* title*` + items `step title* desc*` |
+| `faq` | คำถามที่พบบ่อย | `title*` + items `q* a*` |
+| `gallery` | แกลเลอรีรูปภาพ | `title* columns` + items `image caption*` |
+| `cta` | แบนเนอร์ชวนติดต่อ | `title* subtitle* btn* btnLink` |
+
+(`*` = มีคู่ `Th`/`En` เช่น `titleTh`, `titleEn`)
+
+กฎฝั่ง server:
+- **เก็บและส่งคืน `blocks` ตามที่ได้รับ** — ลำดับอาร์เรย์คือลำดับบนหน้าเว็บ ห้ามเรียงใหม่; ห้ามตรวจ/จำกัด `type` (หน้าบ้านเพิ่มชนิดบล็อกใหม่ได้โดยไม่ต้องแก้ backend)
+- ใช้กฎ §2.5.1 ทั้งหมดกับ `blocks` (ไม่ trim, อนุญาต `\n`, ไม่ encode, ตรวจ scheme อันตรายทุก string)
+- `blocks: []` = หน้าแสดงเฉพาะ Hero (ต้องเก็บเป็นอาร์เรย์ว่าง); ไม่มี key `blocks` = หน้าเก่าที่สร้างก่อนมี Page Builder หน้าบ้านจะแสดงแบบเดิม (Hero + `items` + CTA)
+- จำกัดจำนวน: `blocks` ≤ 50 บล็อกต่อหน้า, `items` ≤ 100 ต่อบล็อก (เกิน → 422) — นอกจากนี้ใช้ลิมิตขนาด document 512 KB เดิม
+
+ตัวอย่าง:
+```json
+{
+  "id": "page-m1abc-x9z1",
+  "heroTitleTh": "สินเชื่อโซลาร์ลอยน้ำ",
+  "blocks": [
+    { "id": "blk-1", "type": "text", "fields": { "titleTh": "ทำไมต้องโซลาร์ลอยน้ำ", "titleEn": "Why Floating Solar", "bodyTh": "ย่อหน้าที่ 1\nย่อหน้าที่ 2", "bodyEn": "Paragraph 1\nParagraph 2" } },
+    { "id": "blk-2", "type": "faq", "hidden": true, "fields": { "titleTh": "คำถามที่พบบ่อย", "titleEn": "FAQ" }, "items": [ { "id": "q1", "qTh": "…", "qEn": "…", "aTh": "…", "aEn": "…" } ] },
+    { "id": "blk-3", "type": "cta", "fields": { "titleTh": "พร้อมเริ่มต้นหรือยัง?", "titleEn": "Ready?", "btnTh": "ขอสินเชื่อ", "btnEn": "Apply", "btnLink": "/leasing-application" } }
+  ]
+}
+```
 
 ---
 
@@ -762,7 +901,7 @@ VALUES (N'marketing', N'<argon2id-hash-of-random-temp-password>', N'admin', N'Ma
 - Server memory cache (`IMemoryCache`) ของ response ที่ serialize แล้ว → ล้างเมื่อมี PUT/DELETE ใน §5
 - `ETag` = hash ของ payload; รองรับ `If-None-Match` → 304
 - `Cache-Control: public, max-age=60, stale-while-revalidate=600` (ถ้ามี CDN หน้า API ใช้ `s-maxage=60`)
-- เป้าหมาย: TTFB < 150 ms (cache hit), payload หลังบีบอัด < 80 KB
+- เป้าหมาย: TTFB < 150 ms (cache hit), payload หลังบีบอัด < 150 KB (เดิม 80 KB — ปรับเพราะ `pageContents.*.sections` เมื่อแอดมินบันทึกครบทุกหน้าเพิ่มราว 60 KB หลังบีบอัด, §9.10.1) — **ต้องเปิด Brotli** (§12.2) ซึ่งเล็กกว่า gzip ~25% สำหรับข้อความไทย
 - `news` ส่งล่าสุดไม่เกิน 100 รายการ
 
 ### 12.2 Compression
@@ -862,6 +1001,10 @@ VITE_TURNSTILE_SITE_KEY=<site key จาก Cloudflare>   # เว้นว่�
 **Sprint 2 — CMS เต็มรูปแบบ**
 - [ ] Admin PUT/DELETE ทั้งหมดใน §5 (upsert, replace-all ใน transaction, invalidate cache, audit log)
 - [ ] HtmlSanitizer + URL validation
+- [ ] `PUT /pages/{pageId}`: เก็บ document ทั้งก้อนรวม `sections` (ห้าม DTO ทิ้งฟิลด์ที่ไม่รู้จัก) + ข้อยกเว้น §2.5.1 (ไม่ trim, อนุญาต `\n`, sanitize เฉพาะ `contentTh/En` ระดับบนสุด, ตรวจ scheme อันตรายทุก string ใน `sections`)
+- [ ] Test: PUT document ที่มี `sections` → `GET /site/public` ต้องได้คืน **ทุกตัวอักษรเหมือนเดิม** (รวม `\n`, ช่องว่างท้ายข้อความ, `&`, `<`, `items: []`)
+- [ ] Test: `sections.{id}.hidden` (true/false) และ `blocks` (ลำดับ, `hidden`, `blocks: []`) ต้องได้คืนเหมือนเดิมทุกประการ; `blocks` > 50 หรือ `items` > 100 → 422
+- [ ] Test: ค่าใน `sections` / `blocks` ที่ขึ้นต้น `javascript:` / ` JavaScript:` / `data:` (รวมในบรรทัดที่ 2 ของค่าหลายบรรทัด) → 422
 - [ ] `POST /uploads/images` (magic bytes, re-encode WebP, GUID name, immutable cache)
 - [ ] PDPA: เข้ารหัส NDA, signed URL ลายเซ็น, retention jobs
 

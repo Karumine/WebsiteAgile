@@ -7,9 +7,13 @@ import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { cn } from '@/lib/utils';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
+import { useSections } from '@/lib/pageSections';
+import { faqPageSections } from '@/data/pageSections/faqPage';
 
 interface FaqItem {
     id: string;
@@ -21,6 +25,10 @@ interface FaqItem {
 
 export function FaqPage() {
     const { lang } = useLanguage();
+    const { content } = usePageContent('faq', DEFAULT_PAGE_CONTENTS['faq']);
+    const section = useSections(content, faqPageSections);
+    const heroExtras = section('hero-extras');
+    const faqBody = section('faq-body');
     const { settings } = useSiteSettings();
     const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -97,12 +105,12 @@ export function FaqPage() {
 
     const faqs = cmsFaqs.length > 0 ? cmsFaqs : defaultFaqs;
 
-    const pageTitle = lang === 'th'
+    const pageTitle = content.metaTitle || (lang === 'th'
         ? 'คำถามที่พบบ่อย (Frequently Asked Questions - FAQ) | Agile Assets'
-        : 'Frequently Asked Questions (FAQ) | Agile Assets';
-    const pageDescription = lang === 'th'
+        : 'Frequently Asked Questions (FAQ) | Agile Assets');
+    const pageDescription = content.metaDescription || (lang === 'th'
         ? 'รวมคำถามที่พบบ่อยเกี่ยวกับสินเชื่อเช่าซื้อเครื่องจักรอุตสาหกรรม อัตราดอกเบี้ย เงื่อนไขการอนุมัติ และขั้นตอนการสมัคร'
-        : 'Frequently Asked Questions about industrial equipment financing, hire purchase, eligibility, interest rates, and loan application procedures.';
+        : 'Frequently Asked Questions about industrial equipment financing, hire purchase, eligibility, interest rates, and loan application procedures.');
 
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-sky-500 selection:text-white">
@@ -122,14 +130,14 @@ export function FaqPage() {
                     {/* Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img
-                            src={heroBg}
+                            src={content.heroImage || heroBg}
                             alt="Agile Assets Frequently Asked Questions"
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
                         <div className="absolute inset-0 bg-radial-at-c from-sky-500/10 via-transparent to-black/80" />
-                        
+
                         {/* Soft Bottom Fog/Fade Gradient into next section */}
                         <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none z-10" />
                     </div>
@@ -142,26 +150,26 @@ export function FaqPage() {
                     <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center my-auto">
                         <ScrollReveal animation="fade-up">
                             <p className="text-xl sm:text-3xl font-semibold text-slate-100 mb-2 font-sans tracking-wide drop-shadow-md">
-                                Agile Assets
+                                {heroExtras.t('t01')}
                             </p>
                             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight drop-shadow-2xl font-sans mb-4">
-                                Frequently Asked Questions (FAQ)
+                                {(lang === 'th' ? (content.heroTitleTh || content.heroTitleEn || 'Frequently Asked Questions (FAQ)') : (content.heroTitleEn || content.heroTitleTh || 'Frequently Asked Questions (FAQ)'))}
                             </h1>
                         </ScrollReveal>
                     </div>
                 </section>
 
                 {/* ─── 2. FAQ Accordion Section ─── */}
-                <section className="py-16 sm:py-24 bg-white dark:bg-slate-950">
+                {!faqBody.hidden && (<section className="py-16 sm:py-24 bg-white dark:bg-slate-950">
                     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
                         {/* Section Header */}
                         <ScrollReveal animation="fade-up">
                             <div className="text-center mb-12 sm:mb-16">
                                 <p className="text-sm sm:text-base font-semibold text-sky-600 dark:text-sky-400 mb-1">
-                                    Frequently Asked Questions (FAQ)
+                                    {faqBody.t('t01')}
                                 </p>
                                 <h2 className="text-2xl sm:text-4xl font-extrabold text-blue-900 dark:text-blue-400 tracking-tight font-sans">
-                                    {lang === 'th' ? 'คำถามที่พบบ่อย' : 'Frequently Asked Questions'}
+                                    {faqBody.t('t02')}
                                 </h2>
                             </div>
                         </ScrollReveal>
@@ -215,27 +223,25 @@ export function FaqPage() {
                             <div className="mt-14 p-6 sm:p-8 rounded-3xl bg-gradient-to-r from-blue-900 to-sky-900 text-white shadow-xl flex flex-col sm:flex-row items-center justify-between gap-6">
                                 <div className="space-y-1 text-center sm:text-left">
                                     <h3 className="text-lg sm:text-xl font-bold font-sans">
-                                        {lang === 'th' ? 'มีข้อสงสัยหรือต้องการสอบถามเพิ่มเติม?' : 'Need More Information or Personalized Advice?'}
+                                        {faqBody.t('t03')}
                                     </h3>
                                     <p className="text-xs sm:text-sm text-sky-200">
-                                        {lang === 'th'
-                                            ? 'เจ้าหน้าที่สินเชื่อผู้เชี่ยวชาญพร้อมให้คำปรึกษาและประเมินวงเงินเบื้องต้นฟรี'
-                                            : 'Our financing specialists are ready to provide initial credit assessments and tailor solutions for your factory.'}
+                                        {faqBody.t('t04')}
                                     </p>
                                 </div>
                                 <a
-                                    href="https://line.me/R/ti/p/%40884ukedb"
+                                    href={faqBody.t('link05')}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="px-6 py-3 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white font-bold text-xs sm:text-sm shadow-lg shadow-sky-500/30 flex items-center gap-2 flex-shrink-0 transition-all hover:scale-105 active:scale-95"
                                 >
                                     <PhoneCall className="w-4 h-4" />
-                                    <span>{lang === 'th' ? 'ติดต่อที่ปรึกษาทาง LINE' : 'Chat via LINE Official'}</span>
+                                    <span>{faqBody.t('t06')}</span>
                                 </a>
                             </div>
                         </ScrollReveal>
                     </div>
-                </section>
+                </section>)}
             </main>
 
             <Footer />

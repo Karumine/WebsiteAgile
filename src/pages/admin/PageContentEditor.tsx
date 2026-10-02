@@ -3,8 +3,8 @@ import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import type { PageCustomContent, PageSectionItem, CustomPageItem } from '@/types';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
-import { 
-    FileEdit, Save, RotateCcw, ExternalLink, Plus, Trash2, 
+import {
+    FileEdit, Save, RotateCcw, ExternalLink, Plus, Trash2,
     Search, Layers, Sparkles, CheckCircle, Image as ImageIcon,
     Globe, Dices, ArrowUp, ArrowDown, Copy, Droplets, Wheat,
     Factory, Flame, Sun, Box, ArrowRight,
@@ -14,6 +14,10 @@ import {
 import toast from 'react-hot-toast';
 import { cn } from '@/lib/utils';
 import defaultHeroImg from '@/assets/Hero-Banner-Website-3-scaled.png';
+import { getPageSchemas, mergePageSections } from '@/data/pageSections';
+import { PageSectionsEditor } from '@/components/admin/PageSectionsEditor';
+import { PageBlocksEditor } from '@/components/admin/PageBlocksEditor';
+import { createBlock, legacyBlocks } from '@/data/pageBlocks';
 
 export interface NavGroupConfig {
     id: string;
@@ -209,6 +213,12 @@ function CustomSelect({
     );
 }
 // ────────────────────────────────────────────────────────────────────────────
+
+// Pages whose public template actually renders the generic `items` list.
+const PAGES_USING_ITEMS = new Set([
+    'home', 'drinking-water', 'livestock-farm', 'food-processing', 'biogas-production', 'solar-power',
+    'chiller', 'injection-molding', 'generator-set',
+]);
 
 interface PageDefinition {
     id: string;
@@ -639,6 +649,12 @@ export function PageContentEditor() {
         return allPages.find((p) => p.id === selectedPageId) || allPages[0];
     }, [allPages, selectedPageId]);
 
+    const pageSchemas = useMemo(() => getPageSchemas(selectedPageId), [selectedPageId]);
+    const isCustomPage = !!activePageDef.isCustom;
+    const showItemsSection = PAGES_USING_ITEMS.has(selectedPageId);
+    const sectionsStartNumber = 2 + (showItemsSection ? 1 : 0) + (selectedPageId === 'home' ? 2 : 0);
+    const seoNumber = sectionsStartNumber + pageSchemas.length + (isCustomPage ? 1 : 0);
+
     const activeNavGroup = useMemo(() => {
         return NAV_GROUPS.find((g) => g.id === activePageDef.groupId) || NAV_GROUPS[0];
     }, [activePageDef]);
@@ -715,6 +731,8 @@ export function PageContentEditor() {
             machinerySubtitleTh: saved?.machinerySubtitleTh || master?.machinerySubtitleTh || (pageId === 'home' ? 'สินเชื่อเช่าซื้อเครื่องจักรอุตสาหกรรมเฉพาะทางสำหรับโรงงานและสายการผลิตชั้นนำ' : undefined),
             machinerySubtitleEn: saved?.machinerySubtitleEn || master?.machinerySubtitleEn || (pageId === 'home' ? 'Specialized industrial equipment leasing for premier manufacturing operations.' : undefined),
             machineryItems: resolvedMachinery,
+            sections: mergePageSections(pageId, saved?.sections),
+            blocks: saved?.blocks ?? (def.isCustom ? legacyBlocks(saved) : undefined),
         };
     };
 
@@ -834,6 +852,7 @@ export function PageContentEditor() {
             metaTitle: `${newPageNameTh.trim()} | Agile Assets`,
             metaDescription: `ข้อมูล ${newPageNameTh.trim()}`,
             items: [],
+            blocks: [createBlock('text'), createBlock('cards'), createBlock('cta')],
             lastUpdated: new Date().toISOString(),
         };
 
@@ -1244,6 +1263,8 @@ export function PageContentEditor() {
             machinerySubtitleTh: master?.machinerySubtitleTh || (selectedPageId === 'home' ? 'สินเชื่อเช่าซื้อเครื่องจักรอุตสาหกรรมเฉพาะทางสำหรับโรงงานและสายการผลิตชั้นนำ' : undefined),
             machinerySubtitleEn: master?.machinerySubtitleEn || (selectedPageId === 'home' ? 'Specialized industrial equipment leasing for premier manufacturing operations.' : undefined),
             machineryItems: master?.machineryItems || [],
+            sections: mergePageSections(selectedPageId),
+            blocks: def.isCustom ? legacyBlocks(undefined) : undefined,
         };
 
         setEditContent(freshDefault);
@@ -1439,9 +1460,9 @@ export function PageContentEditor() {
 
                         {/* Grouped Accordion List */}
                         <div className="max-h-[620px] overflow-y-auto space-y-2 pr-1 pt-1">
-                            {NAV_GROUPS.filter(g => 
-                                selectedGroupFilter === 'all' 
-                                || selectedGroupFilter === g.id 
+                            {NAV_GROUPS.filter(g =>
+                                selectedGroupFilter === 'all'
+                                || selectedGroupFilter === g.id
                                 || (selectedGroupFilter === 'leasing' && (g.id === 'leasing-industry' || g.id === 'leasing-equipment'))
                             ).map((group) => {
                                 const pagesInGroup = groupedPages[group.id] || [];
@@ -1829,6 +1850,7 @@ export function PageContentEditor() {
                     </div>
 
                     {/* Section 2: Section / Equipment Items */}
+                    {showItemsSection && (
                     <div className="glass rounded-2xl p-6 space-y-4">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
@@ -2113,6 +2135,8 @@ export function PageContentEditor() {
                             </div>
                         )}
                     </div>
+
+                    )}
 
                     {/* Section 3 (เฉพาะหน้าแรก): โซลูชั่นทางการเงินในอุตสาหกรรม (Industry Financing Solutions Carousel) */}
                     {selectedPageId === 'home' && (
@@ -2751,14 +2775,29 @@ export function PageContentEditor() {
                         </div>
                     )}
 
-                    {/* Section 5: SEO Metadata */}
+                    {isCustomPage && (
+                        <PageBlocksEditor
+                            number={sectionsStartNumber}
+                            blocks={editContent.blocks || []}
+                            onChange={(blocks) => setEditContent((prev) => ({ ...prev, blocks }))}
+                        />
+                    )}
+
+                    {pageSchemas.length > 0 && (
+                        <PageSectionsEditor
+                            schemas={pageSchemas}
+                            value={editContent.sections || {}}
+                            onChange={(sections) => setEditContent((prev) => ({ ...prev, sections }))}
+                            startNumber={sectionsStartNumber}
+                        />
+                    )}
+
+                    {/* SEO Metadata */}
                     <div className="glass rounded-2xl p-6 space-y-4">
                         <div className="flex items-center gap-2">
                             <Globe className="w-4 h-4 text-sky-400" />
                             <h3 className="text-sm font-bold text-foreground uppercase tracking-wider">
-                                {selectedPageId === 'home'
-                                    ? (lang === 'th' ? '5. ข้อมูล SEO & Search Engines' : '5. SEO & Metadata')
-                                    : (lang === 'th' ? '3. ข้อมูล SEO & Search Engines' : '3. SEO & Metadata')}
+                                {seoNumber}. {lang === 'th' ? 'ข้อมูล SEO & Search Engines' : 'SEO & Metadata'}
                             </h3>
                         </div>
 
@@ -2795,8 +2834,8 @@ export function PageContentEditor() {
 
             {/* Fixed Bottom Save Action Bar (Always visible at all times across all scroll positions) */}
             <div className={`fixed bottom-0 left-0 lg:left-64 right-0 z-40 px-4 sm:px-8 py-3.5 backdrop-blur-xl border-t flex items-center justify-between gap-4 transition-colors duration-300 ${
-                isDirty 
-                    ? 'bg-amber-50/95 dark:bg-slate-950/95 border-amber-500/50 shadow-[0_-4px_25px_rgba(245,158,11,0.15)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.5)]' 
+                isDirty
+                    ? 'bg-amber-50/95 dark:bg-slate-950/95 border-amber-500/50 shadow-[0_-4px_25px_rgba(245,158,11,0.15)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.5)]'
                     : 'bg-white/95 dark:bg-slate-950/95 border-slate-200/90 dark:border-border shadow-[0_-4px_25px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.5)]'
             }`}>
                 <div className="flex items-center gap-3 min-w-0">

@@ -1,16 +1,27 @@
 import { Helmet } from 'react-helmet-async';
-import { ChevronDown, Award, TrendingUp, Calendar, ArrowRight, ShieldCheck, Building2 } from 'lucide-react';
+import { ChevronDown, Award, Calendar, ArrowRight } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { CookieConsent } from '@/components/ui/CookieConsent';
 import { QuickContactWidget } from '@/components/ui/QuickContactWidget';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { LatestNewsSection } from '@/components/sections/LatestNewsSection';
 import heroBg from '@/assets/Hero-Banner-Website-3-scaled.png';
+import { useSections } from '@/lib/pageSections';
+import { newsPageSections } from '@/data/pageSections/newsPage';
+import { getSectionIcon } from '@/lib/sectionIcons';
 
 export function NewsUpdatePage() {
     const { lang } = useLanguage();
+    const { content } = usePageContent('news', DEFAULT_PAGE_CONTENTS['news']);
+    const section = useSections(content, newsPageSections);
+    const heroExtras = section('hero-extras');
+    const mainSec = section('main');
+    const shareholdersSec = section('shareholders');
+    const pressSec = section('press');
 
     const scrollToNews = () => {
         const el = document.getElementById('news');
@@ -20,69 +31,17 @@ export function NewsUpdatePage() {
     };
 
     // Featured Shareholders
-    const shareholders = [
-        {
-            name: lang === 'th' ? 'คุณโชน โสภณพนิช' : 'Mr. Chone Sophonpanich',
-            position: lang === 'th'
-                ? 'กรรมการผู้จัดการใหญ่และประธานเจ้าหน้าที่บริหาร\nบริษัท กรุงเทพประกันชีวิต จำกัด (มหาชน)'
-                : 'President and Chief Executive Officer\nBangkok Life Assurance Public Co., Ltd.',
-            image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img/https://agileassets.co.th/wp-content/uploads/elementor/thumbs/S__44187672_0-e1776838737858-rmdbfhtslbh5zk6f2p7f2gwtfrfocu2qupe8q4iuv8.jpg',
-        },
-        {
-            name: lang === 'th' ? 'ดร.ธรรม์ จิราธิวัฒน์' : 'Dr. Tham Chirathivat',
-            position: lang === 'th'
-                ? 'ประธานเจ้าหน้าที่บริหาร\nเซ็นทรัล รีเทล เวียดนาม'
-                : 'Chief Executive Officer\nCentral Retail Vietnam',
-            image: 'https://sp-ao.shortpixel.ai/client/to_webp,q_lossy,ret_img,w_570,h_570/https://agileassets.co.th/wp-content/uploads/2026/04/190.ธรรม์-จิราธิวัฒน์2_570x570_acf_cropped.jpg',
-        },
-    ];
+    const shareholders = shareholdersSec.items.map((it) => ({ name: it.t('name'), position: it.t('position'), image: it.raw.image }));
 
     // Corporate Press Releases
-    const corporateNews = [
-        {
-            id: 'corp-1',
-            tag: lang === 'th' ? 'ผลประกอบการ' : 'Financial Performance',
-            date: '2026',
-            titleTh: 'บริษัทอาไจล์ แอสเซ็ทส์ มีกำไรทางบัญชีต่อเนื่อง',
-            titleEn: 'Agile Assets Reports Sustained Net Accounting Profit',
-            subtitleTh: 'เรามีกำไรทางบัญชีในปี 2568 มากกว่า 3.9 ล้านบาท',
-            subtitleEn: 'Achieved over 3.9 Million Baht net accounting profit in 2025',
-            descTh: 'สะท้อนถึงการเติบโตและการพัฒนาอย่างต่อเนื่องขององค์กรและทีมงานของเรา เราสัญญาว่าจะยึดมั่นในความโปร่งใสและมุ่งมั่นเพื่อลูกค้าของเราสามารถเติบโตไปพร้อม ๆ กันอย่างมั่นคง',
-            descEn: 'Reflecting resilient operational growth, credit underwriting rigor, and sustainable client partnerships across nationwide manufacturing plants.',
-            icon: TrendingUp,
-        },
-        {
-            id: 'corp-2',
-            tag: lang === 'th' ? 'การขยายธุรกิจ' : 'Business Expansion',
-            date: '2026',
-            titleTh: 'ขยายการให้บริการสินเชื่อเครื่องจักรดูแลลูกค้ากว่า 50 โรงงานทั่วประเทศ',
-            titleEn: 'Serving Over 50 Industrial Plants Nationwide Across Key Sectors',
-            subtitleTh: 'ครอบคลุมอุตสาหกรรมน้ำดื่ม ฟาร์มปศุสัตว์ แปรรูปอาหาร และพลังงานหมุนเวียน',
-            subtitleEn: 'Covering drinking water, livestock cooling, food processing, and renewables',
-            descTh: 'เดินหน้าสนับสนุนสินเชื่อเครื่องจักรและอุปกรณ์อุตสาหกรรมครบวงจร เสริมสภาพคล่องให้โรงงานไทยขยายกำลังการผลิตได้อย่างต่อเนื่อง',
-            descEn: 'Expanding tailored machinery leasing and working capital solutions to meet accelerating private sector industrial expansion.',
-            icon: Building2,
-        },
-        {
-            id: 'corp-3',
-            tag: lang === 'th' ? 'ความยั่งยืน ESG' : 'ESG Sustainability',
-            date: '2026',
-            titleTh: 'ยกระดับมาตรฐานความโปร่งใสและการสนับสนุนสินเชื่อเพื่อสิ่งแวดล้อม',
-            titleEn: 'Elevating Corporate Governance & Green ESG Machinery Financing',
-            subtitleTh: 'ส่งเสริมการลงทุนเครื่องจักรประหยัดพลังงานและระบบโซลาร์เซลล์โรงงาน',
-            subtitleEn: 'Promoting energy-efficient machinery upgrades and commercial solar',
-            descTh: 'ขับเคลื่อนธุรกิจภายใต้หลักธรรมาภิบาล พร้อมเปิดรับพันธมิตรที่มีวิสัยทัศน์ร่วมกันเพื่อร่วมสร้างความมั่นคงทางพลังงานและเศรษฐกิจหมุนเวียน',
-            descEn: 'Adhering to strict ESG standards, transparent underwriting, and collaborative value creation for all stakeholders.',
-            icon: ShieldCheck,
-        },
-    ];
+    const corporateNews = pressSec.items.map((it) => ({ id: it.raw.id, tag: it.t('tag'), date: it.raw.date, titleTh: it.raw.titleTh, titleEn: it.raw.titleEn, subtitleTh: it.raw.subtitleTh, subtitleEn: it.raw.subtitleEn, descTh: it.raw.descTh, descEn: it.raw.descEn, icon: getSectionIcon(it.raw.icon) }));
 
-    const pageTitle = lang === 'th'
+    const pageTitle = content.metaTitle || (lang === 'th'
         ? 'ข่าวสารประชาสัมพันธ์ (News Update) | Agile Assets'
-        : 'News Update | Agile Assets - Corporate Announcements & Insights';
-    const pageDescription = lang === 'th'
+        : 'News Update | Agile Assets - Corporate Announcements & Insights');
+    const pageDescription = content.metaDescription || (lang === 'th'
         ? 'ข่าวประชาสัมพันธ์ล่าสุด อัปเดตความเคลื่อนไหวบริษัท กิจกรรม และความร่วมมือทางธุรกิจ ครบถ้วนในที่เดียว ติดตามข่าวสารล่าสุดของอาไจล์ ได้ที่นี่'
-        : 'Agile Assets News Updates — Corporate milestones, shareholder announcements, and industrial machinery financing news.';
+        : 'Agile Assets News Updates — Corporate milestones, shareholder announcements, and industrial machinery financing news.');
 
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-sky-500 selection:text-white">
@@ -102,7 +61,7 @@ export function NewsUpdatePage() {
                     {/* Background Image */}
                     <div className="absolute inset-0 z-0">
                         <img
-                            src={heroBg}
+                            src={content.heroImage || heroBg}
                             alt="Agile Assets News Update"
                             className="w-full h-full object-cover object-center scale-105 animate-fade-in"
                             loading="eager"
@@ -110,7 +69,7 @@ export function NewsUpdatePage() {
                         {/* Dynamic Vignette & Ambient Light Overlays */}
                         <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
                         <div className="absolute inset-0 bg-radial-at-c from-sky-500/15 via-transparent to-black/80" />
-                        
+
                         {/* Soft Bottom Fog/Fade Gradient into next section */}
                         <div className="absolute bottom-0 left-0 right-0 h-56 bg-gradient-to-t from-background via-background/80 to-transparent pointer-events-none z-10" />
                     </div>
@@ -133,21 +92,19 @@ export function NewsUpdatePage() {
                                 }}
                             >
                                 <span className="w-2 h-2 rounded-full animate-ping" style={{ backgroundColor: 'var(--theme-sky-400, #38bdf8)' }} />
-                                <span>News Update · Corporate Milestones & Media</span>
+                                <span>{(lang === 'th' ? (content.heroBadgeTh || content.heroBadgeEn || 'News Update · Corporate Milestones & Media') : (content.heroBadgeEn || content.heroBadgeTh || 'News Update · Corporate Milestones & Media'))}</span>
                             </div>
                         </ScrollReveal>
 
                         <ScrollReveal animation="fade-up" delay={100}>
                             <p className="text-xl sm:text-3xl font-semibold text-sky-200/90 mb-3 font-sans tracking-wide drop-shadow-md">
-                                Agile Assets
+                                {heroExtras.t('t01')}
                             </p>
                             <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight drop-shadow-2xl font-sans mb-4 bg-gradient-to-r from-white via-sky-100 to-sky-300 bg-clip-text text-transparent">
-                                News Update
+                                {(lang === 'th' ? (content.heroTitleTh || content.heroTitleEn || 'News Update') : (content.heroTitleEn || content.heroTitleTh || 'News Update'))}
                             </h1>
                             <p className="text-sm sm:text-lg text-slate-300 max-w-2xl mx-auto font-light leading-relaxed drop-shadow-md mb-8">
-                                {lang === 'th'
-                                    ? 'อัปเดตข่าวประชาสัมพันธ์ กิจกรรมองค์กร ความร่วมมือทางธุรกิจ และก้าวสำคัญของอาไจล์ แอสเซทส์'
-                                    : 'Corporate press releases, strategic partnerships, shareholder news, and key corporate announcements.'}
+                                {(lang === 'th' ? (content.heroSubtitleTh || content.heroSubtitleEn || 'อัปเดตข่าวประชาสัมพันธ์ กิจกรรมองค์กร ความร่วมมือทางธุรกิจ และก้าวสำคัญของอาไจล์ แอสเซทส์') : (content.heroSubtitleEn || content.heroSubtitleTh || 'Corporate press releases, strategic partnerships, shareholder news, and key corporate announcements.'))}
                             </p>
 
                             {/* Learn More Button */}
@@ -156,7 +113,7 @@ export function NewsUpdatePage() {
                                     onClick={scrollToNews}
                                     className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white font-bold text-xs sm:text-sm tracking-wide shadow-lg shadow-sky-500/25 hover:scale-105 active:scale-95 transition-all duration-200"
                                 >
-                                    <span>Learn More</span>
+                                    <span>{heroExtras.t('t02')}</span>
                                     <ChevronDown className="w-4 h-4" />
                                 </button>
                             </div>
@@ -167,7 +124,7 @@ export function NewsUpdatePage() {
                 {/* ─── 2. ข่าวสารประชาสัมพันธ์ (Main News Section) ─── */}
                 <section id="news" className="relative py-16 sm:py-24 overflow-hidden bg-background">
                     {/* Subtle Silk Wave Gradients */}
-                    <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-40 dark:opacity-30">
+                    {!mainSec.hidden && (<div className="absolute inset-0 pointer-events-none overflow-hidden opacity-40 dark:opacity-30">
                         <svg className="absolute w-full h-full object-cover" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M-100,300 C400,100 900,600 1600,200" stroke="url(#newsWaveGrad1)" strokeWidth="1.5" strokeDasharray="6 6" />
                             <path d="M-50,500 C450,250 950,750 1600,350" stroke="url(#newsWaveGrad2)" strokeWidth="2" />
@@ -186,46 +143,40 @@ export function NewsUpdatePage() {
                         </svg>
                         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[400px] bg-sky-500/10 rounded-full blur-[140px]" />
                         <div className="absolute bottom-10 right-10 w-[500px] h-[500px] bg-blue-600/10 rounded-full blur-[150px]" />
-                    </div>
+                    </div>)}
 
                     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                         {/* Section Header */}
-                        <ScrollReveal animation="fade-up">
+                        {!mainSec.hidden && (<ScrollReveal animation="fade-up">
                             <div className="text-center mb-12 sm:mb-16">
                                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full mb-3 shadow-sm border border-sky-500/20 bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-bold uppercase tracking-wider">
-                                    News Update
+                                    {mainSec.t('t01')}
                                 </div>
                                 <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight font-sans mb-4 bg-gradient-to-r from-blue-900 via-sky-600 to-blue-800 dark:from-white dark:via-sky-200 dark:to-sky-400 bg-clip-text text-transparent">
-                                    {lang === 'th' ? 'ข่าวสารประชาสัมพันธ์' : 'Corporate News & Announcements'}
+                                    {mainSec.t('t02')}
                                 </h2>
                                 <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">
-                                    {lang === 'th'
-                                        ? 'ติดตามข่าวสารความเคลื่อนไหว กิจกรรมองค์กร และความร่วมมือทางธุรกิจ'
-                                        : 'Stay informed with the latest corporate press releases, milestones, and announcements.'}
+                                    {mainSec.t('t03')}
                                 </p>
                             </div>
-                        </ScrollReveal>
+                        </ScrollReveal>)}
 
                         {/* ─── 3. ข่าวเด่นประจำเดือน: แนะนำผู้ถือหุ้นใหม่ ─── */}
-                        <ScrollReveal animation="fade-up">
+                        {!shareholdersSec.hidden && (<ScrollReveal animation="fade-up">
                             <div className="mb-20 glass rounded-3xl p-6 sm:p-10 border border-slate-200/80 dark:border-slate-800/80 shadow-2xl hover:border-sky-500/30 transition-all duration-300">
                                 <div className="text-center max-w-3xl mx-auto mb-10">
                                     <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-500 dark:text-sky-300 text-xs font-bold mb-3 shadow-sm">
                                         <Award className="w-3.5 h-3.5" />
-                                        <span>{lang === 'th' ? 'ข่าวเด่นประจำเดือน' : 'Featured Announcement'}</span>
+                                        <span>{shareholdersSec.t('t01')}</span>
                                     </div>
                                     <h3 className="text-xl sm:text-3xl font-extrabold text-foreground font-sans mb-3">
-                                        {lang === 'th' ? 'แนะนำผู้ถือหุ้นใหม่ บริษัทอาไจล์ แอสเซ็ทส์' : 'Introducing New Strategic Shareholders of Agile Assets'}
+                                        {shareholdersSec.t('t02')}
                                     </h3>
                                     <p className="text-sm sm:text-base font-semibold text-sky-600 dark:text-sky-400 mb-4">
-                                        {lang === 'th'
-                                            ? 'บริษัทอาไจล์ แอสเซ็ทส์ ขอต้อนรับผู้ถือหุ้นใหม่ เพื่อเสริมศักยภาพการเติบโต'
-                                            : 'Agile Assets Welcomes Distinguished Shareholders to Strengthen Growth Potential'}
+                                        {shareholdersSec.t('t03')}
                                     </p>
                                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                                        {lang === 'th'
-                                            ? 'สะท้อนถึงความเชื่อมั่นในทิศทางการดำเนินงานของบริษัท และเป็นปัจจัยสำคัญที่ช่วยเสริมความมั่นคงของโครงสร้างทางการเงิน รวมถึงเพิ่มโอกาสในการเติบโตอย่างต่อเนื่องในอนาคต บริษัทฯ ยังคงมุ่งมั่นในการดำเนินธุรกิจด้วยความโปร่งใส และสร้างคุณค่าให้กับผู้มีส่วนได้ส่วนเสียทุกภาคส่วน พร้อมเดินหน้าสู่การเติบโตอย่างมีคุณภาพและยั่งยืนต่อไป'
-                                            : 'Reflecting profound market confidence in the company’s strategic vision and fortifying our financial capital structure. Agile Assets remains steadfast in transparent corporate governance, creating enduring value for all industrial stakeholders.'}
+                                        {shareholdersSec.t('t04')}
                                     </p>
                                 </div>
 
@@ -256,13 +207,13 @@ export function NewsUpdatePage() {
                                     ))}
                                 </div>
                             </div>
-                        </ScrollReveal>
+                        </ScrollReveal>)}
 
                         {/* ─── 4. ข่าวสารประชาสัมพันธ์ของบริษัท (Corporate Milestones) ─── */}
-                        <ScrollReveal animation="fade-up">
+                        {!pressSec.hidden && (<ScrollReveal animation="fade-up">
                             <div className="text-center mb-10">
                                 <h3 className="text-xl sm:text-3xl font-extrabold text-foreground font-sans">
-                                    {lang === 'th' ? 'ข่าวสารประชาสัมพันธ์ของบริษัท' : 'Corporate Press Releases & Milestones'}
+                                    {pressSec.t('t01')}
                                 </h3>
                             </div>
 
@@ -303,19 +254,19 @@ export function NewsUpdatePage() {
                                             </div>
 
                                             <div className="pt-4 mt-6 border-t border-slate-100 dark:border-slate-800 flex items-center text-xs font-bold text-sky-600 dark:text-sky-400 group-hover:translate-x-1 transition-transform">
-                                                <span>Agile Assets Official</span>
+                                                <span>{pressSec.t('t02')}</span>
                                                 <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                                             </div>
                                         </div>
                                     );
                                 })}
                             </div>
-                        </ScrollReveal>
+                        </ScrollReveal>)}
                     </div>
                 </section>
 
                 {/* ─── 5. CMS News & Articles Section ─── */}
-                <LatestNewsSection />
+                <LatestNewsSection alwaysShow />
             </main>
 
             <Footer />

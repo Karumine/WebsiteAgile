@@ -1,10 +1,14 @@
 import { useState, useMemo } from 'react';
 import { ArrowRight, CalendarDays, MessageSquare, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { formatDate } from '@/lib/utils';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { sanitizeHtml } from '@/lib/sanitize';
+import { useSections } from '@/lib/pageSections';
+import { homeLatestNewsSections } from '@/data/pageSections/homeLatestNews';
 
 export interface NewsItem {
     id: string;
@@ -115,13 +119,16 @@ const LATEST_NEWS_DATA: NewsItem[] = [
     },
 ];
 
-export function LatestNewsSection() {
+export function LatestNewsSection({ alwaysShow = false }: { alwaysShow?: boolean }) {
     const { lang } = useLanguage();
+    const { content } = usePageContent('home', DEFAULT_PAGE_CONTENTS['home']);
+    const section = useSections(content, homeLatestNewsSections);
+    const latestNews = section('latest-news');
     const [selectedArticle, setSelectedArticle] = useState<NewsItem | null>(null);
 
     const { settings } = useSiteSettings();
-    const sectionTitle = lang === 'en' ? 'LATEST NEWS & ACTIVITIES' : 'LATEST NEWS & ACTIVITYS';
-    const sectionSubtitle = lang === 'en' ? 'Company News and Corporate Activities' : 'ข่าวสารและกิจกรรมของบริษัท';
+    const sectionTitle = latestNews.t('t01');
+    const sectionSubtitle = latestNews.t('t02');
 
     const newsList = useMemo(() => {
         if (!settings?.news || settings.news.length === 0) {
@@ -144,6 +151,7 @@ export function LatestNewsSection() {
         }));
     }, [settings.news]);
 
+    if (latestNews.hidden && !alwaysShow) return null;
     return (
         <>
             <section id="news" className="py-16 sm:py-20 bg-slate-50/60 dark:bg-slate-900/40 relative overflow-hidden border-t border-slate-200/60 dark:border-slate-800/80 scroll-mt-20">
@@ -220,7 +228,7 @@ export function LatestNewsSection() {
                                                         setSelectedArticle(item);
                                                     }}
                                                 >
-                                                    <span>READ MORE</span>
+                                                    <span>{latestNews.t('t03')}</span>
                                                     <ArrowRight className="w-3.5 h-3.5" />
                                                 </button>
 

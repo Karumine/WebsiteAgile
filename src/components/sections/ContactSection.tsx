@@ -1,12 +1,17 @@
 import { useState } from 'react';
 import { Send, CheckCircle2 } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
 import { useLeadSubmit } from '@/lib/useLeadSubmit';
 import { formService } from '@/services/formService';
+import { useSections } from '@/lib/pageSections';
+import { homeContactSections } from '@/data/pageSections/homeContact';
 
 export function ContactSection() {
-    const { lang } = useLanguage();
+    const { content } = usePageContent('home', DEFAULT_PAGE_CONTENTS['home']);
+    const section = useSections(content, homeContactSections);
+    const contactCta = section('contact-cta');
 
     const [formData, setFormData] = useState({
         name: '',
@@ -45,12 +50,13 @@ export function ContactSection() {
         setTimeout(() => setSubmitted(false), 5000);
     };
 
+    if (contactCta.hidden) return null;
     return (
         <section id="contact" className="relative py-20 lg:py-24 overflow-hidden">
             {/* Background Image with Dark Blue Overlay */}
             <div className="absolute inset-0 z-0">
                 <img
-                    src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1800&q=80"
+                    src={contactCta.t('img01')}
                     alt="Business Inquiries"
                     className="w-full h-full object-cover object-center"
                     loading="lazy"
@@ -63,12 +69,10 @@ export function ContactSection() {
                 <ScrollReveal animation="fade-up">
                     <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
                         <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-wider font-sans uppercase mb-3">
-                            BUSINESS PARTNERSHIP INQUIRIES
+                            {contactCta.t('t02')}
                         </h2>
                         <p className="text-xs sm:text-sm text-slate-300 font-medium leading-relaxed">
-                            {lang === 'th'
-                                ? 'ติดต่อเราเพื่อปรึกษาการลงทุน โซลูชันทางการเงิน และสินเชื่อเครื่องจักรสำหรับธุรกิจคุณ'
-                                : 'Contact our financial specialists for bespoke equipment financing and strategic enterprise capital solutions.'}
+                            {contactCta.t('t03')}
                         </p>
                     </div>
                 </ScrollReveal>
@@ -79,7 +83,7 @@ export function ContactSection() {
                         {submitted && (
                             <div className="mb-6 p-4 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-sm flex items-center justify-center gap-3 animate-fade-in">
                                 <CheckCircle2 className="w-5 h-5 flex-shrink-0" />
-                                <span>{lang === 'th' ? 'ส่งข้อความเรียบร้อยแล้ว เจ้าหน้าที่จะติดต่อกลับโดยเร็วที่สุด' : 'Thank you! Your message has been sent successfully.'}</span>
+                                <span>{contactCta.t('t04')}</span>
                             </div>
                         )}
 
@@ -93,8 +97,8 @@ export function ContactSection() {
                                         value={formData.name}
                                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                         className="w-full px-4 py-3.5 rounded-xl bg-white/90 dark:bg-slate-950/80 border border-white/30 text-slate-900 dark:text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all"
-                                        aria-label={lang === 'th' ? 'ชื่อ - นามสกุล *' : 'Full Name *'}
-                                        placeholder={lang === 'th' ? 'ชื่อ - นามสกุล *' : 'Full Name *'}
+                                        aria-label={contactCta.t('t05')}
+                                        placeholder={contactCta.t('t05')}
                                         disabled={isVerifying}
                                     />
                                 </div>
@@ -106,8 +110,8 @@ export function ContactSection() {
                                         value={formData.email}
                                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                         className="w-full px-4 py-3.5 rounded-xl bg-white/90 dark:bg-slate-950/80 border border-white/30 text-slate-900 dark:text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all"
-                                        aria-label={lang === 'th' ? 'อีเมล *' : 'Email Address *'}
-                                        placeholder={lang === 'th' ? 'อีเมล *' : 'Email Address *'}
+                                        aria-label={contactCta.t('t06')}
+                                        placeholder={contactCta.t('t06')}
                                         disabled={isVerifying}
                                     />
                                 </div>
@@ -122,8 +126,8 @@ export function ContactSection() {
                                         value={formData.phone}
                                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                         className="w-full px-4 py-3.5 rounded-xl bg-white/90 dark:bg-slate-950/80 border border-white/30 text-slate-900 dark:text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all"
-                                        aria-label={lang === 'th' ? 'เบอร์โทรศัพท์ *' : 'Phone Number *'}
-                                        placeholder={lang === 'th' ? 'เบอร์โทรศัพท์ *' : 'Phone Number *'}
+                                        aria-label={contactCta.t('t07')}
+                                        placeholder={contactCta.t('t07')}
                                         disabled={isVerifying}
                                     />
                                 </div>
@@ -134,8 +138,8 @@ export function ContactSection() {
                                         value={formData.company}
                                         onChange={(e) => setFormData({ ...formData, company: e.target.value })}
                                         className="w-full px-4 py-3.5 rounded-xl bg-white/90 dark:bg-slate-950/80 border border-white/30 text-slate-900 dark:text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all"
-                                        aria-label={lang === 'th' ? 'ชื่อบริษัท / องค์กร' : 'Company Name'}
-                                        placeholder={lang === 'th' ? 'ชื่อบริษัท / องค์กร' : 'Company Name'}
+                                        aria-label={contactCta.t('t08')}
+                                        placeholder={contactCta.t('t08')}
                                         disabled={isVerifying}
                                     />
                                 </div>
@@ -149,8 +153,8 @@ export function ContactSection() {
                                     value={formData.message}
                                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                                     className="w-full px-4 py-3.5 rounded-xl bg-white/90 dark:bg-slate-950/80 border border-white/30 text-slate-900 dark:text-white text-xs sm:text-sm placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-400 transition-all resize-none"
-                                    aria-label={lang === 'th' ? 'ข้อความ หรือรายละเอียดโครงการที่ต้องการปรึกษา...' : 'Project details or consultation message...'}
-                                    placeholder={lang === 'th' ? 'ข้อความ หรือรายละเอียดโครงการที่ต้องการปรึกษา...' : 'Project details or consultation message...'}
+                                    aria-label={contactCta.t('t09')}
+                                    placeholder={contactCta.t('t09')}
                                     disabled={isVerifying}
                                 />
                             </div>
@@ -167,12 +171,12 @@ export function ContactSection() {
                                     {isVerifying ? (
                                         <>
                                             <div className="w-4 h-4 rounded-full border-2 border-slate-950/30 border-t-slate-950 animate-spin" />
-                                            <span>{lang === 'th' ? 'กำลังส่งข้อมูล...' : 'Sending...'}</span>
+                                            <span>{contactCta.t('t10')}</span>
                                         </>
                                     ) : (
                                         <>
                                             <Send className="w-4 h-4" />
-                                            <span>{lang === 'th' ? 'ส่งข้อความ' : 'Send Message'}</span>
+                                            <span>{contactCta.t('t11')}</span>
                                         </>
                                     )}
                                 </button>

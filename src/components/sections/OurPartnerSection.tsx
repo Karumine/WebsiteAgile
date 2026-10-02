@@ -1,66 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import { useSections } from '@/lib/pageSections';
+import { homePartnersSections } from '@/data/pageSections/homePartners';
 
 export function OurPartnerSection() {
-    const { lang } = useLanguage();
-
-    const partners = [
-        {
-            name: 'PHOOWANUS PANICH',
-            tag: 'Limited Partnership',
-            type: 'image',
-            bgColor: '#0f172a',
-            textColor: '#38bdf8',
-            subtitle: 'หจก. ภูวนัส พาณิชย์',
-        },
-        {
-            name: 'GRD Machine',
-            tag: 'Industrial Systems',
-            type: 'image',
-            bgColor: '#ffffff',
-            textColor: '#16a34a',
-            subtitle: 'GRD Industrial Machine',
-        },
-        {
-            name: 'MITSUBISHI MOTORS',
-            tag: 'Heavy Industries',
-            type: 'image',
-            bgColor: '#ffffff',
-            textColor: '#dc2626',
-            subtitle: 'Mitsubishi Machinery',
-        },
-        {
-            name: 'FANUC',
-            tag: 'Robotics & CNC',
-            type: 'image',
-            bgColor: '#ffffff',
-            textColor: '#eab308',
-            subtitle: 'Robotics & Factory Automation',
-        },
-        {
-            name: 'HAITIAN',
-            tag: 'Plastics Machinery',
-            type: 'image',
-            bgColor: '#ffffff',
-            textColor: '#0284c7',
-            subtitle: 'Injection Molding Global Leader',
-        },
-        {
-            name: 'DAIKIN',
-            tag: 'Industrial Chillers',
-            type: 'image',
-            bgColor: '#ffffff',
-            textColor: '#0ea5e9',
-            subtitle: 'Air & Water Cooled Chillers',
-        },
-    ];
+    const { content } = usePageContent('home', DEFAULT_PAGE_CONTENTS['home']);
+    const section = useSections(content, homePartnersSections);
+    const partnersSec = section('partners');
 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isHovered, setIsHovered] = useState(false);
     const [visibleCount, setVisibleCount] = useState(4);
-    const totalItems = partners.length;
+    const totalItems = partnersSec.items.length;
 
     useEffect(() => {
         let resizeTimer: ReturnType<typeof setTimeout>;
@@ -104,6 +58,7 @@ export function OurPartnerSection() {
         return () => clearInterval(interval);
     }, [isHovered, nextSlide]);
 
+    if (partnersSec.hidden) return null;
     return (
         <section className="py-20 sm:py-24 bg-slate-50/70 dark:bg-slate-950/40 text-foreground overflow-hidden">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -111,10 +66,10 @@ export function OurPartnerSection() {
                 <ScrollReveal animation="fade-up">
                     <div className="text-center max-w-3xl mx-auto mb-14 sm:mb-16">
                         <p className="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-sky-800 dark:text-sky-400 mb-3 font-sans">
-                            OUR PARTNER & MACHINE
+                            {partnersSec.t('t01')}
                         </p>
                         <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-foreground tracking-tight font-sans">
-                            {lang === 'th' ? 'คู่ค้าและเครื่องจักรที่เราให้บริการ' : 'Our Trusted Partners & Machine Brands'}
+                            {partnersSec.t('t02')}
                         </h2>
                     </div>
                 </ScrollReveal>
@@ -151,9 +106,9 @@ export function OurPartnerSection() {
                                 transform: `translateX(-${currentIndex * (100 / visibleCount)}%)`,
                             }}
                         >
-                            {[...partners, ...partners, ...partners].map((partner, idx) => (
+                            {[...partnersSec.items, ...partnersSec.items, ...partnersSec.items].map((partner, idx) => (
                                 <div
-                                    key={`${partner.name}-${idx}`}
+                                    key={`${partner.t('name')}-${idx}`}
                                     className="flex-shrink-0 px-3"
                                     style={{
                                         width: `${100 / visibleCount}%`,
@@ -162,49 +117,49 @@ export function OurPartnerSection() {
                                     <div className="group h-40 sm:h-44 rounded-3xl p-6 bg-card border border-border/80 hover:border-sky-400/50 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col items-center justify-center text-center hover:-translate-y-1">
                                         {/* Logo or Brand Typography Display */}
                                         <div className="h-16 flex items-center justify-center w-full mb-3 px-2">
-                                            {partner.name === 'PHOOWANUS PANICH' ? (
+                                            {partner.t('name') === 'PHOOWANUS PANICH' ? (
                                                 <div className="bg-black text-white px-4 py-2 rounded-xl flex items-center gap-2 border border-slate-700 shadow-md group-hover:border-sky-400 transition-colors">
                                                     <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm font-bold">
                                                         🌿
                                                     </div>
                                                     <div className="text-left">
                                                         <div className="text-[11px] font-extrabold tracking-wider leading-tight text-white">
-                                                            PHOOWANUS PANICH
+                                                            {partnersSec.t('t03')}
                                                         </div>
                                                         <div className="text-[9px] text-slate-400 font-medium">
-                                                            LIMITED PARTNERSHIP
+                                                            {partnersSec.t('t04')}
                                                         </div>
                                                     </div>
                                                 </div>
-                                            ) : partner.name === 'GRD Machine' ? (
+                                            ) : partner.t('name') === 'GRD Machine' ? (
                                                 <div className="flex items-center gap-1.5 font-black text-2xl tracking-tighter text-emerald-500 font-sans">
-                                                    <span className="text-emerald-500">GR</span>
+                                                    <span className="text-emerald-500">{partnersSec.t('t05')}</span>
                                                     <span className="text-lime-500">D</span>
                                                     <span className="text-[10px] text-slate-400 tracking-normal ml-1">®</span>
                                                 </div>
-                                            ) : partner.name === 'MITSUBISHI MOTORS' ? (
+                                            ) : partner.t('name') === 'MITSUBISHI MOTORS' ? (
                                                 <div className="flex flex-col items-center">
                                                     <div className="text-red-600 font-black text-xl tracking-wider font-sans">
-                                                        ◆ MITSUBISHI
+                                                        {partnersSec.t('t06')}
                                                     </div>
                                                     <div className="text-[9px] font-bold text-slate-500 tracking-widest uppercase">
-                                                        MOTORS & MACHINERY
+                                                        {partnersSec.t('t07')}
                                                     </div>
                                                 </div>
-                                            ) : partner.name === 'FANUC' ? (
+                                            ) : partner.t('name') === 'FANUC' ? (
                                                 <div className="text-red-600 font-black text-2xl tracking-widest font-sans drop-shadow-sm">
-                                                    FANUC
+                                                    {partnersSec.t('t08')}
                                                 </div>
                                             ) : (
                                                 <div className="font-extrabold text-lg text-sky-600 dark:text-sky-400 font-sans tracking-wide">
-                                                    {partner.name}
+                                                    {partner.t('name')}
                                                 </div>
                                             )}
                                         </div>
 
                                         {/* Subtitle / Thai Descriptor */}
                                         <p className="text-[11px] font-semibold text-muted-foreground group-hover:text-foreground transition-colors line-clamp-1">
-                                            {partner.subtitle}
+                                            {partner.t('subtitle')}
                                         </p>
                                     </div>
                                 </div>
@@ -214,9 +169,9 @@ export function OurPartnerSection() {
 
                     {/* Indicators */}
                     <div className="flex items-center justify-center gap-2 mt-6">
-                        {partners.map((item, idx) => (
+                        {partnersSec.items.map((item, idx) => (
                             <button
-                                key={item.name}
+                                key={item.t('name')}
                                 onClick={() => setCurrentIndex(idx)}
                                 aria-label={`Go to partner slide ${idx + 1}`}
                                 className={`h-2 rounded-full transition-all duration-300 ${

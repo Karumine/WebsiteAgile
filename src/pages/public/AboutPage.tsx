@@ -1,22 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useNavigate } from 'react-router-dom';
-import {
-    ShieldCheck,
-    Clock,
-    Award,
-    TrendingUp,
-    HeartHandshake,
-    ChevronDown,
-    ChevronUp,
-    Building2,
-    Sun,
-    Truck,
-    Sparkles,
-    Briefcase,
-    GraduationCap,
-    Users
-} from 'lucide-react';
+import { Clock, ChevronDown, ChevronUp, Building2, Sun, Truck, Sparkles, Briefcase, GraduationCap, Users } from 'lucide-react';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
@@ -32,10 +17,20 @@ import storyMachineryImg from '@/assets/story_machinery_finance.png';
 import advisorChairmanImg from '@/assets/advisor_chairman.png';
 import directorProfile1Img from '@/assets/director_profile_1.png';
 import directorProfile2Img from '@/assets/director_profile_2.png';
+import { useSections } from '@/lib/pageSections';
+import { aboutSections } from '@/data/pageSections/about';
+import { SectionIcon } from '@/lib/sectionIcons';
 
 export function AboutPage() {
     const { lang } = useLanguage();
     const { content } = usePageContent('about', DEFAULT_PAGE_CONTENTS['about']);
+    const section = useSections(content, aboutSections);
+    const overview = section('overview');
+    const engineering = section('engineering');
+    const history = section('history');
+    const mission = section('mission');
+    const leadership = section('leadership');
+    const ctaStrip = section('cta');
     const { theme } = useTheme();
     const isDark = theme === 'dark';
     const navigate = useNavigate();
@@ -52,88 +47,12 @@ export function AboutPage() {
         setOpenDirector(openDirector === id ? null : id);
     };
 
-    const title = lang === 'en'
+    const title = content.metaTitle || (lang === 'en'
         ? 'About Us • Agile Assets | Engineering Roots & Machinery Finance'
-        : 'เกี่ยวกับเรา • Agile Assets | รากฐานวิศวกรรมและสินเชื่อเครื่องจักรอุตสาหกรรม';
-    const description = lang === 'en'
+        : 'เกี่ยวกับเรา • Agile Assets | รากฐานวิศวกรรมและสินเชื่อเครื่องจักรอุตสาหกรรม');
+    const description = content.metaDescription || (lang === 'en'
         ? 'Learn about Agile Assets story, advisory board, executive leadership, 16+ years of history, mission, and industrial leasing capabilities.'
-        : 'เรื่องราวของอาจิไลท์ แอสเซทส์ รากฐานทางวิศวกรรม คณะกรรมการที่ปรึกษา ผู้บริหาร วิสัยทัศน์ และประสบการณ์กว่า 16 ปีด้านสินเชื่อเครื่องจักร';
-
-    const corePillars = [
-        {
-            icon: Clock,
-            titleTh: 'อนุมัติรวดเร็ว',
-            titleEn: 'Fast Approval',
-            descTh: 'ทราบผลเบื้องต้นใน 24 - 48 ชม.',
-            descEn: 'Turnaround within 24-48 Hours',
-        },
-        {
-            icon: Award,
-            titleTh: 'บริการมืออาชีพ',
-            titleEn: 'Professional Service',
-            descTh: 'ทีมผู้เชี่ยวชาญเครื่องจักรและการเงิน',
-            descEn: 'Engineering & Finance Specialists',
-        },
-        {
-            icon: ShieldCheck,
-            titleTh: 'โปร่งใส ตรงไปตรงมา',
-            titleEn: 'Transparent & Fair',
-            descTh: 'เงื่อนไขชัดเจน ไม่มีค่าธรรมเนียมแอบแฝง',
-            descEn: 'No hidden fees, transparent terms',
-        },
-        {
-            icon: TrendingUp,
-            titleTh: 'โครงสร้างยืดหยุ่น',
-            titleEn: 'Flexible Structuring',
-            descTh: 'ออกแบบค่างวดสอดคล้องกับกระแสเงินสด',
-            descEn: 'Customized to business cash flows',
-        },
-        {
-            icon: HeartHandshake,
-            titleTh: 'พันธมิตรแข็งแกร่ง',
-            titleEn: 'Strong Partnership',
-            descTh: 'เครือข่ายสถาบันการเงินและผู้ผลิตเครื่องจักร',
-            descEn: 'Ecosystem of banks and OEMs',
-        },
-    ];
-
-    const milestones = [
-        {
-            year: '2010',
-            titleTh: 'จุดเริ่มต้นก่อตั้งบริษัท',
-            titleEn: 'Company Inception',
-            descTh: 'ก่อตั้งโดยทีมวิศวกรผู้เชี่ยวชาญเครื่องจักร เริ่มให้บริการสินเชื่อเช่าซื้ออุตสาหกรรม',
-            descEn: 'Founded by industrial engineers providing tailored equipment leasing',
-        },
-        {
-            year: '2014',
-            titleTh: 'ขยายวงเงินและบริการ',
-            titleEn: 'Nationwide Expansion',
-            descTh: 'ขยายการสนับสนุนสินเชื่อครอบคลุมทั่วประเทศ วงเงินสะสมกว่า 5,000 ล้านบาท',
-            descEn: 'Expanded leasing services nationwide exceeding ฿5B in cumulative credit',
-        },
-        {
-            year: '2017',
-            titleTh: 'พัฒนาโซลูชันเฉพาะอุตสาหกรรม',
-            titleEn: 'Industry Solutions',
-            descTh: 'เปิดสายบริการสินเชื่อเครื่องมือแพทย์และยานพาหนะขนส่งเชิงพาณิชย์',
-            descEn: 'Launched medical tech & commercial logistics fleet financing lines',
-        },
-        {
-            year: '2021',
-            titleTh: 'ริเริ่ม Green & ESG Financing',
-            titleEn: 'Green Loan Transition',
-            descTh: 'บุกเบิกสินเชื่อพลังงานสะอาด โซลาร์เซลล์โรงงาน และระบบลดการปล่อยคาร์บอน',
-            descEn: 'Pioneered industrial solar rooftop & ESG clean energy loans',
-        },
-        {
-            year: '2024 - 2026',
-            titleTh: 'สินทรัพย์กว่า 2.5 หมื่นล้านบาท',
-            titleEn: '฿25B+ Assets & Leadership',
-            descTh: 'ก้าวสู่ผู้นำด้านสินเชื่อและโซลูชันเงินทุนที่ได้รับความไว้วางใจสูงสุดในไทย',
-            descEn: 'Top-tier non-bank equipment financing institution trusted by 5,000+ companies',
-        },
-    ];
+        : 'เรื่องราวของอาจิไลท์ แอสเซทส์ รากฐานทางวิศวกรรม คณะกรรมการที่ปรึกษา ผู้บริหาร วิสัยทัศน์ และประสบการณ์กว่า 16 ปีด้านสินเชื่อเครื่องจักร');
 
     return (
         <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-sky-500 selection:text-white">
@@ -160,7 +79,7 @@ export function AboutPage() {
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-background via-black/40 to-black/60" />
                         <div className="absolute inset-0 bg-radial-at-c from-sky-500/10 via-transparent to-black/80" />
-                        
+
                         {/* Soft Bottom Fog/Fade Gradient into next section */}
                         <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-background via-background/70 to-transparent pointer-events-none z-10" />
                     </div>
@@ -187,13 +106,13 @@ export function AboutPage() {
                 </section>
 
                 {/* ─── 2. ABOUT US Overview & 5 Core Pillars ─── */}
-                <section className="py-16 lg:py-20 relative overflow-hidden bg-background">
+                {!overview.hidden && (<section className="py-16 lg:py-20 relative overflow-hidden bg-background">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                         {/* Header */}
                         <ScrollReveal animation="fade-up">
                             <div className="text-center max-w-3xl mx-auto mb-10">
                                 <h2 className="text-3xl sm:text-5xl font-extrabold text-foreground tracking-tight mb-3 font-sans">
-                                    ABOUT US
+                                    {overview.t('t01')}
                                 </h2>
                                 <div className="h-1 w-20 bg-sky-500 mx-auto rounded-full mb-6" />
                             </div>
@@ -203,9 +122,7 @@ export function AboutPage() {
                         <ScrollReveal animation="zoom-in" delay={100}>
                             <div className="rounded-2xl p-4 sm:p-5 bg-sky-500/10 border border-sky-500/25 text-center mb-10 shadow-sm">
                                 <p className="text-xs sm:text-sm font-semibold text-sky-600 dark:text-sky-300 leading-relaxed">
-                                    {lang === 'th'
-                                        ? '✨ บริษัท อาจิไลท์ แอสเซทส์ จำกัด ให้บริการสินเชื่อเช่าซื้อเครื่องจักรอุตสาหกรรม ยานพาหนะเชิงพาณิชย์ เครื่องมือแพทย์ และสินเชื่อหมุนเวียนธุรกิจครบวงจร'
-                                        : '✨ Agile Assets Co., Ltd. provides comprehensive industrial machinery leasing, commercial fleet, medical equipment, and working capital solutions.'}
+                                    {overview.t('t02')}
                                 </p>
                             </div>
                         </ScrollReveal>
@@ -214,14 +131,10 @@ export function AboutPage() {
                         <ScrollReveal animation="fade-up" delay={150}>
                             <div className="max-w-4xl mx-auto space-y-5 text-sm sm:text-base text-muted-foreground leading-relaxed mb-14 text-center">
                                 <p>
-                                    {lang === 'th'
-                                        ? 'อาจิไลท์ แอสเซทส์ ก่อตั้งขึ้นโดยกลุ่มผู้บริหารและวิศวกรที่มีประสบการณ์ยาวนานในแวดวงเครื่องจักรอุตสาหกรรมและตลาดการเงิน เราเข้าใจดีว่า “เครื่องจักรและเทคโนโลยี” คือหัวใจสำคัญของขีดความสามารถในการแข่งขันของภาคการผลิตไทย แต่ข้อจำกัดด้านเงินทุนมักเป็นอุปสรรคสำคัญที่ทำให้ผู้ประกอบการไม่สามารถขยายงานได้ตามศักยภาพ'
-                                        : 'Agile Assets was established by seasoned executives and engineers with profound expertise in industrial technology and financial markets. We understand that modern equipment is the lifeblood of competitive manufacturing, yet capital constraints frequently bottleneck growth.'}
+                                    {overview.t('t03')}
                                 </p>
                                 <p>
-                                    {lang === 'th'
-                                        ? 'เราจึงมุ่งมั่นทำหน้าที่เป็น “พันธมิตรทางการเงินที่เข้าใจวิศวกรรม” ออกแบบโครงสร้างสินเชื่อที่ยืดหยุ่น รวดเร็ว และตอบโจทย์สภาพคล่องอย่างแท้จริง เพื่อเป็นกำลังสำคัญในการผลักดันให้ธุรกิจไทยเติบโตอย่างมั่นคง'
-                                        : 'We are dedicated to being the "Engineering-Minded Financial Partner", structuring agile, fast, and bespoke capital models that empower Thai enterprises to scale with confidence.'}
+                                    {overview.t('t04')}
                                 </p>
                             </div>
                         </ScrollReveal>
@@ -229,12 +142,12 @@ export function AboutPage() {
                         {/* 5 Core Pillars Grid */}
                         <div className="text-center mb-8">
                             <h3 className="text-lg sm:text-xl font-bold text-foreground font-sans">
-                                {lang === 'th' ? '5 จุดเด่นที่ทำให้เราแตกต่างและได้รับความไว้วางใจ' : '5 Key Strengths That Set Us Apart'}
+                                {overview.t('t05')}
                             </h3>
                         </div>
 
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
-                            {corePillars.map((pillar, idx) => (
+                            {overview.items.map((pillar, idx) => (
                                 <ScrollReveal
                                     key={idx}
                                     animation="fade-up"
@@ -249,23 +162,23 @@ export function AboutPage() {
                                         }`}
                                     >
                                         <div className="w-12 h-12 rounded-2xl bg-sky-500/10 text-sky-500 flex items-center justify-center mb-3">
-                                            <pillar.icon className="w-6 h-6" />
+                                            <SectionIcon name={pillar.raw.icon} className="w-6 h-6" />
                                         </div>
                                         <h4 className="text-sm font-bold text-foreground mb-1.5 font-sans">
-                                            {lang === 'th' ? pillar.titleTh : pillar.titleEn}
+                                            {pillar.t('title')}
                                         </h4>
                                         <p className="text-[11px] text-muted-foreground leading-snug">
-                                            {lang === 'th' ? pillar.descTh : pillar.descEn}
+                                            {pillar.t('desc')}
                                         </p>
                                     </div>
                                 </ScrollReveal>
                             ))}
                         </div>
                     </div>
-                </section>
+                </section>)}
 
                 {/* ─── 3. Deep Navy Engineering Roots Feature Box ─── */}
-                <section className="py-16 lg:py-20 relative overflow-hidden bg-slate-950 text-white">
+                {!engineering.hidden && (<section className="py-16 lg:py-20 relative overflow-hidden bg-slate-950 text-white">
                     {/* Background Radial Glow */}
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-950 via-slate-950 to-slate-900 opacity-90" />
                     <div className="absolute top-1/2 right-10 w-96 h-96 bg-sky-500/15 rounded-full blur-[140px] pointer-events-none" />
@@ -276,27 +189,21 @@ export function AboutPage() {
                             <ScrollReveal animation="fade-right" className="lg:col-span-6 space-y-6">
                                 <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-sky-400/15 border border-sky-400/30 text-sky-300 text-xs font-bold uppercase tracking-wider">
                                     <Sparkles className="w-3.5 h-3.5" />
-                                    <span>Engineering Roots • รากฐานวิศวกรรม</span>
+                                    <span>{engineering.t('t01')}</span>
                                 </div>
 
                                 <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight font-sans leading-snug text-white">
-                                    {lang === 'th'
-                                        ? 'จากความเข้าใจในเครื่องจักร สู่โซลูชันการเงินที่ตอบโจทย์โรงงานจริง'
-                                        : 'Deep Machinery Knowledge Powering Real-World Industrial Capital'}
+                                    {engineering.t('t02')}
                                 </h2>
 
                                 <div className="pl-4 border-l-2 border-sky-400">
                                     <p className="text-sm sm:text-base font-semibold text-sky-200 leading-relaxed italic">
-                                        {lang === 'th'
-                                            ? '“เราไม่ได้มองเครื่องจักรเป็นเพียงหลักประกัน แต่มองเป็นเครื่องยนต์ขับเคลื่อนความมั่งคั่งของภาคธุรกิจ”'
-                                            : '“We view machinery not merely as collateral, but as the core engine powering industrial wealth.”'}
+                                        {engineering.t('t03')}
                                     </p>
                                 </div>
 
                                 <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-light">
-                                    {lang === 'th'
-                                        ? 'ด้วยทีมงานที่มีรากฐานจากวิศวกรรมอุตสาหการ เราจึงมีความสามารถในการประเมินประสิทธิภาพเครื่องจักร รอบอายุการใช้งาน และผลตอบแทนจากการลงทุน (ROI) ได้อย่างแม่นยำ ทำให้เราสามารถอนุมัติวงเงินที่สูงกว่า และเสนอเงื่อนไขที่ตรงจุดกว่าสถาบันการเงินทั่วไป'
-                                        : 'With our engineering heritage, we accurately assess equipment lifecycle, production efficiency, and ROI dynamics—enabling higher credit lines and far more tailored structures than traditional lenders.'}
+                                    {engineering.t('t04')}
                                 </p>
                             </ScrollReveal>
 
@@ -304,50 +211,48 @@ export function AboutPage() {
                             <ScrollReveal animation="fade-left" delay={150} className="lg:col-span-6">
                                 <div className="rounded-3xl overflow-hidden aspect-[4/3] border border-sky-400/30 shadow-2xl relative group">
                                     <img
-                                        src={storyOriginImg}
+                                        src={engineering.t('img05') || storyOriginImg}
                                         alt="Agile Assets Engineering Team"
                                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                                     <div className="absolute bottom-6 left-6 right-6 p-4 rounded-2xl bg-black/60 backdrop-blur-md border border-white/20">
                                         <p className="text-white font-bold text-sm">
-                                            {lang === 'th' ? 'วิศวกรผู้เชี่ยวชาญตรวจประเมินหน้างานจริง' : 'On-site Industrial Machinery Inspection'}
+                                            {engineering.t('t06')}
                                         </p>
                                         <p className="text-sky-300 text-xs mt-0.5">
-                                            {lang === 'th' ? 'รองรับเครื่องจักรอุตสาหกรรมหนักทุกประเภท' : 'Supporting all types of heavy machinery & production lines'}
+                                            {engineering.t('t07')}
                                         </p>
                                     </div>
                                 </div>
                             </ScrollReveal>
                         </div>
                     </div>
-                </section>
+                </section>)}
 
                 {/* ─── 4. Company History (ไทม์ไลน์ประวัติองค์กร) ─── */}
-                <section className="py-16 lg:py-20 relative overflow-hidden bg-background">
+                {!history.hidden && (<section className="py-16 lg:py-20 relative overflow-hidden bg-background">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                         <ScrollReveal animation="fade-up">
                             <div className="text-center max-w-3xl mx-auto mb-14">
                                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-sky-400/20 text-xs font-semibold text-sky-400 mb-3">
                                     <Clock className="w-3.5 h-3.5" />
-                                    <span>Milestones</span>
+                                    <span>{history.t('t01')}</span>
                                 </div>
                                 <h2 className="text-3xl sm:text-5xl font-extrabold text-foreground tracking-tight mb-4 font-sans">
-                                    Company History
+                                    {history.t('t02')}
                                 </h2>
                                 <p className="text-sm sm:text-base text-muted-foreground">
-                                    {lang === 'th'
-                                        ? 'เส้นทางการเติบโตและพัฒนาการตลอดกว่า 16 ปีแห่งความเชี่ยวชาญ'
-                                        : 'Our 16-year trajectory of growth, trust, and industrial empowerment'}
+                                    {history.t('t03')}
                                 </p>
                             </div>
                         </ScrollReveal>
 
                         {/* Horizontal Milestones Grid */}
                         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                            {milestones.map((m, idx) => (
+                            {history.items.map((m, idx) => (
                                 <ScrollReveal
-                                    key={m.year}
+                                    key={m.t('year')}
                                     animation="fade-up"
                                     delay={idx * 120}
                                     className="flex flex-col h-full"
@@ -362,31 +267,31 @@ export function AboutPage() {
                                         <div>
                                             <div className="flex items-center justify-between mb-3">
                                                 <span className="text-2xl sm:text-3xl font-black text-sky-500 font-sans">
-                                                    {m.year}
+                                                    {m.t('year')}
                                                 </span>
                                                 <div className="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse" />
                                             </div>
                                             <h3 className="text-base font-bold text-foreground mb-2 font-sans">
-                                                {lang === 'th' ? m.titleTh : m.titleEn}
+                                                {m.t('title')}
                                             </h3>
                                         </div>
                                         <p className="text-xs text-muted-foreground leading-relaxed mt-2 pt-3 border-t border-border/60">
-                                            {lang === 'th' ? m.descTh : m.descEn}
+                                            {m.t('desc')}
                                         </p>
                                     </div>
                                 </ScrollReveal>
                             ))}
                         </div>
                     </div>
-                </section>
+                </section>)}
 
                 {/* ─── 5. OUR MISSION & VISION & CHANGE ASSETS INTO PROFITS ─── */}
-                <section className="py-16 lg:py-20 relative overflow-hidden bg-slate-900/40 border-y border-border/50">
+                {!mission.hidden && (<section className="py-16 lg:py-20 relative overflow-hidden bg-slate-900/40 border-y border-border/50">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                         <ScrollReveal animation="fade-up">
                             <div className="text-center max-w-3xl mx-auto mb-14">
                                 <h2 className="text-3xl sm:text-5xl font-extrabold text-foreground tracking-tight mb-3 font-sans">
-                                    OUR MISSION & VISION
+                                    {mission.t('t01')}
                                 </h2>
                                 <div className="h-1 w-20 bg-sky-500 mx-auto rounded-full" />
                             </div>
@@ -397,7 +302,7 @@ export function AboutPage() {
                             <ScrollReveal animation="fade-right" className="lg:col-span-5">
                                 <div className="rounded-3xl overflow-hidden aspect-[4/3] shadow-xl border border-sky-500/20">
                                     <img
-                                        src={storyMachineryImg}
+                                        src={mission.t('img02') || storyMachineryImg}
                                         alt="Mission & Vision Collaboration"
                                         className="w-full h-full object-cover"
                                     />
@@ -418,13 +323,11 @@ export function AboutPage() {
                                             M
                                         </div>
                                         <h3 className="text-lg sm:text-xl font-bold text-foreground font-sans">
-                                            {lang === 'th' ? 'พันธกิจ (Our Mission)' : 'Our Mission'}
+                                            {mission.t('t03')}
                                         </h3>
                                     </div>
                                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                                        {lang === 'th'
-                                            ? 'มุ่งมั่นสร้างสะพานเชื่อมโอกาสทางการเงินแก่ผู้ประกอบการไทย ด้วยความเข้าใจทางวิศวกรรม เพื่อปลดล็อกศักยภาพการผลิตและผลักดันธุรกิจให้เติบโตอย่างยั่งยืน'
-                                            : 'Committed to delivering accessible, engineering-driven financing solutions that unlock production potential and propel Thai businesses to sustainable prosperity.'}
+                                        {mission.t('t04')}
                                     </p>
                                 </div>
 
@@ -441,13 +344,11 @@ export function AboutPage() {
                                             V
                                         </div>
                                         <h3 className="text-lg sm:text-xl font-bold text-foreground font-sans">
-                                            {lang === 'th' ? 'วิสัยทัศน์ (Our Vision)' : 'Our Vision'}
+                                            {mission.t('t05')}
                                         </h3>
                                     </div>
                                     <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                                        {lang === 'th'
-                                            ? 'เป็นผู้นำด้านสินเชื่อเครื่องจักรอุตสาหกรรมและโซลูชันเงินทุนที่ได้รับความไว้วางใจสูงสุดในภูมิภาค เคียงข้างทุกก้าวการเติบโตของภาคอุตสาหกรรม'
-                                            : 'To be the most trusted non-bank equipment financing and capital partner in Southeast Asia, standing beside every industrial success story.'}
+                                        {mission.t('t06')}
                                     </p>
                                 </div>
                             </ScrollReveal>
@@ -465,24 +366,22 @@ export function AboutPage() {
                                             A
                                         </span>
                                         <h3 className="text-2xl sm:text-4xl font-black tracking-tight uppercase font-sans text-white leading-none mb-1">
-                                            CHANGE
+                                            {mission.t('t07')}
                                         </h3>
                                         <h3 className="text-3xl sm:text-5xl font-black tracking-tight uppercase font-sans text-sky-400 leading-none mb-2">
-                                            ASSETS
+                                            {mission.t('t08')}
                                         </h3>
                                         <p className="text-sm font-light text-slate-300 tracking-widest uppercase mb-1">
-                                            into
+                                            {mission.t('t09')}
                                         </p>
                                         <h3 className="text-3xl sm:text-5xl font-black tracking-tight uppercase font-sans text-amber-400 leading-none">
-                                            PROFITS
+                                            {mission.t('t10')}
                                         </h3>
                                     </div>
 
                                     <div className="pt-8 mt-8 border-t border-white/15">
                                         <p className="text-xs text-slate-300 leading-relaxed font-light">
-                                            {lang === 'th'
-                                                ? 'เปลี่ยนเครื่องจักรและสินทรัพย์เป็นพลังสร้างผลกำไรและกระแสเงินสดหมุนเวียนอย่างต่อเนื่อง'
-                                                : 'Transform your machinery and industrial capital into enduring cash flow and operating profits.'}
+                                            {mission.t('t11')}
                                         </p>
                                     </div>
                                 </div>
@@ -492,10 +391,10 @@ export function AboutPage() {
                             <ScrollReveal animation="fade-left" delay={150} className="lg:col-span-7 flex flex-col justify-between">
                                 <div className="space-y-3 mb-4">
                                     <h3 className="text-lg font-bold text-foreground font-sans">
-                                        {lang === 'th' ? 'หมวดหมู่เครื่องจักรและอุปกรณ์ที่รองรับ' : 'Categories of Machinery & Equipment'}
+                                        {mission.t('t12')}
                                     </h3>
                                     <p className="text-xs text-muted-foreground">
-                                        {lang === 'th' ? 'ครอบคลุมทุกกลุ่มอุตสาหกรรมการผลิตหลักของประเทศ' : 'Covering core manufacturing, logistics and clean technology'}
+                                        {mission.t('t13')}
                                     </p>
                                 </div>
 
@@ -503,7 +402,7 @@ export function AboutPage() {
                                     {/* 1. CNC & Industrial */}
                                     <div className="rounded-2xl overflow-hidden relative group aspect-[4/5] sm:aspect-auto h-full border border-sky-500/20 shadow-md">
                                         <img
-                                            src="https://images.unsplash.com/photo-1567789884554-0b844b597180?w=800&q=80"
+                                            src={mission.t('img14')}
                                             alt="Industrial Machinery"
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                         />
@@ -511,10 +410,10 @@ export function AboutPage() {
                                         <div className="absolute bottom-4 left-4 right-4 text-white">
                                             <Building2 className="w-5 h-5 text-sky-400 mb-1.5" />
                                             <h4 className="text-xs font-bold font-sans">
-                                                {lang === 'th' ? 'เครื่องจักรอุตสาหกรรม' : 'CNC & Machinery'}
+                                                {mission.t('t15')}
                                             </h4>
                                             <p className="text-[10px] text-slate-300 mt-0.5">
-                                                {lang === 'th' ? 'CNC, Robot, เครื่องฉีดพลาสติก' : 'Machining, Robotics'}
+                                                {mission.t('t16')}
                                             </p>
                                         </div>
                                     </div>
@@ -522,7 +421,7 @@ export function AboutPage() {
                                     {/* 2. Solar & Clean Tech */}
                                     <div className="rounded-2xl overflow-hidden relative group aspect-[4/5] sm:aspect-auto h-full border border-sky-500/20 shadow-md">
                                         <img
-                                            src="https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=800&q=80"
+                                            src={mission.t('img17')}
                                             alt="Solar Clean Energy"
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                         />
@@ -530,10 +429,10 @@ export function AboutPage() {
                                         <div className="absolute bottom-4 left-4 right-4 text-white">
                                             <Sun className="w-5 h-5 text-amber-400 mb-1.5" />
                                             <h4 className="text-xs font-bold font-sans">
-                                                {lang === 'th' ? 'พลังงานสะอาด & Solar' : 'Solar & ESG Tech'}
+                                                {mission.t('t18')}
                                             </h4>
                                             <p className="text-[10px] text-slate-300 mt-0.5">
-                                                {lang === 'th' ? 'Solar Rooftop, BESS' : 'Commercial Solar, Storage'}
+                                                {mission.t('t19')}
                                             </p>
                                         </div>
                                     </div>
@@ -541,7 +440,7 @@ export function AboutPage() {
                                     {/* 3. Logistics & Fleet */}
                                     <div className="rounded-2xl overflow-hidden relative group aspect-[4/5] sm:aspect-auto h-full border border-sky-500/20 shadow-md">
                                         <img
-                                            src="https://images.unsplash.com/photo-1519003722824-194d4455a60c?w=800&q=80"
+                                            src={mission.t('img20')}
                                             alt="Commercial Fleet"
                                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                         />
@@ -549,10 +448,10 @@ export function AboutPage() {
                                         <div className="absolute bottom-4 left-4 right-4 text-white">
                                             <Truck className="w-5 h-5 text-emerald-400 mb-1.5" />
                                             <h4 className="text-xs font-bold font-sans">
-                                                {lang === 'th' ? 'ยานพาหนะขนส่ง' : 'Commercial Fleet'}
+                                                {mission.t('t21')}
                                             </h4>
                                             <p className="text-[10px] text-slate-300 mt-0.5">
-                                                {lang === 'th' ? 'รถบรรทุก, หัวลาก EV' : 'Prime movers, EV trucks'}
+                                                {mission.t('t22')}
                                             </p>
                                         </div>
                                     </div>
@@ -560,25 +459,23 @@ export function AboutPage() {
                             </ScrollReveal>
                         </div>
                     </div>
-                </section>
+                </section>)}
 
                 {/* ─── 6. ADVISORY BOARD PROFILES & EXECUTIVE TEAM ─── */}
-                <section className="py-16 lg:py-24 relative overflow-hidden bg-background">
+                {!leadership.hidden && (<section className="py-16 lg:py-24 relative overflow-hidden bg-background">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                         {/* Section Header */}
                         <ScrollReveal animation="fade-up">
                             <div className="text-center max-w-3xl mx-auto mb-16">
                                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-sky-400/20 text-xs font-semibold text-sky-400 mb-3">
                                     <Users className="w-3.5 h-3.5" />
-                                    <span>Leadership & Governance</span>
+                                    <span>{leadership.t('t01')}</span>
                                 </div>
                                 <h2 className="text-3xl sm:text-5xl font-extrabold text-foreground tracking-tight mb-3 font-sans">
-                                    ADVISORY BOARD PROFILES
+                                    {leadership.t('t02')}
                                 </h2>
                                 <p className="text-sm sm:text-base text-muted-foreground">
-                                    {lang === 'th'
-                                        ? 'คณะกรรมการที่ปรึกษาและทีมผู้บริหารผู้ขับเคลื่อนองค์กรด้วยหลักธรรมาภิบาลและความเชี่ยวชาญ'
-                                        : 'Advisory board and senior executive team steering Agile Assets with visionary governance.'}
+                                    {leadership.t('t03')}
                                 </p>
                             </div>
                         </ScrollReveal>
@@ -595,23 +492,21 @@ export function AboutPage() {
                                 {/* Circle Headshot */}
                                 <div className="relative w-36 h-36 sm:w-44 sm:h-44 rounded-full overflow-hidden mx-auto mb-6 border-4 border-sky-400/60 shadow-xl">
                                     <img
-                                        src={advisorChairmanImg}
+                                        src={leadership.t('img04') || advisorChairmanImg}
                                         alt="Chairman of Advisory Board"
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
 
                                 <h3 className="text-xl sm:text-2xl font-extrabold text-foreground font-sans mb-1">
-                                    {lang === 'th' ? 'คุณประเสริฐ ชัยประเสริฐกิจ' : 'Mr. Prasert Chaiprasertkit'}
+                                    {leadership.t('t05')}
                                 </h3>
                                 <p className="text-xs sm:text-sm font-semibold text-sky-500 uppercase tracking-wider mb-4">
-                                    {lang === 'th' ? 'ประธานคณะกรรมการที่ปรึกษา (Chairman of the Advisory Board)' : 'Chairman of the Advisory Board'}
+                                    {leadership.t('t06')}
                                 </p>
 
                                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-lg mx-auto">
-                                    {lang === 'th'
-                                        ? 'อดีตผู้บริหารระดับสูงและที่ปรึกษาองค์กรชั้นนำในอุตสาหกรรมการเงินและภาคการผลิต มีประสบการณ์ชี้นำยุทธศาสตร์การเติบโตและการกำกับดูแลกิจการที่ดีกว่า 30 ปี'
-                                        : 'Former senior executive and corporate advisor across financial institutions and manufacturing industries, with over 30 years of strategic leadership and governance excellence.'}
+                                    {leadership.t('t07')}
                                 </p>
                             </div>
                         </ScrollReveal>
@@ -620,10 +515,10 @@ export function AboutPage() {
                         <ScrollReveal animation="fade-up">
                             <div className="text-center max-w-2xl mx-auto mb-10">
                                 <h3 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight mb-2 font-sans">
-                                    DIRECTORS PROFILE
+                                    {leadership.t('t08')}
                                 </h3>
                                 <p className="text-xs sm:text-sm text-muted-foreground">
-                                    {lang === 'th' ? 'ทีมผู้บริหารสายงานกลยุทธ์และการปฏิบัติการ' : 'Executive Leadership & Operational Directors'}
+                                    {leadership.t('t09')}
                                 </p>
                             </div>
                         </ScrollReveal>
@@ -642,17 +537,17 @@ export function AboutPage() {
                                     <div className="flex items-center gap-5 mb-6">
                                         <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-sky-400/40 shadow-md flex-shrink-0">
                                             <img
-                                                src={directorProfile1Img}
+                                                src={leadership.t('img10') || directorProfile1Img}
                                                 alt="Managing Director"
                                                 className="w-full h-full object-cover"
                                             />
                                         </div>
                                         <div>
                                             <h4 className="text-lg font-bold text-foreground font-sans">
-                                                {lang === 'th' ? 'คุณศุภชัย เลิศรัตนวิทย์' : 'Mr. Suphachai Lertrattanawit'}
+                                                {leadership.t('t11')}
                                             </h4>
                                             <p className="text-xs font-semibold text-sky-500 mt-0.5">
-                                                {lang === 'th' ? 'กรรมการผู้จัดการ (Managing Director)' : 'Managing Director'}
+                                                {leadership.t('t12')}
                                             </p>
                                         </div>
                                     </div>
@@ -664,7 +559,7 @@ export function AboutPage() {
                                     >
                                         <span className="flex items-center gap-2">
                                             <Briefcase className="w-4 h-4" />
-                                            <span>{lang === 'th' ? 'ดูประวัติและประสบการณ์การทำงาน' : 'View Profile & Experience'}</span>
+                                            <span>{leadership.t('t13')}</span>
                                         </span>
                                         {openDirector === 'dir-1' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                                     </button>
@@ -675,19 +570,19 @@ export function AboutPage() {
                                             <div>
                                                 <p className="font-bold text-foreground mb-1 flex items-center gap-1.5">
                                                     <GraduationCap className="w-3.5 h-3.5 text-sky-400" />
-                                                    <span>{lang === 'th' ? 'การศึกษา' : 'Education'}:</span>
+                                                    <span>{leadership.t('t14')}:</span>
                                                 </p>
-                                                <p>• M.S. Industrial Engineering, Chulalongkorn University</p>
-                                                <p>• B.Eng. Mechanical Engineering, KMUTT</p>
+                                                <p>{leadership.t('t15')}</p>
+                                                <p>{leadership.t('t16')}</p>
                                             </div>
                                             <div>
                                                 <p className="font-bold text-foreground mb-1 flex items-center gap-1.5">
                                                     <Briefcase className="w-3.5 h-3.5 text-sky-400" />
-                                                    <span>{lang === 'th' ? 'ประสบการณ์การทำงาน' : 'Key Experience'}:</span>
+                                                    <span>{leadership.t('t17')}:</span>
                                                 </p>
-                                                <p>• ผู้อำนวยการฝ่ายสินเชื่ออุตสาหกรรม บริษัทการเงินชั้นนำ (10 ปี)</p>
-                                                <p>• ที่ปรึกษาการลงทุนเครื่องจักรและเทคโนโลยีการผลิต</p>
-                                                <p>• ผู้ร่วมก่อตั้ง Agile Assets Co., Ltd.</p>
+                                                <p>{leadership.t('t18')}</p>
+                                                <p>{leadership.t('t19')}</p>
+                                                <p>{leadership.t('t20')}</p>
                                             </div>
                                         </div>
                                     )}
@@ -706,17 +601,17 @@ export function AboutPage() {
                                     <div className="flex items-center gap-5 mb-6">
                                         <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden border-2 border-sky-400/40 shadow-md flex-shrink-0">
                                             <img
-                                                src={directorProfile2Img}
+                                                src={leadership.t('img21') || directorProfile2Img}
                                                 alt="Senior Executive Director"
                                                 className="w-full h-full object-cover"
                                             />
                                         </div>
                                         <div>
                                             <h4 className="text-lg font-bold text-foreground font-sans">
-                                                {lang === 'th' ? 'คุณกฤษดา พงษ์ไพศาล' : 'Mr. Kritsada Pongphaisan'}
+                                                {leadership.t('t22')}
                                             </h4>
                                             <p className="text-xs font-semibold text-sky-500 mt-0.5">
-                                                {lang === 'th' ? 'รองกรรมการผู้จัดการอาวุโส (Senior Executive Director)' : 'Senior Executive Director'}
+                                                {leadership.t('t23')}
                                             </p>
                                         </div>
                                     </div>
@@ -728,7 +623,7 @@ export function AboutPage() {
                                     >
                                         <span className="flex items-center gap-2">
                                             <Briefcase className="w-4 h-4" />
-                                            <span>{lang === 'th' ? 'ดูประวัติและประสบการณ์การทำงาน' : 'View Profile & Experience'}</span>
+                                            <span>{leadership.t('t13')}</span>
                                         </span>
                                         {openDirector === 'dir-2' ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
                                     </button>
@@ -739,19 +634,19 @@ export function AboutPage() {
                                             <div>
                                                 <p className="font-bold text-foreground mb-1 flex items-center gap-1.5">
                                                     <GraduationCap className="w-3.5 h-3.5 text-sky-400" />
-                                                    <span>{lang === 'th' ? 'การศึกษา' : 'Education'}:</span>
+                                                    <span>{leadership.t('t14')}:</span>
                                                 </p>
-                                                <p>• Master of Business Administration (MBA - Finance), NIDA</p>
-                                                <p>• B.B.A. Finance & Banking, Thammasat University</p>
+                                                <p>{leadership.t('t24')}</p>
+                                                <p>{leadership.t('t25')}</p>
                                             </div>
                                             <div>
                                                 <p className="font-bold text-foreground mb-1 flex items-center gap-1.5">
                                                     <Briefcase className="w-3.5 h-3.5 text-sky-400" />
-                                                    <span>{lang === 'th' ? 'ประสบการณ์การทำงาน' : 'Key Experience'}:</span>
+                                                    <span>{leadership.t('t17')}:</span>
                                                 </p>
-                                                <p>• ผู้เชี่ยวชาญการบริหารความเสี่ยงสินเชื่อธุรกิจ (Credit Underwriting)</p>
-                                                <p>• ผู้วางโครงสร้างกองทุนเพื่อความยั่งยืน ESG Green Financing</p>
-                                                <p>• กรรมการบริหารสายงานปฏิบัติการ Agile Assets Co., Ltd.</p>
+                                                <p>{leadership.t('t26')}</p>
+                                                <p>{leadership.t('t27')}</p>
+                                                <p>{leadership.t('t28')}</p>
                                             </div>
                                         </div>
                                     )}
@@ -759,21 +654,17 @@ export function AboutPage() {
                             </ScrollReveal>
                         </div>
                     </div>
-                </section>
+                </section>)}
 
                 {/* ─── 7. Bottom CTA Strip ─── */}
-                <section className="py-16 relative overflow-hidden bg-gradient-to-r from-sky-500 via-sky-600 to-blue-600 text-white">
+                {!ctaStrip.hidden && (<section className="py-16 relative overflow-hidden bg-gradient-to-r from-sky-500 via-sky-600 to-blue-600 text-white">
                     <div className="max-w-5xl mx-auto px-4 text-center relative z-10">
                         <ScrollReveal animation="fade-up">
                             <h2 className="text-2xl sm:text-4xl font-black tracking-tight mb-4 font-sans text-white">
-                                {lang === 'th'
-                                    ? 'พร้อมเติบโตและขยายกำลังการผลิตไปกับ Agile Assets หรือยัง?'
-                                    : 'Ready to Scale Your Production with Agile Assets?'}
+                                {ctaStrip.t('t01')}
                             </h2>
                             <p className="text-xs sm:text-base text-sky-100 mb-8 max-w-2xl mx-auto font-light leading-relaxed">
-                                {lang === 'th'
-                                    ? 'ปรึกษาทีมผู้เชี่ยวชาญด้านสินเชื่อเครื่องจักรเพื่อรับโครงสร้างวงเงินที่ดีที่สุดสำหรับกิจการของคุณ'
-                                    : 'Consult our equipment financing specialists today for the most optimal credit structure.'}
+                                {ctaStrip.t('t02')}
                             </p>
 
                             <div className="flex flex-wrap items-center justify-center gap-4">
@@ -781,18 +672,18 @@ export function AboutPage() {
                                     onClick={() => navigate('/#contact')}
                                     className="px-8 py-4 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm shadow-xl hover:scale-105 active:scale-[0.98] transition-all"
                                 >
-                                    <span>{lang === 'th' ? 'ปรึกษาผู้เชี่ยวชาญ' : 'Consult Our Team'}</span>
+                                    <span>{ctaStrip.t('t03')}</span>
                                 </button>
                                 <button
                                     onClick={() => navigate('/#calculator')}
                                     className="px-8 py-4 rounded-2xl bg-sky-700/60 hover:bg-sky-700 text-white font-bold text-sm border border-white/30 backdrop-blur-md hover:scale-105 active:scale-[0.98] transition-all"
                                 >
-                                    <span>{lang === 'th' ? 'คำนวณค่างวดสินเชื่อ' : 'Calculate Loan'}</span>
+                                    <span>{ctaStrip.t('t04')}</span>
                                 </button>
                             </div>
                         </ScrollReveal>
                     </div>
-                </section>
+                </section>)}
             </main>
 
             <Footer />

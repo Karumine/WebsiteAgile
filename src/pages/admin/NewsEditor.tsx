@@ -201,7 +201,7 @@ export function NewsEditor() {
                     </button>
                 </>
             }
-            preview={<LatestNewsSection />}
+            preview={<LatestNewsSection alwaysShow />}
         >
             <div className="space-y-4">
                 {/* Hidden file input */}

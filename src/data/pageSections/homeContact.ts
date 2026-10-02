@@ -1,0 +1,46 @@
+import type { PageSectionSchema } from '@/lib/pageSections';
+
+export const homeContactSections: PageSectionSchema[] = [
+    {
+        id: "contact-cta",
+        label: "หน้าแรก: ส่วนติดต่อเรา",
+        fields: [
+            { key: "img01", label: "รูปภาพ (URL)", type: "image" },
+            { key: "t02", label: "หัวข้อ — \"BUSINESS PARTNERSHIP INQUIRIES\"", type: "text" },
+            { key: "t03", label: "ข้อความ — \"ติดต่อเราเพื่อปรึกษาการลงทุน โซลูชัน…\"", type: "textarea" },
+            { key: "t04", label: "ข้อความ — \"ส่งข้อความเรียบร้อยแล้ว เจ้าหน้าที่จ…\"", type: "text" },
+            { key: "t05", label: "ข้อความสำหรับโปรแกรมอ่านหน้าจอ — \"ชื่อ - นามสกุล *\"", type: "text" },
+            { key: "t06", label: "ข้อความสำหรับโปรแกรมอ่านหน้าจอ — \"อีเมล *\"", type: "text" },
+            { key: "t07", label: "ข้อความสำหรับโปรแกรมอ่านหน้าจอ — \"เบอร์โทรศัพท์ *\"", type: "text" },
+            { key: "t08", label: "ข้อความสำหรับโปรแกรมอ่านหน้าจอ — \"ชื่อบริษัท / องค์กร\"", type: "text" },
+            { key: "t09", label: "ข้อความสำหรับโปรแกรมอ่านหน้าจอ — \"ข้อความ หรือรายละเอียดโครงการที่ต้อง…\"", type: "text" },
+            { key: "t10", label: "ข้อความ — \"กำลังส่งข้อมูล...\"", type: "text" },
+            { key: "t11", label: "ข้อความ — \"ส่งข้อความ\"", type: "text" },
+        ],
+        defaults: {
+            fields: {
+                img01: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=1800&q=80",
+                t02Th: "BUSINESS PARTNERSHIP INQUIRIES",
+                t02En: "BUSINESS PARTNERSHIP INQUIRIES",
+                t03Th: "ติดต่อเราเพื่อปรึกษาการลงทุน โซลูชันทางการเงิน และสินเชื่อเครื่องจักรสำหรับธุรกิจคุณ",
+                t03En: "Contact our financial specialists for bespoke equipment financing and strategic enterprise capital solutions.",
+                t04Th: "ส่งข้อความเรียบร้อยแล้ว เจ้าหน้าที่จะติดต่อกลับโดยเร็วที่สุด",
+                t04En: "Thank you! Your message has been sent successfully.",
+                t05Th: "ชื่อ - นามสกุล *",
+                t05En: "Full Name *",
+                t06Th: "อีเมล *",
+                t06En: "Email Address *",
+                t07Th: "เบอร์โทรศัพท์ *",
+                t07En: "Phone Number *",
+                t08Th: "ชื่อบริษัท / องค์กร",
+                t08En: "Company Name",
+                t09Th: "ข้อความ หรือรายละเอียดโครงการที่ต้องการปรึกษา...",
+                t09En: "Project details or consultation message...",
+                t10Th: "กำลังส่งข้อมูล...",
+                t10En: "Sending...",
+                t11Th: "ส่งข้อความ",
+                t11En: "Send Message",
+            },
+        },
+    },
+];

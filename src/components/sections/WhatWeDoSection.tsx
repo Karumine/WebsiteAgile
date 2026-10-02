@@ -1,30 +1,19 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Handshake, HeartHandshake, ShieldCheck } from 'lucide-react';
-import { useLanguage } from '@/contexts/LanguageContext';
+import { ArrowRight } from 'lucide-react';
+import { usePageContent } from '@/lib/usePageContent';
+import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import { ScrollReveal } from '@/components/ui/ScrollReveal';
+import { useSections } from '@/lib/pageSections';
+import { homeWhatWeDoSections } from '@/data/pageSections/homeWhatWeDo';
+import { SectionIcon } from '@/lib/sectionIcons';
 
 export function WhatWeDoSection() {
-    const { lang } = useLanguage();
+    const { content } = usePageContent('home', DEFAULT_PAGE_CONTENTS['home']);
+    const section = useSections(content, homeWhatWeDoSections);
+    const whatWeDo = section('what-we-do');
     const navigate = useNavigate();
 
-    const pillars = [
-        {
-            icon: Handshake,
-            title: 'CLOSE',
-            desc: lang === 'th' ? 'ดูแลใกล้ชิด เสมือนพี่เลี้ยง' : 'Dedicated mentorship & close partnership',
-        },
-        {
-            icon: HeartHandshake,
-            title: 'CARING',
-            desc: lang === 'th' ? 'เข้าใจและสนองความต้องการของ SMEs' : 'Attentive to SME growth challenges',
-        },
-        {
-            icon: ShieldCheck,
-            title: 'FLEXIBLE',
-            desc: lang === 'th' ? 'ใช้หลักประกันน้อยและยืดหยุ่น' : 'Low collateral requirements & flexible terms',
-        },
-    ];
-
+    if (whatWeDo.hidden) return null;
     return (
         <section className="relative py-20 sm:py-24 bg-[#0a234d] text-white overflow-hidden">
             {/* Background Decorative Grid and Glow */}
@@ -39,7 +28,7 @@ export function WhatWeDoSection() {
                     <ScrollReveal animation="fade-right" className="lg:col-span-6">
                         <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-white/10 group">
                             <img
-                                src="https://images.unsplash.com/photo-1521737711867-e3b97375f902?w=1024&q=80"
+                                src={whatWeDo.t('img01')}
                                 alt="Agile Assets Financing Support"
                                 className="w-full h-[360px] sm:h-[460px] object-cover object-center group-hover:scale-105 transition-transform duration-700"
                                 loading="lazy"
@@ -57,35 +46,29 @@ export function WhatWeDoSection() {
                     <ScrollReveal animation="fade-left" delay={150} className="lg:col-span-6 space-y-6">
                         <div>
                             <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-wide font-sans mb-6">
-                                WHAT WE DO
+                                {whatWeDo.t('t02')}
                             </h2>
 
                             {/* Section 1: ก้าวแรกของการเติบโต */}
                             <div className="space-y-2 mb-6">
                                 <h3 className="text-lg sm:text-xl font-bold text-sky-300">
-                                    {lang === 'th' ? 'ก้าวแรกของการเติบโต' : 'The First Step of Growth'}
+                                    {whatWeDo.t('t03')}
                                 </h3>
                                 <p className="text-xs sm:text-sm text-slate-200/90 leading-relaxed font-light">
-                                    {lang === 'th'
-                                        ? 'ธุรกิจจำนวนมากยังเข้าไม่ถึงเงินทุน โดยเฉพาะในต่างจังหวัด เราจึงเข้าไปเติมเต็มโอกาสและมุ่งสนับสนุนให้การเติบโตของอุตสาหกรรมกระจายสู่ภูมิภาค'
-                                        : 'Many enterprises still lack access to capital, particularly in provincial areas. We step in to bridge this opportunity and drive industrial growth across all regions.'}
+                                    {whatWeDo.t('t04')}
                                 </p>
                             </div>
 
                             {/* Section 2: ABOUT AGILE ASSETS */}
                             <div className="space-y-3">
                                 <h3 className="text-lg sm:text-xl font-bold text-sky-300">
-                                    ABOUT AGILE ASSETS
+                                    {whatWeDo.t('t05')}
                                 </h3>
                                 <p className="text-xs sm:text-sm text-slate-200/90 leading-relaxed font-light">
-                                    {lang === 'th'
-                                        ? 'บริษัท อาไจล์ แอสเซ็ทส์ ขับเคลื่อนภายใต้วิสัยทัศน์ของผู้บริหาร เดินหน้าให้บริการเช่าซื้อเครื่องจักรแก่โรงงานทั่วประเทศ ครอบคลุมอุตสาหกรรมน้ำดื่ม น้ำแข็ง เครื่องกำเนิดไฟฟ้า พลังงานไบโอแก๊ส และฟาร์มปศุสัตว์'
-                                        : 'Agile Assets Co., Ltd. operates under forward-thinking executive leadership, providing machinery leasing to industrial plants nationwide across drinking water, ice manufacturing, generators, biogas energy, and livestock farming.'}
+                                    {whatWeDo.t('t06')}
                                 </p>
                                 <p className="text-xs sm:text-sm text-slate-200/90 leading-relaxed font-light">
-                                    {lang === 'th'
-                                        ? 'ปัจจุบันบริษัทดูแลลูกค้ามากกว่า 50 โรงงาน และขยายบริการสู่หลากหลายอุตสาหกรรมเพิ่มมากขึ้น เพื่อรองรับความต้องการที่เพิ่มขึ้นอย่างต่อเนื่อง พร้อมมองเห็นโอกาสเติบโตในอุตสาหกรรมอาหารและพลาสติก รวมถึงเปิดรับพันธมิตรที่มีวิสัยทัศน์ร่วม ทั้งในด้านการลงทุน ความเชี่ยวชาญเฉพาะทาง และเครือข่ายอุตสาหกรรม เพื่อขับเคลื่อนธุรกิจไทยสู่ความยั่งยืน'
-                                        : 'Today, the company oversees over 50 industrial plants and continues to expand across diverse sectors to satisfy rising demand. We welcome visionary partners in investment, specialized engineering, and industrial networks to empower sustainable growth.'}
+                                    {whatWeDo.t('t07')}
                                 </p>
                             </div>
 
@@ -98,7 +81,7 @@ export function WhatWeDoSection() {
                                     }}
                                     className="inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl bg-sky-400 hover:bg-sky-300 text-slate-950 font-extrabold text-xs sm:text-sm tracking-wide shadow-xl shadow-sky-400/25 hover:scale-105 active:scale-95 transition-all"
                                 >
-                                    <span>{lang === 'th' ? 'รู้จักเราให้มากขึ้น' : 'Learn More About Us'}</span>
+                                    <span>{whatWeDo.t('t08')}</span>
                                     <ArrowRight className="w-4 h-4" />
                                 </button>
                             </div>
@@ -110,16 +93,16 @@ export function WhatWeDoSection() {
                 <ScrollReveal animation="fade-up" delay={250}>
                     <div className="rounded-2xl sm:rounded-3xl bg-sky-100/90 dark:bg-sky-950/60 backdrop-blur-md p-6 sm:p-8 border border-sky-300/30 text-slate-900 dark:text-white shadow-2xl">
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 sm:gap-8 divide-y sm:divide-y-0 sm:divide-x divide-sky-300/40 dark:divide-sky-800/60">
-                            {pillars.map((item, i) => (
+                            {whatWeDo.items.map((item, i) => (
                                 <div key={i} className="flex flex-col items-center text-center pt-4 sm:pt-0 first:pt-0 sm:px-4">
                                     <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white dark:bg-sky-900 flex items-center justify-center text-sky-600 dark:text-sky-300 mb-3 shadow-lg border border-sky-200/50 dark:border-sky-700/50">
-                                        <item.icon className="w-7 h-7 sm:w-8 sm:h-8" />
+                                        <SectionIcon name={item.raw.icon} className="w-7 h-7 sm:w-8 sm:h-8" />
                                     </div>
                                     <h4 className="text-base sm:text-lg font-extrabold text-slate-900 dark:text-white tracking-wider mb-1 font-sans">
-                                        {item.title}
+                                        {item.t('title')}
                                     </h4>
                                     <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-medium">
-                                        {item.desc}
+                                        {item.t('desc')}
                                     </p>
                                 </div>
                             ))}
