@@ -140,7 +140,7 @@ export function WorkForUsPage() {
                             {lang === 'th' ? (content.heroTitleTh || content.heroTitleEn || 'ร่วมงานกับ Agile Assets') : (content.heroTitleEn || content.heroTitleTh || 'Work with Agile Assets')}
                         </h1>
 
-                        <p className="mt-6 text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+                        <p className="mt-6 text-base sm:text-lg text-slate-700 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal">
                             {lang === 'th' ? (content.heroSubtitleTh || content.heroSubtitleEn || 'ร่วมขับเคลื่อนอนาคตอุตสาหกรรมไทยและพลังงานสะอาดไปพร้อมกับเรา') : (content.heroSubtitleEn || content.heroSubtitleTh || 'Join us to empower Thai manufacturing with clean tech and dynamic capital.')}
                         </p>
 
