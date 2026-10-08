@@ -1,4 +1,4 @@
-import { apiRequest, setAuthToken, clearAuthToken, getAuthToken } from './apiClient';
+import { apiRequest, setAuthToken, clearAuthToken, getAuthToken, type ApiResult } from './apiClient';
 import type { LoginResponseData, User } from '@/types';
 
 export interface LoginResult {
@@ -6,6 +6,7 @@ export interface LoginResult {
     user?: User;
     status: number;
     error?: string;
+    retryAfterSec?: number;
 }
 
 /** Reads `exp` from a JWT without verifying it (the server verifies). */
@@ -39,6 +40,7 @@ export const authService = {
             success: false,
             status: result.status,
             error: result.error || result.message || 'Login failed',
+            retryAfterSec: result.retryAfterSec,
         };
     },
 
@@ -47,5 +49,13 @@ export const authService = {
             void apiRequest('/auth/logout', { method: 'POST', timeout: 5000 });
         }
         clearAuthToken();
+    },
+
+    /** The server revokes every existing token on success, so the caller must sign in again. */
+    changePassword(currentPassword: string, newPassword: string): Promise<ApiResult<void>> {
+        return apiRequest<void>('/users/me/password', {
+            method: 'PUT',
+            body: JSON.stringify({ currentPassword, newPassword }),
+        });
     },
 };

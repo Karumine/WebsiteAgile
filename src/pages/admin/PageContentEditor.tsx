@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react';
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import type { PageCustomContent, PageSectionItem, CustomPageItem } from '@/types';
 import { DEFAULT_PAGE_CONTENTS } from '@/data/defaultPageContents';
 import {
@@ -17,6 +18,7 @@ import defaultHeroImg from '@/assets/Hero-Banner-Website-3-scaled.png';
 import { getPageSchemas, mergePageSections } from '@/data/pageSections';
 import { PageSectionsEditor } from '@/components/admin/PageSectionsEditor';
 import { PageBlocksEditor } from '@/components/admin/PageBlocksEditor';
+import { ImageUploadButton } from '@/components/admin/ImageUploadButton';
 import { createBlock, legacyBlocks } from '@/data/pageBlocks';
 
 export interface NavGroupConfig {
@@ -601,6 +603,7 @@ const SAMPLE_MACHINERY_POOL: PageSectionItem[] = [
 
 export function PageContentEditor() {
     const { settings, updateSettings } = useSiteSettings();
+    const { isServerSession } = useAuth();
     const { lang } = useLanguage();
 
     const [selectedPageId, setSelectedPageId] = useState<string>('home');
@@ -1190,6 +1193,8 @@ export function PageContentEditor() {
             ...existing,
             [selectedPageId]: {
                 ...editContent,
+                // The bundled default is a build-specific path; store "" so every build falls back to its own copy.
+                heroImage: editContent.heroImage === defaultHeroImg ? '' : editContent.heroImage,
                 lastUpdated: new Date().toISOString(),
             },
         };
@@ -1212,9 +1217,14 @@ export function PageContentEditor() {
             lastUpdated: new Date().toISOString(),
         }));
         toast.success(
-            lang === 'th'
-                ? `บันทึกเนื้อหาหน้า "${activePageDef.nameTh}" เรียบร้อยแล้ว!`
-                : `Page "${activePageDef.nameEn}" content saved successfully!`
+            isServerSession
+                ? (lang === 'th'
+                    ? `บันทึกแบบร่างหน้า "${activePageDef.nameTh}" แล้ว — กดปุ่ม "เผยแพร่" ที่แถบด้านบนเพื่อขึ้นเว็บจริง`
+                    : `Draft of "${activePageDef.nameEn}" saved — press "Publish" in the top bar to put it live.`)
+                : (lang === 'th'
+                    ? `บันทึกเนื้อหาหน้า "${activePageDef.nameTh}" เรียบร้อยแล้ว!`
+                    : `Page "${activePageDef.nameEn}" content saved successfully!`),
+            { duration: isServerSession ? 6000 : 4000 }
         );
     };
 
@@ -1795,6 +1805,7 @@ export function PageContentEditor() {
                                         placeholder="https://... หรือ /assets/..."
                                     />
                                 </div>
+                                <ImageUploadButton folder="pages" onUploaded={(url) => updateField('heroImage', url)} />
                                 {editContent.heroImage && (
                                     <img
                                         src={editContent.heroImage}
@@ -2069,13 +2080,16 @@ export function PageContentEditor() {
                                                 <label className="block text-[11px] font-medium text-muted-foreground mb-1">
                                                     URL รูปภาพ
                                                 </label>
-                                                <input
-                                                    type="text"
-                                                    value={item.image || ''}
-                                                    onChange={(e) => updateItemField(item.id, 'image', e.target.value)}
-                                                    className="w-full px-3 py-1.5 rounded-lg bg-navy-light border border-border text-foreground text-xs focus:ring-1 focus:ring-primary"
-                                                    placeholder="https://..."
-                                                />
+                                                <div className="flex items-center gap-2">
+                                                    <input
+                                                        type="text"
+                                                        value={item.image || ''}
+                                                        onChange={(e) => updateItemField(item.id, 'image', e.target.value)}
+                                                        className="w-full px-3 py-1.5 rounded-lg bg-navy-light border border-border text-foreground text-xs focus:ring-1 focus:ring-primary"
+                                                        placeholder="https://..."
+                                                    />
+                                                    <ImageUploadButton folder="pages" onUploaded={(url) => updateItemField(item.id, 'image', url)} />
+                                                </div>
                                             </div>
                                             <div>
                                                 <label className="block text-[11px] font-medium text-muted-foreground mb-1">
@@ -2520,6 +2534,7 @@ export function PageContentEditor() {
                                                                     className="w-full px-3 py-1.5 rounded-lg bg-navy-light border border-border text-foreground text-xs focus:ring-1 focus:ring-primary"
                                                                     placeholder="https://images.unsplash.com/..."
                                                                 />
+                                                                <ImageUploadButton folder="pages" onUploaded={(url) => updateSolutionField(item.id, 'image', url)} />
                                                                 {item.image && (
                                                                     <img
                                                                         src={item.image}
@@ -2735,6 +2750,7 @@ export function PageContentEditor() {
                                                             placeholder="https://images.unsplash.com/..."
                                                             className="w-full px-3 py-1.5 rounded-lg bg-navy-light border border-border text-foreground text-xs focus:ring-1 focus:ring-primary"
                                                         />
+                                                        <ImageUploadButton folder="pages" onUploaded={(url) => updateMachineryField(item.id, 'image', url)} />
                                                         {item.image && (
                                                             <div
                                                                 className="relative w-9 h-9 rounded-lg overflow-hidden border border-border bg-slate-900 flex-shrink-0 flex items-center justify-center group/thumb"
@@ -2853,11 +2869,11 @@ export function PageContentEditor() {
                     <span className="hidden md:inline text-xs truncate font-medium text-slate-600 dark:text-slate-300">
                         {isDirty
                             ? (lang === 'th'
-                                ? 'กรุณากดปุ่ม "บันทึกข้อมูลหน้านี้" (ด้านขวา) เพื่อให้รูปภาพและข้อมูลขึ้นบนหน้าเว็บหลักทันที'
-                                : 'Please click "Save Changes" on the right to apply your image and edits to the live site.')
+                                ? 'กดปุ่ม "บันทึกข้อมูลหน้านี้" (ด้านขวา) เพื่อเก็บการแก้ไข แล้วกด "เผยแพร่" ที่แถบด้านบนเพื่อขึ้นเว็บจริง'
+                                : 'Click "Save Changes" on the right to keep your edits, then "Publish" in the top bar to put them live.')
                             : (lang === 'th'
-                                ? 'ข้อมูลหน้านี้เป็นเวอร์ชันล่าสุดแล้ว'
-                                : 'Current page content is synchronized with the live website.')}
+                                ? (isServerSession ? 'บันทึกแล้ว — ถ้าปุ่ม "เผยแพร่" ด้านบนเป็นสีเขียว แปลว่ายังไม่ขึ้นเว็บจริง' : 'ข้อมูลหน้านี้เป็นเวอร์ชันล่าสุดแล้ว')
+                                : (isServerSession ? 'Saved — a green "Publish" button in the top bar means it is not live yet.' : 'Current page content is synchronized with the live website.'))}
                     </span>
                 </div>
 

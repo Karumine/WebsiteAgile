@@ -24,6 +24,8 @@ export interface ApiResult<T> {
     message?: string;
     error?: string;
     status: number;
+    /** Seconds from the `Retry-After` header of a 429 response. */
+    retryAfterSec?: number;
 }
 
 type JsonObject = Record<string, unknown>;
@@ -40,6 +42,14 @@ function extractErrorMessage(body: unknown): string | undefined {
     if (typeof body.message === 'string') return body.message;
     if (typeof body.title === 'string') return body.title;
     return undefined;
+}
+
+function parseRetryAfter(header: string | null): number | undefined {
+    if (!header) return undefined;
+    const seconds = Number(header);
+    if (Number.isFinite(seconds)) return Math.max(Math.ceil(seconds), 1);
+    const date = Date.parse(header);
+    return Number.isNaN(date) ? undefined : Math.max(Math.ceil((date - Date.now()) / 1000), 1);
 }
 
 export function getAuthToken(): string | null {
@@ -125,6 +135,7 @@ export async function apiRequest<T = unknown>(
                 message: errorMsg,
                 error: errorMsg,
                 status: response.status,
+                retryAfterSec: response.status === 429 ? parseRetryAfter(response.headers.get('Retry-After')) : undefined,
             };
         }
 

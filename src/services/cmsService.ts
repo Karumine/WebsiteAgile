@@ -1,4 +1,4 @@
-import { apiRequest, type ApiResult } from './apiClient';
+import { API_BASE_URL, apiRequest, type ApiResult } from './apiClient';
 import type {
     BannerSettings,
     CompanyInfo,
@@ -23,6 +23,9 @@ export interface UploadedImage {
     height?: number;
     size?: number;
 }
+
+/** Host that serves uploaded files. In dev the API base is the relative Vite proxy path, which does not proxy /uploads. */
+const UPLOADS_ORIGIN = API_BASE_URL.startsWith('http') ? new URL(API_BASE_URL).origin : 'https://api.tunjai.in.th';
 
 type WithId = { id: string };
 
@@ -71,8 +74,9 @@ async function syncPages(
 }
 
 export const cmsService = {
-    getPublicSite(): Promise<ApiResult<PublicSiteData>> {
-        return apiRequest<PublicSiteData>('/site/public', { method: 'GET', timeout: 8000 });
+    /** `fresh` skips the browser's 60 s HTTP cache, so an admin sees a publish right after it lands. */
+    getPublicSite(fresh = false): Promise<ApiResult<PublicSiteData>> {
+        return apiRequest<PublicSiteData>('/site/public', { method: 'GET', timeout: 8000, cache: fresh ? 'no-cache' : 'default' });
     },
 
     getCustomFields(): Promise<ApiResult<CustomField[]>> {
@@ -128,6 +132,12 @@ export const cmsService = {
         const body = new FormData();
         body.append('file', file);
         body.append('folder', folder);
-        return apiRequest<UploadedImage>('/uploads/images', { method: 'POST', body, timeout: 60000 });
+        return apiRequest<UploadedImage>('/uploads/images', { method: 'POST', body, timeout: 60000 }).then((res) => {
+            // The server may answer with a root-relative path; it must point at the API host, not this site.
+            if (res.data?.url?.startsWith('/')) {
+                res.data = { ...res.data, url: `${UPLOADS_ORIGIN}${res.data.url}` };
+            }
+            return res;
+        });
     },
 };

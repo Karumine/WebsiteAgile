@@ -51,6 +51,7 @@ const FaqEditor = lazy(() => import('@/pages/admin/FaqEditor').then(m => ({ defa
 const CompanyInfoEditor = lazy(() => import('@/pages/admin/CompanyInfoEditor').then(m => ({ default: m.CompanyInfoEditor })));
 const ThemeEditor = lazy(() => import('@/pages/admin/ThemeEditor').then(m => ({ default: m.ThemeEditor })));
 const PageContentEditor = lazy(() => import('@/pages/admin/PageContentEditor').then(m => ({ default: m.PageContentEditor })));
+const ChangePasswordPage = lazy(() => import('@/pages/admin/ChangePasswordPage').then(m => ({ default: m.ChangePasswordPage })));
 
 // Loading Fallback
 const PageLoader = () => (
@@ -182,6 +183,7 @@ export default function App() {
                           <Route path="/management-portal/assets" element={<AssetsEditor />} />
                           <Route path="/management-portal/faq" element={<FaqEditor />} />
                           <Route path="/management-portal/company" element={<CompanyInfoEditor />} />
+                          <Route path="/management-portal/account" element={<ChangePasswordPage />} />
                         </Route>
                       </Route>
                       {/* Dynamic Custom Pages created via CMS "เพิ่มหน้า" */}

@@ -120,7 +120,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         if (res.status === 429) {
-            return { ok: false, reason: 'locked', retryAfterSec: 60 };
+            const retryAfterSec = res.retryAfterSec ?? 60;
+            writeLock({ failures: 0, lockedUntil: Date.now() + retryAfterSec * 1000 });
+            return { ok: false, reason: 'locked', retryAfterSec };
         }
 
         const backendDown = res.status === 0 || res.status >= 500 || res.status === 404 || res.status === 408;

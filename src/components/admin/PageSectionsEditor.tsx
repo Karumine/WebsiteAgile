@@ -4,6 +4,7 @@ import type { PageSectionContent, SectionListItem } from '@/types';
 import { isBilingual, type PageSectionSchema, type SectionFieldDef } from '@/lib/pageSections';
 import { SECTION_ICON_NAMES, SectionIcon } from '@/lib/sectionIcons';
 import { cn } from '@/lib/utils';
+import { ImageUploadButton } from '@/components/admin/ImageUploadButton';
 
 interface Props {
     schemas: PageSectionSchema[];
@@ -52,6 +53,7 @@ function FieldInput({ def, langKey, value, onChange }: {
         return (
             <div className="flex items-center gap-2">
                 <input type="text" {...common} placeholder={def.placeholder || 'https://...'} className={cn(inputCls, 'font-mono')} />
+                <ImageUploadButton folder="pages" onUploaded={(url) => onChange(langKey, url)} />
                 {value && <img src={value} alt="" className="w-9 h-9 shrink-0 rounded-lg object-cover border border-border" />}
             </div>
         );

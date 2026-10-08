@@ -208,6 +208,8 @@ export interface User {
     role: 'admin';
     fullName?: string;
     email?: string;
+    /** Set by the backend for accounts still on a temporary password. */
+    mustChangePassword?: boolean;
 }
 
 export interface ApiResponse<T = unknown> {

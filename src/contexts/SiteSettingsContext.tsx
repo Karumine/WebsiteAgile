@@ -131,7 +131,7 @@ function loadSettings(): SiteSettings {
 
             // Unhashed /assets/* paths never exist after a Vite build (older defaults stored one).
             Object.values(parsed.pageContents).forEach((page) => {
-                if (page?.heroImage?.startsWith('/assets/')) page.heroImage = '';
+                if (page?.heroImage?.startsWith('/assets/') || page?.heroImage?.startsWith('/src/assets/')) page.heroImage = '';
             });
             parsed.impactStats = parsed.impactStats || (defaultSettingsData as unknown as SiteSettings).impactStats;
             parsed.companyInfo = parsed.companyInfo || (defaultSettingsData as unknown as SiteSettings).companyInfo;
@@ -204,14 +204,17 @@ function changedSections(current: SiteSettings, baseline: SiteSettings): Publish
     return PUBLISHABLE_KEYS.filter((key) => JSON.stringify(current[key]) !== JSON.stringify(baseline[key]));
 }
 
-/** Keeps only known, well-shaped sections from an API payload. */
+/**
+ * Keeps only known, well-shaped sections from an API payload.
+ * Empty sections count as "not in the DB" (spec §4), so the built-in defaults stay.
+ */
 function pickPublicSections(data: PublicSiteData): Partial<SiteSettings> {
     const picked: Record<string, unknown> = {};
     PUBLIC_KEYS.forEach((key) => {
         const value = data[key];
         if (value === undefined || value === null) return;
         const expectsArray = ['interestRates', 'news', 'usedMachinery', 'faqs', 'customPages'].includes(key);
-        if (expectsArray ? Array.isArray(value) : typeof value === 'object' && !Array.isArray(value)) {
+        if (expectsArray ? Array.isArray(value) && value.length > 0 : typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length > 0) {
             picked[key] = value;
         }
     });
@@ -275,7 +278,7 @@ export function SiteSettingsProvider({ children }: { children: ReactNode }) {
     // An admin's unpublished draft (shared with the preview iframe) is never overwritten.
     useEffect(() => {
         let cancelled = false;
-        cmsService.getPublicSite().then((res) => {
+        cmsService.getPublicSite(isServerSessionRef.current).then((res) => {
             if (cancelled || !res.success || !res.data || typeof res.data !== 'object') return;
             const remote = pickPublicSections(res.data);
             if (Object.keys(remote).length === 0) return;

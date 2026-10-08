@@ -3,6 +3,7 @@ import { Plus, Edit2, Trash2, Save, X, Tag, Phone, Sparkles } from 'lucide-react
 import { useSiteSettings } from '@/contexts/SiteSettingsContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { SplitPreviewContainer } from '@/components/admin/SplitPreviewContainer';
+import { ImageUploadButton } from '@/components/admin/ImageUploadButton';
 import type { UsedMachineryItem } from '@/types';
 import toast from 'react-hot-toast';
 
@@ -384,13 +385,17 @@ export function AssetsEditor() {
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-muted-foreground mb-1">URL รูปภาพ</label>
-                                <input
-                                    type="text"
-                                    value={formData.image || ''}
-                                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                                    className="w-full px-3 py-2 rounded-xl bg-background border border-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
-                                    placeholder="https://..."
-                                />
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="text"
+                                        value={formData.image || ''}
+                                        onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                                        className="w-full px-3 py-2 rounded-xl bg-background border border-border text-foreground text-xs focus:outline-none focus:ring-2 focus:ring-primary/50"
+                                        placeholder="https://..."
+                                    />
+                                    <ImageUploadButton folder="assets" onUploaded={(url) => setFormData((prev) => ({ ...prev, image: url }))} />
+                                    {formData.image && <img src={formData.image} alt="" className="w-9 h-9 shrink-0 rounded-lg object-cover border border-border" />}
+                                </div>
                             </div>
                             <div>
                                 <label className="block text-xs font-semibold text-muted-foreground mb-1">รายละเอียด / สเปกเครื่องจักร</label>

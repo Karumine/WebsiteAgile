@@ -46,9 +46,13 @@ export function LoginPage() {
 
         setPassword('');
         if (outcome.reason === 'locked') {
+            const sec = outcome.retryAfterSec ?? 60;
+            const wait = sec >= 60
+                ? (lang === 'th' ? `${Math.ceil(sec / 60)} นาที` : `${Math.ceil(sec / 60)} minute(s)`)
+                : (lang === 'th' ? `${sec} วินาที` : `${sec} seconds`);
             setError(lang === 'th'
-                ? `พยายามเข้าสู่ระบบผิดหลายครั้ง กรุณารอ ${outcome.retryAfterSec ?? 60} วินาทีแล้วลองใหม่`
-                : `Too many failed attempts. Please wait ${outcome.retryAfterSec ?? 60} seconds and try again.`);
+                ? `พยายามเข้าสู่ระบบผิดหลายครั้ง กรุณารอ ${wait} แล้วลองใหม่`
+                : `Too many failed attempts. Please wait ${wait} and try again.`);
         } else if (outcome.reason === 'unavailable') {
             setError(lang === 'th'
                 ? 'ไม่สามารถเชื่อมต่อระบบหลังบ้านได้ในขณะนี้ กรุณาลองใหม่ภายหลัง'

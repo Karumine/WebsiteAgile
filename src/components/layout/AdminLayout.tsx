@@ -17,6 +17,7 @@ import {
     CloudOff,
     UploadCloud,
     CheckCircle2,
+    KeyRound,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -37,6 +38,9 @@ const SECTION_LABELS: Record<PublishableSection, { th: string; en: string }> = {
 };
 
 import logoCmyk from '@/assets/Logo_Agile Assets_CMYK.png';
+
+/** Off until the backend ships `PUT /users/me/password`; the page and route stay in place. */
+const PASSWORD_CHANGE_ENABLED = false;
 
 export function AdminLayout() {
     const { user, logout, isServerSession } = useAuth();
@@ -64,6 +68,7 @@ export function AdminLayout() {
         { to: '/management-portal/assets', icon: ShoppingBag, labelEn: 'Assets for Sale', labelTh: 'เครื่องจักรมือสอง' },
         { to: '/management-portal/faq', icon: HelpCircle, labelEn: 'FAQ & Help', labelTh: 'คำถามที่พบบ่อย (FAQ)' },
         { to: '/management-portal/company', icon: Building2, labelEn: 'Company & Stats', labelTh: 'ข้อมูลบริษัท & สถิติ' },
+        ...(isServerSession && PASSWORD_CHANGE_ENABLED ? [{ to: '/management-portal/account', icon: KeyRound, labelEn: 'Change Password', labelTh: 'เปลี่ยนรหัสผ่าน' }] : []),
     ];
 
     const handleLogout = () => {
